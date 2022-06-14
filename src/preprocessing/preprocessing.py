@@ -3,7 +3,6 @@ from tensorflow import Tensor
 import tensorflow as tf
 import heartpy as hp
 import numpy as np
-from sklearn import preprocessing
 
 
 def print_and_return(x: Tensor, y: Tensor = None):
