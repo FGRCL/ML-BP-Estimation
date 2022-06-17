@@ -1,3 +1,7 @@
+import pandas as pd
+from keras.metrics import MeanAbsoluteError
+
+from src.metrics.standardeviation import StandardDeviation, AbsoluteError
 from src.vitaldb.fetchingstrategy.Sdk import Sdk
 from src.vitaldb.casegenerator import VitalFileOptions
 from src.vitaldb.casesplit import split_generator
@@ -11,7 +15,7 @@ from tensorflow import keras
 from keras import layers
 
 frequency = 500
-samples = range(1, 10)
+samples = range(1, 6389)
 train_split = 0.7
 validate_split = 0.15
 validate_test = 0.15
@@ -38,11 +42,14 @@ dataset_val = tf.data.Dataset.from_generator(
     )
 )
 
+
 def abp_low_pass_graph_adapter(x, frequency):
     return tf.numpy_function(transforms.abp_low_pass, [x, frequency], tf.float64)
 
+
 def extract_clean_windows_graph_adapter(x, frequency: int, window_size: int, step_size: int):
     return tf.numpy_function(transforms.extract_clean_windows, [x, frequency, window_size, step_size], tf.float64)
+
 
 def preprocess_dataset(dataset: tf.data.Dataset):
     dataset = dataset.filter(filters.has_data)
@@ -50,7 +57,7 @@ def preprocess_dataset(dataset: tf.data.Dataset):
     dataset = dataset.map(transforms.remove_nan)
     dataset = dataset.map(lambda x: abp_low_pass_graph_adapter(x, frequency))
     dataset = dataset.map(lambda x: extract_clean_windows_graph_adapter(x, frequency, 8, 2))
-    dataset= dataset.flat_map(transforms.to_tensor)
+    dataset = dataset.flat_map(transforms.to_tensor)
     dataset = dataset.filter(lambda x: filters.pressure_out_of_bounds(x, 30, 230))
     dataset = dataset.map(transforms.extract_sbp_dbp_from_abp_window)
     dataset = dataset.map(transforms.scale_array)
@@ -63,14 +70,23 @@ def preprocess_dataset(dataset: tf.data.Dataset):
 
     return dataset
 
+
 dataset_train = preprocess_dataset(dataset_train)
 dataset_val = preprocess_dataset(dataset_val)
 
 model = baseline_model()
 model.summary()
-model.compile(optimizer='Adam', loss=keras.losses.MeanAbsoluteError())
+model.compile(optimizer='Adam', loss=keras.losses.MeanAbsoluteError(),
+              metrics=[
+                  MeanAbsoluteError(),
+                  StandardDeviation(AbsoluteError())
+              ]
+              )
 
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="src/logs")
-model.fit(dataset_train, epochs=1, callbacks=[tensorboard_callback])
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="./logs")
+model.fit(dataset_train, epochs=10, callbacks=[tensorboard_callback])
 
-model.evaluate(dataset_val,  callbacks=[tensorboard_callback])
+metrics = model.evaluate(dataset_val, callbacks=[tensorboard_callback])
+print(pd.DataFrame(metrics))
+
+model.save('models')
