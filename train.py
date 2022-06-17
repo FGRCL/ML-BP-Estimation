@@ -1,6 +1,7 @@
 from src.vitaldb.fetchingstrategy.Sdk import Sdk
 from src.vitaldb.casegenerator import VitalFileOptions
 from src.vitaldb.casesplit import split_generator
+from src.models.baseline import baseline_model
 import src.preprocessing.transforms as transforms
 import src.preprocessing.filters as filters
 
@@ -65,16 +66,7 @@ def preprocess_dataset(dataset: tf.data.Dataset):
 dataset_train = preprocess_dataset(dataset_train)
 dataset_val = preprocess_dataset(dataset_val)
 
-inputs = keras.Input(shape=(4000, 1))
-x = layers.Conv1D(64, 15, activation='relu', input_shape=(4000, 1))(inputs)
-x = layers.BatchNormalization()(x)
-x = layers.MaxPooling1D(4)(x)
-x = layers.Dropout(0.1)(x)
-x = layers.LSTM(64, return_sequences=True)(x)
-x = layers.LSTM(64)(x)
-outputs = layers.Dense(2)(x)
-
-model = keras.Model(inputs, outputs)
+model = baseline_model()
 model.summary()
 model.compile(optimizer='Adam', loss=keras.losses.MeanAbsoluteError())
 
