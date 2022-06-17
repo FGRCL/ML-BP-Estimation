@@ -44,9 +44,11 @@ def to_tensor(x):
     return tf.data.Dataset.from_tensor_slices(x)
 
 
-def normalize_array(x, y):  # Unit test this
-    normalized, norm = tf.linalg.normalize(x)
-    return normalized, y
+def scale_array(x, y):  # Unit test this
+    mean = tf.math.reduce_mean(x)
+    std = tf.math.reduce_std(x)
+    scaled = (x-mean)/std
+    return scaled, y
 
 
 def extract_clean_windows(abp_track: np.ndarray, sample_rate: int, window_size: int, step_size: int):

@@ -52,7 +52,7 @@ def preprocess_dataset(dataset: tf.data.Dataset):
     dataset= dataset.flat_map(transforms.to_tensor)
     dataset = dataset.filter(lambda x: filters.pressure_out_of_bounds(x, 30, 230))
     dataset = dataset.map(transforms.extract_sbp_dbp_from_abp_window)
-    dataset = dataset.map(transforms.normalize_array)
+    dataset = dataset.map(transforms.scale_array)
 
     if batching:
         dataset = dataset.map(lambda d, l: (tf.reshape(d, shape=(4000, 1)), l))
