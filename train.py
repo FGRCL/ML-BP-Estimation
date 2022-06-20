@@ -15,7 +15,7 @@ from tensorflow import keras
 from keras import layers
 
 frequency = 500
-samples = range(1, 6389)
+samples = range(1, 500)
 train_split = 0.7
 validate_split = 0.15
 validate_test = 0.15
@@ -64,7 +64,7 @@ def preprocess_dataset(dataset: tf.data.Dataset):
 
     if batching:
         dataset = dataset.map(lambda d, l: (tf.reshape(d, shape=(4000, 1)), l))
-        dataset = dataset.batch(20).prefetch(2)
+        dataset = dataset.batch(20)
     else:
         dataset = dataset.map(lambda d, l: (tf.reshape(d, shape=(1, 4000)), l))
 

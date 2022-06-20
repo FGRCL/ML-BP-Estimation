@@ -6,7 +6,7 @@ from src.layers.baselinepreprocessing import WindowPreprocessing
 def baseline_model():
     input_shape = (4000, 1)
     return Sequential([
-        layers.Conv1D(64, 15, activation='relu', input_shape=(4000, 1)),
+        layers.Conv1D(64, 15, activation='relu', input_shape=input_shape),
         layers.BatchNormalization(),
         layers.MaxPooling1D(4),
         layers.Dropout(0.1),
