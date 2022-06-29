@@ -48,7 +48,7 @@ def to_tensor(x):
     return tf.data.Dataset.from_tensor_slices(x)
 
 
-def scale_array(x, y):  # Unit test this
+def standardize_track(x, y):  # Unit test this
     mean = tf.math.reduce_mean(x)
     std = tf.math.reduce_std(x)
     scaled = (x - mean) / std

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Iterable
 
 from numpy import ndarray
 
@@ -16,7 +17,7 @@ class VitalFileOptions:
 
 class VitalDBGenerator(object):
 
-    def __init__(self, options: VitalFileOptions, fetching_strategy: VitalDBFetchingStrategy, case_ids: list[int]):
+    def __init__(self, options: VitalFileOptions, fetching_strategy: VitalDBFetchingStrategy, case_ids: Iterable[int]):
         if len(case_ids) < 1:
             raise Exception(f'No case ids were passed to the generator')
         if min(case_ids) < MIN_VITAL_DB_CASE or max(case_ids) > MAX_VITAL_DB_CASE:
