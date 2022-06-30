@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from vitaldb import VitalFile
+from numpy import ndarray
 
 
 class VitalDBFetchingStrategy(ABC):
     @abstractmethod
-    def fetchvitalfile(self, caseid: int, tracks: list[str]) -> VitalFile:
+    def fetch_tracks(self, case_id: int, tracks: list[str], interval: float) -> ndarray:
         pass

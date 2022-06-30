@@ -1,7 +1,5 @@
 from keras import Sequential, layers
 
-from src.layers.baselinepreprocessing import WindowPreprocessing
-
 
 def baseline_model():
     input_shape = (4000, 1)

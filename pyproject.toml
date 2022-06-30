@@ -6,14 +6,17 @@ authors = ["François LaBerge <fgrclaberge@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
-keras = "^2.9.0"
 jupyter = "^1.0.0"
 pandas = "^1.4.2"
 tensorflow = "^2.9.1"
-vitaldb = "^0.1.19"
+vitaldb = "1.0.1"
 matplotlib = "^3.5.2"
 heartpy = "^1.2.7"
 neurokit2 = "^0.2.0"
+tensorboard = "^2.9.1"
+tensorboard-plugin-profile = "^2.8.0"
+keras = "^2.9.0"
+
 
 [tool.poetry.dev-dependencies]
 
