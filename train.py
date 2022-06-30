@@ -16,7 +16,6 @@ from tensorflow import keras
 from src.vitaldb.fetchingstrategy.VitalFileApi import VitalFileApi
 
 frequency = 500
-samples = range(1, 500)
 train_split = 0.7
 validate_split = 0.15
 validate_test = 0.15
@@ -28,7 +27,8 @@ options = VitalFileOptions(
     1/frequency
 )
 
-train_generator, val_generator, test_generator = split_generator(options, DatasetApi(), samples, [0.7, 0.15, 0.15])
+
+train_generator, val_generator, test_generator = split_generator(options, DatasetApi(), [0.7, 0.15, 0.15])
 
 dataset_train = tf.data.Dataset.from_generator(
     lambda: train_generator,

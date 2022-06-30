@@ -4,6 +4,9 @@ from numpy import ndarray
 
 from src.vitaldb.fetchingstrategy.VitalDBFetchingStrategy import VitalDBFetchingStrategy
 
+MIN_VITAL_DB_CASE = 1
+MAX_VITAL_DB_CASE = 6388
+
 
 @dataclass
 class VitalFileOptions:
@@ -14,8 +17,10 @@ class VitalFileOptions:
 class VitalDBGenerator(object):
 
     def __init__(self, options: VitalFileOptions, fetching_strategy: VitalDBFetchingStrategy, case_ids: list[int]):
-        if len(case_ids) < 1 or len(case_ids) > 6388:  # TODO save those constants somewhere
-            raise Exception(f'The generator should have between 1 and 6388 case ids but got {len(case_ids)}')
+        if len(case_ids) < 1:
+            raise Exception(f'No case ids were passed to the generator')
+        if min(case_ids) < MIN_VITAL_DB_CASE or max(case_ids) > MAX_VITAL_DB_CASE:
+            raise Exception(f'At least one case was outside the allowed range for case ids')
         self.case_ids = iter(case_ids)
         self.options = options
         self.fetching_strategy = fetching_strategy
