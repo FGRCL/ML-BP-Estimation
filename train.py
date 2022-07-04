@@ -2,10 +2,11 @@ import pandas as pd
 from keras.metrics import MeanAbsoluteError
 
 from src.metrics.standardeviation import StandardDeviation, AbsoluteError
+from src.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 from src.vitaldb.fetchingstrategy.DatasetApi import DatasetApi
-from src.vitaldb.casegenerator import VitalFileOptions
-from src.vitaldb.casesplit import split_generator
-from src.models.baseline import baseline_model
+from src.vitaldb.casegenerator import VitalFileOptions, VitalDBGenerator
+from src.vitaldb.casesplit import get_splits
+from src.models.baseline import build_baseline_model
 import src.preprocessing.transforms as transforms
 import src.preprocessing.filters as filters
 
@@ -27,18 +28,17 @@ options = VitalFileOptions(
     1/frequency
 )
 
-
-train_generator, val_generator, test_generator = split_generator(options, DatasetApi(), [0.7, 0.15, 0.15])
+train_cases, val_cases, test_cases = get_splits([0.7, 0.15, 0.15])
 
 dataset_train = tf.data.Dataset.from_generator(
-    lambda: train_generator,
+    lambda: VitalDBGenerator(options, DatasetApi(), train_cases),
     output_signature=(
         tf.TensorSpec(shape=(None, 1), dtype=tf.float64)
     )
 ).take(1)
 
 dataset_val = tf.data.Dataset.from_generator(
-    lambda: val_generator,
+    lambda: VitalDBGenerator(options, DatasetApi(), val_cases),
     output_signature=(
         tf.TensorSpec(shape=(None, 1), dtype=tf.float64)
     )
@@ -62,7 +62,6 @@ def preprocess_dataset(dataset: tf.data.Dataset):
     dataset = dataset.filter(lambda x: filters.pressure_out_of_bounds(x, 30, 230))
     dataset = dataset.map(transforms.extract_sbp_dbp_from_abp_window)
     dataset = dataset.map(transforms.scale_array)
-    dataset = dataset.repeat(epochs)
 
     if batching:
         dataset = dataset.map(lambda d, l: (tf.reshape(d, shape=(4000, 1)), l))
@@ -76,7 +75,7 @@ def preprocess_dataset(dataset: tf.data.Dataset):
 dataset_train = preprocess_dataset(dataset_train)
 dataset_val = preprocess_dataset(dataset_val)
 
-model = baseline_model()
+model = build_baseline_model()
 model.summary()
 model.compile(optimizer='Adam', loss=keras.losses.MeanSquaredError(),
               metrics=[

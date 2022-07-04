@@ -4,15 +4,7 @@ from src.vitaldb.casegenerator import VitalDBGenerator, VitalFileOptions, VitalD
     MAX_VITAL_DB_CASE
 
 
-def split_generator(options: VitalFileOptions, fetching_strategy: VitalDBFetchingStrategy,
-                    split_percentages: list[float],
-                    case_range: list[int] = range(MIN_VITAL_DB_CASE, MAX_VITAL_DB_CASE + 1)) -> tuple[VitalDBGenerator]:
-    splits = split_case_ids(case_range, split_percentages)
-    generators = [VitalDBGenerator(options, fetching_strategy, split) for split in splits]
-    return tuple(generators)
-
-
-def split_case_ids(case_range: list[int], split_percentages: list[float]) -> list[list[int]]:
+def get_splits(split_percentages: list[float], case_range: list[int] = range(MIN_VITAL_DB_CASE, MAX_VITAL_DB_CASE + 1)) -> list[list[int]]:
     if not round(sum(split_percentages), 2) == 1:
         raise Exception(f'split percentages should sum up to 100%, but summed up to {sum(split_percentages) * 100}%')
 
@@ -26,6 +18,6 @@ def split_case_ids(case_range: list[int], split_percentages: list[float]) -> lis
     for case in case_range:
         hashed_id = crc32(np.int64(case)) & 0xffffffff  # TODO this hash doesn't provide the most reliable dataset sizes. consider reworking it
         for i in range(0, len(split_thresholds) - 1):
-            if (split_thresholds[i] < hashed_id <= split_thresholds[i + 1]):
+            if split_thresholds[i] < hashed_id <= split_thresholds[i + 1]:
                 splits[i].append(case)
     return splits

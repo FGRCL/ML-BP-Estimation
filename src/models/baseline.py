@@ -1,7 +1,7 @@
 from keras import Sequential, layers
 
 
-def baseline_model():
+def build_baseline_model():
     input_shape = (4000, 1)
     return Sequential([
         layers.Conv1D(64, 15, activation='relu', input_shape=input_shape),

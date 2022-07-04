@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import heartpy as hp
+from numpy import float64
 from tensorflow import Tensor
 
 
@@ -8,11 +9,16 @@ def add_0_labels(x: Tensor):
     return x, 0
 
 
+def print_tensor(x: Tensor, y: Tensor = None):
+    tf.print(x)
+    return x, y
+
+
 def extract_abp_track(tracks: Tensor):
     return tracks[:, 1]
 
 
-def abp_low_pass(unfiltered_abp: np.ndarray, sample_rate: int):
+def abp_low_pass(unfiltered_abp: np.ndarray, sample_rate: int) -> float64:
     return hp.filter_signal(unfiltered_abp, cutoff=5, sample_rate=float(sample_rate), filtertype='lowpass')
 
 
