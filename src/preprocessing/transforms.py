@@ -22,7 +22,7 @@ def abp_low_pass(unfiltered_abp: np.ndarray, sample_rate: int) -> float64:
     return hp.filter_signal(unfiltered_abp, cutoff=5, sample_rate=float(sample_rate), filtertype='lowpass')
 
 
-def remove_nan(abp_recording: Tensor):
+def remove_nan(abp_recording: Tensor) -> Tensor:
     return tf.boolean_mask(abp_recording, tf.logical_not(tf.math.is_nan(abp_recording)))
 
 

@@ -13,7 +13,7 @@ def bp_contains_nan(track: Tensor, bp: list) -> bool:
 
 
 @tf.function
-def pressure_out_of_bounds(track: Tensor, min_pressure: int, max_pressure: int) -> bool:
+def pressure_within_bounds(track: Tensor, min_pressure: int, max_pressure: int) -> bool:
     return tf.reduce_min(track) > min_pressure and tf.reduce_max(track) < max_pressure
 
 
