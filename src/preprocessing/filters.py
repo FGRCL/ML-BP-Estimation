@@ -1,6 +1,8 @@
 import tensorflow as tf
 from tensorflow import Tensor
 
+from src.preprocessing.pipelines.base import FilterOperation
+
 
 @tf.function
 def track_contains_nan(track: Tensor, bp: list) -> bool:
@@ -17,6 +19,7 @@ def pressure_within_bounds(track: Tensor, min_pressure: int, max_pressure: int) 
     return tf.reduce_min(track) > min_pressure and tf.reduce_max(track) < max_pressure
 
 
-@tf.function
-def has_data(track: Tensor) -> bool:
-    return tf.size(track) != 0
+class HasData(FilterOperation):
+
+    def filter(self, x: Tensor, y: Tensor = None) -> bool:
+        return tf.size(x) != 0

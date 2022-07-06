@@ -1,72 +1,73 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Any
+from typing import Any, Tuple
 
+import tensorflow as tf
 from numpy import ndarray
 from tensorflow import Tensor, numpy_function, DType
 from tensorflow.python.data import Dataset
 
 
-class DatasetOperations(ABC):
-    def __init__(self, *additional_args):
-        self.additional_args = additional_args
-
+class DatasetOperation(ABC):
     @abstractmethod
     def apply(self, dataset: Dataset) -> Dataset:
         ...
 
 
-class TransformOperation(DatasetOperations):
-    def __init__(self, transform: Callable[[Tensor, Tensor, ...], Tensor], *additional_arguments):
-        super().__init__(*additional_arguments)
-        self.transform = transform
-        self.additional_arguments = additional_arguments
-
+class TransformOperation(DatasetOperation):
     def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.map(self.transform_func)
+        return dataset.map(self.transform)
 
-    def transform_func(self, x: Tensor, y: Tensor = None):
-        if y is not None:
-            return self.transform(x, y, *self.additional_args)
-        else:
-            return self.transform(x, *self.additional_args)
+    @abstractmethod
+    def transform(self, x: Tensor, y: Tensor = None) -> Any:
+        ...
 
 
-class FilterOperation(DatasetOperations):
-    def __init__(self, _filter: Callable[[Tensor, Tensor, ...], bool], *additional_args):
-        super().__init__(*additional_args)
-        self.filter = _filter
-
+class FilterOperation(DatasetOperation):
     def apply(self, dataset) -> Dataset:
-        return dataset.filter(self.filter_func)
+        return dataset.filter(self.filter)
 
-    def filter_func(self, x: Tensor, y: Tensor = None):
-        if y is not None:
-            return self.filter(x, y, *self.additional_args)
-        else:
-            return self.filter(x, *self.additional_args)
+    @abstractmethod
+    def filter(self, x: Tensor, y: Tensor = None) -> bool:
+        ...
 
 
-class NumpyTransformOperation(DatasetOperations):
-    def __init__(self, transform: Callable[[ndarray, ...], Any], out_type: DType, *additional_args):
-        super().__init__(*additional_args)
-        self.transform = transform
+class NumpyTransformOperation(DatasetOperation):
+    def __init__(self, out_type: DType | Tuple[DType]):
         self.out_type = out_type
 
     def apply(self, dataset: Dataset) -> Dataset:
         return dataset.map(self.adapted_function)
 
     def adapted_function(self, x: Tensor, y: Tensor = None):
-        if y is not None:
-            return numpy_function(self.transform, [x, y, *self.additional_args], self.out_type)
+        if y is None:
+            return numpy_function(self.transform, [x], self.out_type)
         else:
-            return numpy_function(self.transform, [x, *self.additional_args], self.out_type)
+            return numpy_function(self.transform, [x, y], self.out_type)
+
+    @abstractmethod
+    def transform(self, x: ndarray, y: ndarray = None) -> Any:
+        ...
+
+
+class Print(TransformOperation):
+    def __init__(self, operation_name):
+        self.operation_name = operation_name
+
+    def transform(self, x: Tensor, y: Tensor = None) -> Any:
+        tf.print(self.operation_name)
+        tf.print(x)
+        if y is not None: tf.print(y)
+        return x, y
 
 
 class DatasetPreprocessingPipeline(ABC):
-    def __init__(self, dataset_operations: list[DatasetOperations]):
+    def __init__(self, dataset_operations: list[DatasetOperation], debug=False):
         self.dataset_operations = dataset_operations
+        self.debug = debug
 
     def preprocess(self, dataset: Dataset) -> Dataset:
         for op in self.dataset_operations:
             dataset = op.apply(dataset)
+            if self.debug:
+                dataset = Print(op.__class__.__name__).apply(dataset)
         return dataset

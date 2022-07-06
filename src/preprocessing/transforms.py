@@ -1,17 +1,14 @@
+import heartpy as hp
 import numpy as np
 import tensorflow as tf
-import heartpy as hp
 from numpy import float64
 from tensorflow import Tensor
+
+from src.preprocessing.pipelines.base import TransformOperation
 
 
 def add_0_labels(x: Tensor):
     return x, 0
-
-
-def print_tensor(x: Tensor, y: Tensor = None):
-    tf.print(x)
-    return x, y
 
 
 def extract_abp_track(tracks: Tensor):
@@ -22,8 +19,9 @@ def abp_low_pass(unfiltered_abp: np.ndarray, sample_rate: int) -> float64:
     return hp.filter_signal(unfiltered_abp, cutoff=5, sample_rate=float(sample_rate), filtertype='lowpass')
 
 
-def remove_nan(abp_recording: Tensor) -> Tensor:
-    return tf.boolean_mask(abp_recording, tf.logical_not(tf.math.is_nan(abp_recording)))
+class RemoveNan(TransformOperation):
+    def transform(self, x: Tensor, y: Tensor = None) -> Tensor:
+        return tf.boolean_mask(x, tf.logical_not(tf.math.is_nan(x)))
 
 
 def abp_split_windows(full_abp_recording: Tensor, sample_rate: int, window_size: int, step_size: int):
@@ -53,7 +51,7 @@ def to_tensor(x):
 def scale_array(x, y):  # Unit test this
     mean = tf.math.reduce_mean(x)
     std = tf.math.reduce_std(x)
-    scaled = (x-mean)/std
+    scaled = (x - mean) / std
     return scaled, y
 
 
