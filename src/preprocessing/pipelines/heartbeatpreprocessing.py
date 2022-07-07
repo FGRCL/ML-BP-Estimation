@@ -1,29 +1,34 @@
+from collections import namedtuple
 from typing import Any, Tuple
 
 from heartpy import filter_signal, process
-from numpy import ndarray, argmin, array
+from numpy import ndarray, argmin, empty, append, asarray
+from scipy.signal import find_peaks
 from tensorflow import Tensor, float64, reduce_min, reduce_max, DType
 from tensorflow.python.data import Dataset
 
 from src.preprocessing.filters import HasData
 from src.preprocessing.pipelines.base import DatasetPreprocessingPipeline, TransformOperation, NumpyTransformOperation, \
-    FilterOperation, DatasetOperation
-from src.preprocessing.transforms import RemoveNan
+    FilterOperation, DatasetOperation, NumpyFilterOperation
+from src.preprocessing.transforms import RemoveNan, StandardizeArray
 
 
 class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
-    def __init__(self, frequency=500, lowpass_cutoff=5, bandpass_cutoff=(0.1, 8), min_pressure=30, max_pressure=230):
+    def __init__(self, frequency=500, lowpass_cutoff=5, bandpass_cutoff=(0.1, 8), min_pressure=30, max_pressure=230,
+                 beat_length=400, max_peak_count=2):
         dataset_operations = [
             HasData(),
             RemoveNan(),
             FilterTrack(float64, frequency, lowpass_cutoff, bandpass_cutoff),
-            ExtractHeartbeats(float64, frequency),
+            ExtractHeartbeats(float64, frequency, beat_length),
             FlattenDataset(),
             ExtractBloodPressureFromBeat(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
+            FilterExtraPeaks(max_peak_count),
             RemoveLowpassTrack(),
+            StandardizeArray(),
         ]
-        super().__init__(dataset_operations, debug=True)
+        super().__init__(dataset_operations)
 
 
 class FilterTrack(NumpyTransformOperation):
@@ -38,15 +43,17 @@ class FilterTrack(NumpyTransformOperation):
                                       filtertype='lowpass')
         track_bandpass = filter_signal(data=track, cutoff=self.bandpass_cutoff, sample_rate=self.sample_rate,
                                        filtertype='bandpass')
-        return array([track_lowpass, track_bandpass])
+        FilteredTracks = namedtuple('FilteredTracks', ['lowpass', 'bandpass'])
+        return [FilteredTracks(track_lowpass, track_bandpass)]
 
 
 class ExtractHeartbeats(NumpyTransformOperation):
-    def __init__(self, out_type: DType | Tuple[DType], sample_rate):
+    def __init__(self, out_type: DType | Tuple[DType], sample_rate, beat_length):
         super().__init__(out_type)
+        self.beat_length = beat_length
         self.sample_rate = sample_rate
 
-    def transform(self, tracks: ndarray, y: ndarray = None) -> Any:
+    def transform(self, tracks: Tensor, y: Tensor = None) -> Any:
         track_lowpass, track_bandpass = tracks
         working_data, measure = process(track_lowpass, self.sample_rate)
 
@@ -59,12 +66,21 @@ class ExtractHeartbeats(NumpyTransformOperation):
                 end_beat = middle + argmin(track_lowpass[middle:end])
                 heartbeats_indices.append((start_beat, end_beat))
 
-        heartbeats_lowpass = [track_lowpass[i[0]:i[1]] for i in heartbeats_indices]
-        heartbeats_bandpass = [track_bandpass[i[0]:i[1]] for i in heartbeats_indices]
+        heartbeats = empty(shape=(len(heartbeats_indices), 2, self.beat_length))
+        for i, indices in enumerate(heartbeats_indices):
+            heartbeats[i][0] = self._standardize_heartbeat_length(asarray(track_lowpass[indices[0]:indices[1]]))
+            heartbeats[i][1] = self._standardize_heartbeat_length(asarray(track_bandpass[indices[0]:indices[1]]))
 
-        print(heartbeats_lowpass)
-        print(heartbeats_bandpass)
-        return array([heartbeats_lowpass, heartbeats_bandpass])
+        return heartbeats
+
+    def _standardize_heartbeat_length(self, heartbeat):
+        missing_length = self.beat_length - len(heartbeat)
+        if missing_length > 0:
+            last_element = heartbeat[-1]
+            padding = [last_element] * missing_length
+            return append(heartbeat, padding)
+        else:
+            return heartbeat[0:self.beat_length]
 
 
 class FlattenDataset(DatasetOperation):
@@ -73,7 +89,7 @@ class FlattenDataset(DatasetOperation):
 
     @staticmethod
     def element_to_dataset(x: Tensor, y: Tensor = None) -> tuple[Tensor, Tensor | None]:
-        return Dataset.from_tensors(x)
+        return Dataset.from_tensor_slices(x)
 
 
 class ExtractBloodPressureFromBeat(TransformOperation):
@@ -82,6 +98,14 @@ class ExtractBloodPressureFromBeat(TransformOperation):
         sbp = reduce_max(track_lowpass)
         dbp = reduce_min(track_lowpass)
         return tracks, [sbp, dbp]
+
+
+class FilterExtraPeaks(NumpyFilterOperation):
+    def __init__(self, max_peak_count):
+        self.max_peak_count = max_peak_count
+
+    def filter(self, heartbeats: ndarray, y: Tensor = None) -> bool:
+        return len(find_peaks(heartbeats[1])) <= self.max_peak_count
 
 
 class FilterPressureWithinBounds(FilterOperation):

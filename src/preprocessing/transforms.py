@@ -1,3 +1,5 @@
+from typing import Any
+
 import heartpy as hp
 import numpy as np
 import tensorflow as tf
@@ -48,11 +50,12 @@ def to_tensor(x):
     return tf.data.Dataset.from_tensor_slices(x)
 
 
-def standardize_track(x, y):  # Unit test this
-    mean = tf.math.reduce_mean(x)
-    std = tf.math.reduce_std(x)
-    scaled = (x - mean) / std
-    return scaled, y
+class StandardizeArray(TransformOperation):
+    def transform(self, x: Tensor, y: Tensor = None) -> Any:
+        mean = tf.math.reduce_mean(x)
+        std = tf.math.reduce_std(x)
+        scaled = (x - mean) / std
+        return scaled, y
 
 
 def extract_clean_windows(abp_track: np.ndarray, sample_rate: int, window_size: int, step_size: int):
