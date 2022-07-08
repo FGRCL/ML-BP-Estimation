@@ -19,7 +19,7 @@ class TestTransforms(unittest.TestCase):
     def test_scale_array(self):
         array = tf.constant([82.0, 49.0, 99.0, 35.0, 14.0])
 
-        scaled = transforms.scale_array(array, None)
+        scaled = transforms.standardize_track(array, None)
 
         self.assertAlmostEqual(0, tf.math.reduce_mean(scaled).numpy(), 3)
         self.assertAlmostEqual(1, tf.math.reduce_variance(scaled).numpy(), 3)
@@ -27,7 +27,17 @@ class TestTransforms(unittest.TestCase):
     def test_scale_array_large_array(self):
         array = tf.constant(np.arange(0.0, 10000.0, 1.0))
 
-        scaled = transforms.scale_array(array, None)
+        scaled = transforms.standardize_track(array, None)
 
         self.assertAlmostEqual(0, tf.math.reduce_mean(scaled).numpy(), 3)
         self.assertAlmostEqual(1, tf.math.reduce_variance(scaled).numpy(), 3)
+
+
+    def test_filter_track(self):
+        signal = np.zeros(10000)
+
+        filteredTracks = transforms.filter_track(signal, 500)
+
+        expectedTrack = np.zeros(10000)
+        self.assertSequenceEqual(expectedTrack, filteredTracks.lowpass)
+        self.assertSequenceEqual(expectedTrack, filteredTracks.bandpass)
