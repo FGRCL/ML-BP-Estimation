@@ -1,11 +1,11 @@
 import unittest
 
-from src.vitaldb.casesplit import split_case_ids
+from src.vitaldb.casesplit import get_splits
 
 class TestCaseSplit(unittest.TestCase):
 
     def test_splitgenerator(self):
-        result = split_case_ids(range(0, 100), [0.5, 0.5])
+        result = get_splits(range(0, 100), [0.5, 0.5])
 
         print(len(result[0]))
 
@@ -18,7 +18,7 @@ class TestCaseSplit(unittest.TestCase):
                 self.assertTrue(set(result[i]).isdisjoint(set(result[j])))
 
     def test_splitgenerator(self):
-        result = split_case_ids(range(0, 1000), [0.7, 0.15, 0.15])
+        result = get_splits(range(0, 1000), [0.7, 0.15, 0.15])
 
         self.assertEqual(len(result), 3)
         self.assertEqual(len(result[0]), 700)
@@ -30,7 +30,7 @@ class TestCaseSplit(unittest.TestCase):
                 self.assertTrue(set(result[i]).isdisjoint(set(result[j])))
 
     def test_splitgenerator(self):
-        result = split_case_ids(range(0, 1000), [0.1] * 10)
+        result = get_splits(range(0, 1000), [0.1] * 10)
 
         self.assertEqual(len(result), 10)
         for l in result:
