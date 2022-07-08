@@ -7,7 +7,7 @@ from src.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreproce
 def build_heartbeat_cnn_model(datasets):
     input_shape = (400, 1)
     pipeline = HeartbeatPreprocessing()
-    preprocessed_datasets = [pipeline.preprocess(dataset).batch(1) for dataset in datasets]
+    preprocessed_datasets = [pipeline.preprocess(dataset).batch(20) for dataset in datasets]
     model = Sequential([
         Conv1D(64, 15, activation='relu', input_shape=input_shape),
         BatchNormalization(),

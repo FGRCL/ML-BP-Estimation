@@ -1,16 +1,15 @@
-from collections import namedtuple
 from typing import Any, Tuple
 
-from heartpy import filter_signal, process
+from heartpy import process
 from numpy import ndarray, argmin, empty, append, asarray
 from scipy.signal import find_peaks
-from tensorflow import Tensor, float64, reduce_min, reduce_max, DType, ensure_shape
-from tensorflow.python.data import Dataset
+from tensorflow import Tensor, float64, DType
 
-from src.preprocessing.filters import HasData
-from src.preprocessing.pipelines.base import DatasetPreprocessingPipeline, TransformOperation, NumpyTransformOperation, \
-    FilterOperation, DatasetOperation, NumpyFilterOperation
-from src.preprocessing.transforms import RemoveNan, StandardizeArray
+from src.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation, \
+    NumpyFilterOperation
+from src.preprocessing.shared.filters import HasData, FilterPressureWithinBounds
+from src.preprocessing.shared.transforms import RemoveNan, StandardizeArray, SignalFilter, AddBloodPressureOutput, \
+    FlattenDataset, RemoveLowpassTrack, SetTensorShape
 
 
 class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
@@ -19,36 +18,20 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
         dataset_operations = [
             HasData(),
             RemoveNan(),
-            FilterTrack(float64, frequency, lowpass_cutoff, bandpass_cutoff),
-            ExtractHeartbeats(float64, frequency, beat_length),
+            SignalFilter(float64, frequency, lowpass_cutoff, bandpass_cutoff),
+            SplitHeartbeats(float64, frequency, beat_length),
             FlattenDataset(),
-            ExtractBloodPressureFromBeat(),
+            AddBloodPressureOutput(),
+            RemoveLowpassTrack(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
             FilterExtraPeaks(max_peak_count),
-            RemoveLowpassTrack(),
             StandardizeArray(),
             SetTensorShape(beat_length)
         ]
         super().__init__(dataset_operations)
 
 
-class FilterTrack(NumpyTransformOperation):
-    def __init__(self, out_type: DType | Tuple[DType], sample_rate, lowpass_cutoff, bandpass_cutoff):
-        super().__init__(out_type)
-        self.bandpass_cutoff = bandpass_cutoff
-        self.lowpass_cutoff = lowpass_cutoff
-        self.sample_rate = sample_rate
-
-    def transform(self, track: ndarray, y: ndarray = None) -> Any:
-        track_lowpass = filter_signal(data=track, cutoff=self.lowpass_cutoff, sample_rate=self.sample_rate,
-                                      filtertype='lowpass')
-        track_bandpass = filter_signal(data=track, cutoff=self.bandpass_cutoff, sample_rate=self.sample_rate,
-                                       filtertype='bandpass')
-        FilteredTracks = namedtuple('FilteredTracks', ['lowpass', 'bandpass'])
-        return [FilteredTracks(track_lowpass, track_bandpass)]
-
-
-class ExtractHeartbeats(NumpyTransformOperation):
+class SplitHeartbeats(NumpyTransformOperation):
     def __init__(self, out_type: DType | Tuple[DType], sample_rate, beat_length):
         super().__init__(out_type)
         self.beat_length = beat_length
@@ -84,49 +67,9 @@ class ExtractHeartbeats(NumpyTransformOperation):
             return heartbeat[0:self.beat_length]
 
 
-class FlattenDataset(DatasetOperation):
-    def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.flat_map(self.element_to_dataset)
-
-    @staticmethod
-    def element_to_dataset(x: Tensor, y: Tensor = None) -> tuple[Tensor, Tensor | None]:
-        return Dataset.from_tensor_slices(x)
-
-
-class ExtractBloodPressureFromBeat(TransformOperation):
-    def transform(self, tracks: Tensor, y: Tensor = None) -> Any:
-        track_lowpass = tracks[0]
-        sbp = reduce_max(track_lowpass)
-        dbp = reduce_min(track_lowpass)
-        return tracks, [sbp, dbp]
-
-
 class FilterExtraPeaks(NumpyFilterOperation):
     def __init__(self, max_peak_count):
         self.max_peak_count = max_peak_count
 
     def filter(self, heartbeats: ndarray, y: Tensor = None) -> bool:
-        return len(find_peaks(heartbeats[1])) <= self.max_peak_count
-
-
-class FilterPressureWithinBounds(FilterOperation):
-    def __init__(self, min_pressure, max_pressure):
-        self.min_pressure = min_pressure
-        self.max_pressure = max_pressure
-
-    def filter(self, tracks: Tensor, y: Tensor = None) -> bool:
-        heartbeats_lowpass = tracks[0]
-        return reduce_min(heartbeats_lowpass) > self.min_pressure and reduce_max(heartbeats_lowpass) < self.max_pressure
-
-
-class RemoveLowpassTrack(TransformOperation):
-    def transform(self, x: Tensor, y: Tensor = None) -> Any:
-        return x[1], y
-
-
-class SetTensorShape(TransformOperation):
-    def __init__(self, input_length):
-        self.input_length = input_length
-
-    def transform(self, x: Tensor, y: Tensor = None) -> Any:
-        return ensure_shape(x, self.input_length), ensure_shape(y, 2)
+        return len(find_peaks(heartbeats)) <= self.max_peak_count
