@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-import matplotlib.pyplot
 import tensorflow as tf
 from neurokit2 import ppg_simulate
+from tensorflow import TensorSpec, float64
 
 from src.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
 
@@ -14,10 +14,7 @@ class TestHeartbeatPreprocessing(TestCase):
         dataset = tf.data.Dataset.from_tensor_slices([ppg_signal])
         pipeline = HeartbeatPreprocessing()
 
-        processed_pipeline = pipeline.preprocess(dataset)
+        processed_dataset = pipeline.preprocess(dataset)
 
-        for element in processed_pipeline:
-            print(element[1].numpy())
-            matplotlib.pyplot.plot(element[0].numpy())
-
-        matplotlib.pyplot.show()
+        expected_specs = (TensorSpec(shape=400, dtype=float64), TensorSpec(shape=2, dtype=float64))
+        self.assertEqual(expected_specs, processed_dataset.element_spec)

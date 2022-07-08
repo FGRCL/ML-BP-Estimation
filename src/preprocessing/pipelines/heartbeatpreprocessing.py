@@ -4,7 +4,7 @@ from typing import Any, Tuple
 from heartpy import filter_signal, process
 from numpy import ndarray, argmin, empty, append, asarray
 from scipy.signal import find_peaks
-from tensorflow import Tensor, float64, reduce_min, reduce_max, DType
+from tensorflow import Tensor, float64, reduce_min, reduce_max, DType, ensure_shape
 from tensorflow.python.data import Dataset
 
 from src.preprocessing.filters import HasData
@@ -27,6 +27,7 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             FilterExtraPeaks(max_peak_count),
             RemoveLowpassTrack(),
             StandardizeArray(),
+            SetTensorShape(beat_length)
         ]
         super().__init__(dataset_operations)
 
@@ -121,3 +122,11 @@ class FilterPressureWithinBounds(FilterOperation):
 class RemoveLowpassTrack(TransformOperation):
     def transform(self, x: Tensor, y: Tensor = None) -> Any:
         return x[1], y
+
+
+class SetTensorShape(TransformOperation):
+    def __init__(self, input_length):
+        self.input_length = input_length
+
+    def transform(self, x: Tensor, y: Tensor = None) -> Any:
+        return ensure_shape(x, self.input_length), ensure_shape(y, 2)
