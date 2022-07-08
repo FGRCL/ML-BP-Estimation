@@ -1,9 +1,13 @@
 from keras import Sequential, layers
 
+from src.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 
-def build_baseline_model():
+
+def build_baseline_model(datasets):
     input_shape = (4000, 1)
-    return Sequential([
+    pipeline = WindowPreprocessing()
+    preprocessed_datasets = [pipeline.preprocess(dataset).batch(20) for dataset in datasets]
+    model = Sequential([
         layers.Conv1D(64, 15, activation='relu', input_shape=input_shape),
         layers.BatchNormalization(),
         layers.MaxPooling1D(4),
@@ -12,3 +16,4 @@ def build_baseline_model():
         layers.LSTM(64),
         layers.Dense(2),
     ])
+    return preprocessed_datasets, model

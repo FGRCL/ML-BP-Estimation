@@ -11,7 +11,6 @@ epochs = 10
 train, val, _ = load_vitaldb_dataset()
 (train, val), model = build_heartbeat_cnn_model([train, val])
 
-print(train)
 model.summary()
 model.compile(optimizer='Adam', loss=keras.losses.MeanSquaredError(),
               metrics=[
