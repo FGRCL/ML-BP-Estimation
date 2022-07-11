@@ -1,0 +1,1 @@
+salloc --account=def-bentahar --gres=gpu:1 --cpus-per-task=3 --mem=32000M --time=00:15:00
