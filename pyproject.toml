@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "bpbaseline"
+name = "ML-BP-estimation"
 version = "0.1.0"
 description = ""
 authors = ["François LaBerge <fgrclaberge@gmail.com>"]
