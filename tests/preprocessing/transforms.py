@@ -1,16 +1,17 @@
 import unittest
 
-import numpy as np
 import heartpy as hp
+import numpy as np
 import tensorflow as tf
 
-import src.preprocessing.transforms as transforms
+import src.preprocessing.shared.transforms as transforms
+
 
 class TestTransforms(unittest.TestCase):
 
     def test_extract_clean_windows(self):
         track, timer = hp.load_exampledata(2)
-        sample_rate = hp.get_samplerate_datetime(timer, timeformat = '%Y-%m-%d %H:%M:%S.%f')
+        sample_rate = hp.get_samplerate_datetime(timer, timeformat='%Y-%m-%d %H:%M:%S.%f')
 
         windows = transforms.extract_clean_windows(track, sample_rate, 8, 2)
 
@@ -31,7 +32,6 @@ class TestTransforms(unittest.TestCase):
 
         self.assertAlmostEqual(0, tf.math.reduce_mean(scaled).numpy(), 3)
         self.assertAlmostEqual(1, tf.math.reduce_variance(scaled).numpy(), 3)
-
 
     def test_filter_track(self):
         signal = np.zeros(10000)
