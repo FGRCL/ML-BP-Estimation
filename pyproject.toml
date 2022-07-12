@@ -13,6 +13,7 @@ neurokit2 = "^0.2.0"
 tensorflow = "^2.9.1"
 wfdb = "^4.0.0"
 envyaml = "^1.10.211231"
+wandb = "^0.12.21"
 
 [tool.poetry.dev-dependencies]
 pandas = "^1.4.2"
