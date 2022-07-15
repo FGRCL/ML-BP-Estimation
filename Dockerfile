@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3-slim
 
 ENV POETRY_VERSION=1.1.4
 
