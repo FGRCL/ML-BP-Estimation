@@ -2,9 +2,9 @@ FROM python:3-slim
 
 ENV POETRY_VERSION=1.1.4
 
-COPY src/ src
-COPY train.py pyproject.toml poetry.lock .
-COPY --chown=55 train.sh .
+COPY src/ /code/src
+COPY train.py pyproject.toml poetry.lock /code/
+COPY --chown=55 train.sh /code/
 
 RUN pip install "poetry==$POETRY_VERSION"
 RUN poetry config virtualenvs.create false

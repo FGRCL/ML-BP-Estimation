@@ -4,7 +4,7 @@ pipeline{
         IMAGE_TAG = "train-test"
         DOCKERHUB_PROJECT = "fgrcl/ml-bp-estimation"
         GIT_URL = "github.com:FGRCL/ML-BP-Estimation.git"
-        GIT_BRANCH = "main"
+        GIT_BRANCH = "docker"
     }
     stages {
         stage('Clone repo') {
@@ -13,26 +13,28 @@ pipeline{
                 git credentialsId: 'ssh-key', url: "git@${GIT_URL}", branch: "${GIT_BRANCH}"
             }
         }
-        stage('Container'){
+        stage('Build image') {
+            agent any
+            steps {
+                sh 'docker build -t ${DOCKERHUB_PROJECT}:${IMAGE_TAG} .'
+            }
+        }
+        stage('Publish image') {
             agent any
             environment {
                 DOCKERHUB_CREDENTIALS = credentials('docker-credentials')
             }
             steps {
-                //sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                sh 'ls'
-                sh 'docker build -t ${DOCKERHUB_PROJECT}:${IMAGE_TAG} .'
-                sh 'docker push ${DOCKERHUB_PROJECT}:${IMAGE_TAG}'
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                sh "docker push ${DOCKERHUB_PROJECT}:${IMAGE_TAG}"
             }
         }
-        stage('Train'){
+        stage('Train') {
             agent{
                 label 'CCCedar'
             }
             steps{
-                git branch: '${env.BRANCH_NAME}',
-                    credentialsId: 'Jenkins',
-                    url: 'ssh://git@github.com:FGRCL/ML-BP-Estimation.git'
+                git credentialsId: 'ssh-key', url: "git@${GIT_URL}", branch: "${GIT_BRANCH}"
                 sh 'sbatch ./train.sh'
             }
         }
