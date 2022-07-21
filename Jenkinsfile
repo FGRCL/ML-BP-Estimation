@@ -1,26 +1,24 @@
 pipeline{
-    agent none
+    agent any
     environment {
         IMAGE_TAG = "train-test"
         DOCKERHUB_PROJECT = "fgrcl/ml-bp-estimation"
         GIT_URL = "github.com:FGRCL/ML-BP-Estimation.git"
         GIT_BRANCH = "docker"
+        SCRIPT_NAME = "test.sh"
     }
     stages {
         stage('Clone repo') {
-            agent any
             steps {
                 git credentialsId: 'ssh-key', url: "git@${GIT_URL}", branch: "${GIT_BRANCH}"
             }
         }
         stage('Build image') {
-            agent any
             steps {
-                sh 'docker build -t ${DOCKERHUB_PROJECT}:${IMAGE_TAG} .'
+                sh "docker build -t ${DOCKERHUB_PROJECT}:${IMAGE_TAG} ."
             }
         }
         stage('Publish image') {
-            agent any
             environment {
                 DOCKERHUB_CREDENTIALS = credentials('docker-credentials')
             }
@@ -30,12 +28,16 @@ pipeline{
             }
         }
         stage('Train') {
-            agent{
-                label 'CCCedar'
+            environment {
+                SCRIPT_PATH = "~/projects/def-bentahar/fgrcl/jenkins/"
             }
-            steps{
-                git credentialsId: 'ssh-key', url: "git@${GIT_URL}", branch: "${GIT_BRANCH}"
-                sh 'sbatch ./train.sh'
+            steps {
+                sshagent(credentials: ['ssh-key-cc']){
+                    sh """
+                        scp train.sh fgrcl@cedar.computecanada.ca:${scriptPath}
+                        ssh fgrcl@cedar.computecanada.ca "cd ${scriptPath} && srun train.sh"
+                    """
+                }
             }
         }
     }
