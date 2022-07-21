@@ -10,5 +10,5 @@
 
 # Setup and run task -------------
 module load apptainer/1.0
-sudo apptainer build -F train-test.sif docker://fgrcl/ml-bp-estimation:train-test
+sudo apptainer build -F train-${1}.sif docker://fgrcl/ml-bp-estimation:train-${1}
 apptainer run train-test.sif
