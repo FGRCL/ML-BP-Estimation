@@ -29,13 +29,13 @@ pipeline{
         }
         stage('Train') {
             environment {
-                SCRIPT_PATH = "~/projects/def-bentahar/fgrcl/jenkins/${IMAGE_TAG}"
+                SCRIPT_PATH = "~/projects/def-bentahar/fgrcl/jenkins"
             }
             steps {
                 sshagent(credentials: ['ssh-key-cc']){
                     sh """
                         scp ${SCRIPT_NAME} fgrcl@cedar.computecanada.ca:${SCRIPT_PATH}
-                        ssh fgrcl@cedar.computecanada.ca "cd ${SCRIPT_PATH} && srun ${SCRIPT_NAME} ${IMAGE_TAG}"
+                        ssh fgrcl@cedar.computecanada.ca "cd ${SCRIPT_PATH} && srun ${SCRIPT_NAME}
                     """
                 }
             }
