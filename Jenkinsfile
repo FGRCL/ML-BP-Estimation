@@ -34,7 +34,7 @@ pipeline{
             steps {
                 sshagent(credentials: ['ssh-key-cc']){
                     sh """
-                        scp ${SCRIPT_NAME} fgrcl@cedar.computecanada.ca:${IMAGE_TAG}
+                        scp ${SCRIPT_NAME} fgrcl@cedar.computecanada.ca:${SCRIPT_PATH}
                         ssh fgrcl@cedar.computecanada.ca "cd ${SCRIPT_PATH} && srun ${SCRIPT_NAME} ${IMAGE_TAG}"
                     """
                 }
