@@ -4,10 +4,10 @@ from heartpy import process_segmentwise
 from numpy import asarray, empty, ndarray
 from tensorflow import DType, float64
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation
-from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, \
-    RemoveNan, SetTensorShape, SignalFilter, StandardizeArray
+from src.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation
+from src.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
+from src.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, RemoveNan, \
+    SetTensorShape, SignalFilter, StandardizeArray
 
 
 class WindowPreprocessing(DatasetPreprocessingPipeline):
@@ -25,7 +25,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             StandardizeArray(),
             SetTensorShape(frequency * window_size),
         ]
-        super().__init__(dataset_operations, debug=False)
+        super().__init__(dataset_operations, debug=True)
 
 
 class SplitWindows(NumpyTransformOperation):

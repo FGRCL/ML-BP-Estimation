@@ -1,9 +1,6 @@
-from envyaml import EnvYAML
+from dataclasses import dataclass
 
-from mlbpestimation.resources.importer import get_resource
 
-CONFIG_FILE_NAME = 'config.yaml'
-
-config_file = get_resource(CONFIG_FILE_NAME)
-with open(config_file, 'r') as config:
-    configuration = EnvYAML(config.name)
+@dataclass
+class Configuration:
+    databaseUrl = "sqlite:///database.db"
