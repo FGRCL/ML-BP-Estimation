@@ -17,13 +17,14 @@ def load_mimic_dataset() -> (Dataset, Dataset, Dataset):
     Random(SEED).shuffle(record_paths)
     nb_records = len(record_paths)
     record_paths_splits = split(record_paths, [int(nb_records * 0.70), int(nb_records * 0.85)])
+
     datasets = []
     for path_split in record_paths_splits:
         datasets.append(
             Dataset.from_generator(
                 lambda: MimicCaseGenerator(path_split),
                 output_signature=(
-                    TensorSpec(shape=(None, 1), dtype=float32)
+                    TensorSpec(shape=(None,), dtype=float32)
                 )
             )
         )
@@ -33,5 +34,5 @@ def load_mimic_dataset() -> (Dataset, Dataset, Dataset):
 
 def get_paths():
     return [splitext(path)[0] for path in
-            Path('../../../data/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves').rglob('*hea') if
+            Path('data/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves').rglob('*hea') if
             match(r'(\d)*.hea', path.name)]

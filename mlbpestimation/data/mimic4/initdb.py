@@ -1,4 +1,5 @@
 import sys
+from multiprocessing import Pool
 from os.path import splitext
 from pathlib import Path
 from re import match
@@ -28,14 +29,8 @@ def main():
         session.commit()
 
     record_paths = get_paths()
-    record_entities = []
-    for path in tqdm(record_paths):
-        record_entity = get_record_entity(path)
-        record_entities.append(record_entity)
-
-    with Session(engine) as session:
-        session.add_all(record_entities)
-        session.commit()
+    for path in tqdm(record_paths, position=0):
+        save_record_entity(path, engine)
 
 
 def get_paths():
@@ -44,9 +39,13 @@ def get_paths():
             match(r'(\d)*.hea', path.name)]
 
 
-def get_record_entity(path):
+def save_record_entity(path, engine):
     record = rdrecord(path)
-    return map_record_to_entity(record)
+    record = map_record_to_entity(record)
+
+    with Session(engine) as session:
+        session.add(record)
+        session.commit()
 
 
 def map_record_to_entity(record: Record):
@@ -56,8 +55,10 @@ def map_record_to_entity(record: Record):
         length=record.sig_len,
     )
 
-    for signal_name, values in tqdm(zip(record.sig_name, array(record.p_signal).T), total=len(record.sig_name)):
-        record_entity.signals.append(map_signal_to_entity(signal_name, values))
+    with Pool() as pool:
+        for signal_name, values in tqdm(zip(record.sig_name, array(record.p_signal).T), total=len(record.sig_name),
+                                        position=1):
+            record_entity.signals.append(map_signal_to_entity(signal_name, values))
 
     return record_entity
 
@@ -67,7 +68,7 @@ def map_signal_to_entity(signal_name, values):
         type=signal_name
     )
 
-    for value in tqdm(values):
+    for value in tqdm(values, position=2):
         value_entity = MimicSignalValue(
             value=value
         )

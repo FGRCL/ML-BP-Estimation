@@ -25,7 +25,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             StandardizeArray(),
             SetTensorShape(frequency * window_size),
         ]
-        super().__init__(dataset_operations, debug=True)
+        super().__init__(dataset_operations)
 
 
 class SplitWindows(NumpyTransformOperation):
