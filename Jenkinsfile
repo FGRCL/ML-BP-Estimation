@@ -1,11 +1,12 @@
 pipeline{
     agent any
     environment {
-        IMAGE_TAG = "train-test"
+        IMAGE_TAG = "${env.BRANCH_NAME}-${currentBuild.id}"
         DOCKERHUB_PROJECT = "fgrcl/ml-bp-estimation"
         GIT_URL = "github.com:FGRCL/ML-BP-Estimation.git"
         GIT_BRANCH = "docker"
-        SCRIPT_NAME = "test.sh"
+        SCRIPT_PATH = "~/projects/def-bentahar/fgrcl/jenkins/${IMAGE_TAG}"
+        SCRIPT_NAME = "train.sh"
     }
     stages {
         stage('Clone repo') {
@@ -28,14 +29,16 @@ pipeline{
             }
         }
         stage('Train') {
-            environment {
-                SCRIPT_PATH = "~/projects/def-bentahar/fgrcl/jenkins"
-            }
             steps {
                 sshagent(credentials: ['ssh-key-cc']){
                     sh """
+                        ssh fgrcl@cedar.computecanada.ca mkdir ${SCRIPT_PATH}
                         scp ${SCRIPT_NAME} fgrcl@cedar.computecanada.ca:${SCRIPT_PATH}
-                        ssh fgrcl@cedar.computecanada.ca "cd ${SCRIPT_PATH} && chmod +x ${SCRIPT_NAME} && srun ${SCRIPT_NAME}"
+                        ssh fgrcl@cedar.computecanada.ca <<< EOF
+                            cd ${SCRIPT_PATH}
+                            chmod +x ${SCRIPT_NAME}
+                            sbatch ${SCRIPT_NAME} --export=IMAGE_TAG=${IMAGE_TAG}
+                        EOF
                     """
                 }
             }

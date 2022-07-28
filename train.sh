@@ -5,14 +5,10 @@
 #SBATCH --account def-bentahar
 #SBATCH --gres=gpu:v100l:1               # Number of GPUs (per node)
 #SBATCH --cpus-per-task=8          # Number of cores (not cpus)
-#SBATCH --mem=32G               # memory (per node)
-#SBATCH --time=2-00:00             # time (DD-HH:MM)
+#SBATCH --mem=64G               # memory (per node)
+#SBATCH --time=0-02:00             # time (DD-HH:MM)
 
 # Setup and run task -------------
-module restore ml
-module load gcc/9.3.0 arrow/8.0.0
-virtualenv --no-download env
-source env/bin/activate
-pip install -r requirements.txt
-
-python -m train
+module load apptainer/1.0
+apptainer build -F "$IMAGE_TAG".sif docker://fgrcl/ml-bp-estimation:"$IMAGE_TAG"
+apptainer run "$IMAGE_TAG".sif
