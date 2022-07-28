@@ -37,7 +37,7 @@ pipeline{
                         ssh fgrcl@cedar.computecanada.ca <<- EOF
                             cd ${SCRIPT_PATH}
                             chmod +x ${SCRIPT_NAME}
-                            sbatch ${SCRIPT_NAME} --export=IMAGE_TAG=${IMAGE_TAG}
+                            sbatch --export=IMAGE_TAG=${IMAGE_TAG} ${SCRIPT_NAME}
                         EOF
                     """.stripIndent()
                 }
