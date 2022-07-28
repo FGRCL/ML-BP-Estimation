@@ -38,7 +38,7 @@ pipeline{
                             cd ${SCRIPT_PATH}
                             chmod +x ${SCRIPT_NAME}
                             sbatch ${SCRIPT_NAME} --export=IMAGE_TAG=${IMAGE_TAG}
-                        EOF
+EOF
                     """
                 }
             }
