@@ -34,7 +34,7 @@ pipeline{
                     sh """
                         ssh fgrcl@cedar.computecanada.ca mkdir ${SCRIPT_PATH}
                         scp ${SCRIPT_NAME} fgrcl@cedar.computecanada.ca:${SCRIPT_PATH}
-                        ssh fgrcl@cedar.computecanada.ca /bin/bash <<- EOF
+                        ssh fgrcl@cedar.computecanada.ca <<- EOF
                             cd ${SCRIPT_PATH}
                             chmod +x ${SCRIPT_NAME}
                             sbatch ${SCRIPT_NAME} --export=IMAGE_TAG=${IMAGE_TAG}
