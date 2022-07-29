@@ -4,7 +4,6 @@ pipeline{
         IMAGE_TAG = "${env.BRANCH_NAME}-${currentBuild.id}"
         DOCKERHUB_PROJECT = "fgrcl/ml-bp-estimation"
         GIT_URL = "github.com:FGRCL/ML-BP-Estimation.git"
-        GIT_BRANCH = "docker"
         SCRIPT_PATH = "/home/fgrcl/projects/def-bentahar/fgrcl/jenkins/${IMAGE_TAG}"
         SCRIPT_NAME = "train.sh"
     }
