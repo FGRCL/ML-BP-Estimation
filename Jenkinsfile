@@ -11,7 +11,7 @@ pipeline{
     stages {
         stage('Clone repo') {
             steps {
-                git credentialsId: 'ssh-key', url: "git@${GIT_URL}", branch: "${GIT_BRANCH}"
+                git credentialsId: 'ssh-key', url: "git@${GIT_URL}", branch: "${env.BRANCH_NAME}"
             }
         }
         stage('Build image') {
