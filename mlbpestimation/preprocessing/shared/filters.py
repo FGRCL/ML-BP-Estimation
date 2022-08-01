@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow import Tensor
 
-from src.preprocessing.base import FilterOperation
+from mlbpestimation.preprocessing.base import FilterOperation
 
 
 class HasData(FilterOperation):

@@ -2,9 +2,9 @@ import tensorflow as tf
 from keras.metrics import MeanAbsoluteError
 from tensorflow import keras
 
-from src.metrics.standardeviation import StandardDeviation, AbsoluteError
-from src.models.heartbeat import build_heartbeat_cnn_model
-from src.vitaldb.casesplit import load_vitaldb_dataset
+from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
+from mlbpestimation.models.heartbeat import build_heartbeat_cnn_model
+from mlbpestimation.vitaldb.casesplit import load_vitaldb_dataset
 
 epochs = 10
 
@@ -18,7 +18,7 @@ model.compile(optimizer='Adam', loss=keras.losses.MeanSquaredError(),
                   StandardDeviation(AbsoluteError())
               ]
               )
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="./logs", histogram_freq=1, profile_batch='500,520')
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="../logs", histogram_freq=1, profile_batch='500,520')
 model.fit(train, epochs=epochs, callbacks=[tensorboard_callback], validation_data=val)
 
 model.save('models')

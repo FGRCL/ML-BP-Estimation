@@ -1,6 +1,7 @@
 import unittest
 
-from src.vitaldb.casesplit import get_splits
+from mlbpestimation.vitaldb.casesplit import get_splits
+
 
 class TestCaseSplit(unittest.TestCase):
 
@@ -14,7 +15,7 @@ class TestCaseSplit(unittest.TestCase):
         self.assertEqual(len(result[1]), 50)
 
         for i in range(0, len(result)):
-            for j in range(i+1, len(result)):
+            for j in range(i + 1, len(result)):
                 self.assertTrue(set(result[i]).isdisjoint(set(result[j])))
 
     def test_splitgenerator(self):
@@ -26,7 +27,7 @@ class TestCaseSplit(unittest.TestCase):
         self.assertEqual(len(result[2]), 150)
 
         for i in range(0, len(result)):
-            for j in range(i+1, len(result)):
+            for j in range(i + 1, len(result)):
                 self.assertTrue(set(result[i]).isdisjoint(set(result[j])))
 
     def test_splitgenerator(self):
@@ -37,5 +38,5 @@ class TestCaseSplit(unittest.TestCase):
             self.assertTrue(98 <= len(l) <= 102)
 
         for i in range(0, len(result)):
-            for j in range(i+1, len(result)):
+            for j in range(i + 1, len(result)):
                 self.assertTrue(set(result[i]).isdisjoint(set(result[j])))

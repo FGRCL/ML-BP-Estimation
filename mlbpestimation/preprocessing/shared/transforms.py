@@ -4,10 +4,10 @@ from typing import Any, Tuple
 import tensorflow as tf
 from heartpy import filter_signal
 from numpy import ndarray
-from tensorflow import Tensor, DType, reduce_max, reduce_min, ensure_shape
+from tensorflow import DType, Tensor, ensure_shape, reduce_max, reduce_min
 from tensorflow.python.data import Dataset
 
-from src.preprocessing.base import TransformOperation, NumpyTransformOperation, DatasetOperation
+from mlbpestimation.preprocessing.base import DatasetOperation, NumpyTransformOperation, TransformOperation
 
 
 class RemoveNan(TransformOperation):

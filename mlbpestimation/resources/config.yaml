@@ -1,0 +1,5 @@
+data:
+  mimic_files_directory: ${MIMIC_FILES_DIRECTORY}
+model:
+  preprocessing: window
+  architecture: baseline
