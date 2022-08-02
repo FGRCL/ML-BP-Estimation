@@ -1,3 +1,10 @@
+import groovy.text.StreamingTemplateEngine
+
+def renderTemplate(input, variables) {
+  def engine = new StreamingTemplateEngine()
+  return engine.createTemplate(input).make(variables).toString()
+}
+
 pipeline{
     agent any
     environment {
@@ -6,11 +13,26 @@ pipeline{
         GIT_URL = "github.com:FGRCL/ML-BP-Estimation.git"
         SCRIPT_PATH = "/home/fgrcl/projects/def-bentahar/fgrcl/jenkins/${IMAGE_TAG}"
         SCRIPT_NAME = "train.sh"
+        DEPLOYMENT_ENVIRONMENT = "cedar.computecanada.ca"
     }
     stages {
         stage('Clone repo') {
             steps {
                 git credentialsId: 'ssh-key', url: "git@${GIT_URL}", branch: "${env.BRANCH_NAME}"
+            }
+        }
+        stage('Replace secrets') {
+            steps {
+                withCredentials(
+                    string(variable:'wandb-api-key', credentialsId:'wandb-api-key')
+                ){
+                    def secrets = [
+                        'wandb-api-key':'$wandb-api-key'
+                    ]
+                    environmentVariables = renderTemplate(readFile("environments/${DEPLOYMENT_ENVIRONMENT}/template.env"), secrets)
+                    writeFile("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env", environmentVariables.toString())
+                    archiveArtifacts("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env")
+                }
             }
         }
         stage('Build image') {
@@ -33,6 +55,7 @@ pipeline{
                     sh """
                         ssh fgrcl@cedar.computecanada.ca mkdir ${SCRIPT_PATH}
                         scp ${SCRIPT_NAME} fgrcl@cedar.computecanada.ca:${SCRIPT_PATH}
+                        scp environments/${DEPLOYMENT_ENVIRONMENT}/variables.env ${SCRIPT_PATH}
                         ssh fgrcl@cedar.computecanada.ca <<- EOF
                             cd ${SCRIPT_PATH}
                             chmod +x ${SCRIPT_NAME}

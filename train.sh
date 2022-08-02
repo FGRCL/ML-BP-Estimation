@@ -10,4 +10,4 @@
 
 # Setup and run task -------------
 module load apptainer/1.0
-apptainer run --nv docker://fgrcl/ml-bp-estimation:"$IMAGE_TAG"
+apptainer run --nv --env-file variables.env docker://fgrcl/ml-bp-estimation:"$IMAGE_TAG"

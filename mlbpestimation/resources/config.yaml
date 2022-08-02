@@ -5,3 +5,5 @@ model:
   architecture: baseline
 test:
   ssh: $SSH_AUTH_SOCK
+wandb:
+  api_key: $WANDB_API_KEY
