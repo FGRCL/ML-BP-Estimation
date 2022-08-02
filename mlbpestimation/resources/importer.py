@@ -1,7 +1,7 @@
-from importlib.resources import files
+from importlib.resources import path
 
 resource_package = 'mlbpestimation.resources'
 
 
 def get_resource(name):
-    return files(resource_package).joinpath(name).
+    return path(resource_package, name)

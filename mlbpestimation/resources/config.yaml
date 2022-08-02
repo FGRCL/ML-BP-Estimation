@@ -1,5 +1,7 @@
 data:
-  mimic_files_directory: ${MIMIC_FILES_DIRECTORY}
+  mimic_files_directory: temp
 model:
   preprocessing: window
   architecture: baseline
+test:
+  ssh: $SSH_AUTH_SOCK
