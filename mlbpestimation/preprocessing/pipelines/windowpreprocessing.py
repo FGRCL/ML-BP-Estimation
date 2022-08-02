@@ -38,8 +38,12 @@ class SplitWindows(NumpyTransformOperation):
     def transform(self, tracks: ndarray, y: ndarray = None) -> Any:
         track_lowpass, track_bandpass = tracks
         segment_overlap = self.step_size / self.window_size
-        working_data, b = process_segmentwise(track_lowpass, self.sample_rate, segment_width=self.window_size,
-                                              segment_overlap=segment_overlap)
+
+        try:
+            working_data, b = process_segmentwise(track_lowpass, self.sample_rate, segment_width=self.window_size,
+                                                  segment_overlap=segment_overlap)
+        except (RuntimeWarning, UserWarning):
+            pass
 
         window_indices = []
         for i, (start, end) in enumerate(working_data['segment_indices']):

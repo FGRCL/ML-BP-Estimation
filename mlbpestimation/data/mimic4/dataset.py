@@ -12,7 +12,7 @@ from src.data.mimic4.generator import MimicCaseGenerator
 SEED = 106
 
 
-def load_mimic_dataset() -> (Dataset, Dataset, Dataset):
+def load_mimic_dataset() -> list[Dataset]:
     record_paths = get_paths()
     Random(SEED).shuffle(record_paths)
     nb_records = len(record_paths)
@@ -22,7 +22,7 @@ def load_mimic_dataset() -> (Dataset, Dataset, Dataset):
     for path_split in record_paths_splits:
         datasets.append(
             Dataset.from_generator(
-                lambda: MimicCaseGenerator(path_split),
+                lambda path_split=path_split: MimicCaseGenerator(path_split),
                 output_signature=(
                     TensorSpec(shape=(None,), dtype=float32)
                 )
