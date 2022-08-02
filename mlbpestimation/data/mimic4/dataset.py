@@ -22,7 +22,7 @@ def load_mimic_dataset() -> list[Dataset]:
     for path_split in record_paths_splits:
         datasets.append(
             Dataset.from_generator(
-                lambda path_split=path_split: MimicCaseGenerator(path_split),
+                lambda p=path_split: MimicCaseGenerator(p),
                 output_signature=(
                     TensorSpec(shape=(None,), dtype=float32)
                 )
