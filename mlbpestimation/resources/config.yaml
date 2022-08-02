@@ -1,9 +1,5 @@
-data:
-  mimic_files_directory: temp
-model:
-  preprocessing: window
-  architecture: baseline
-test:
-  ssh: $SSH_AUTH_SOCK
 wandb:
-  api_key: $WANDB_API_KEY
+  project_name: test-project
+  entity: warpfive
+  config:
+    testing: true
