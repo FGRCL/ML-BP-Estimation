@@ -9,7 +9,7 @@ from src.models.baseline import build_baseline_model
 epochs = 10
 
 train, val, _ = load_mimic_dataset()
-(train, val), model = build_baseline_model([train, val], frequency=500)
+(train, val), model = build_baseline_model([train, val], frequency=63)
 
 model.summary()
 model.compile(optimizer='Adam', loss=keras.losses.MeanSquaredError(),
