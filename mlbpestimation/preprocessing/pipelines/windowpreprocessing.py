@@ -5,9 +5,9 @@ from numpy import asarray, empty, ndarray
 from tensorflow import DType, Tensor, float64
 from tensorflow.python.ops.array_ops import size
 
-from src.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, NumpyTransformOperation
-from src.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from src.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, RemoveNan, \
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, NumpyTransformOperation
+from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, RemoveNan, \
     SetTensorShape, SignalFilter, StandardizeArray
 
 
