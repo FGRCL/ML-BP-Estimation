@@ -31,9 +31,9 @@ pipeline{
             steps {
                 script {
                     withCredentials(
-                        string(variable:'wandb-api-key', credentialsId:'wandb-api-key')
+                        [string(variable:'wandb-api-key', credentialsId:'wandb-api-key')]
                     ){
-                             def secrets = [
+                         def secrets = [
                             'wandb-api-key':'$wandb-api-key'
                         ]
                         environmentVariables = renderTemplate(readFile("environments/${DEPLOYMENT_ENVIRONMENT}/template.env"), secrets)
