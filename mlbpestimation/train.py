@@ -12,7 +12,7 @@ from mlbpestimation.vitaldb.casesplit import load_vitaldb_dataset
 def main():
     epochs = 10
     init(project=configuration['wandb.project_name'], entity=configuration['wandb.entity'],
-         config=configuration['wandb.config'])
+         config=configuration['wandb.config'], mode=configuration['wandb.mode'])
 
     train, val, _ = load_vitaldb_dataset()
     (train, val), model = build_heartbeat_cnn_model([train, val])

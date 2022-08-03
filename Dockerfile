@@ -12,4 +12,4 @@ RUN pip install "poetry==$POETRY_VERSION"
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev --no-interaction --no-ansi
 
-ENTRYPOINT python3 /code/mlbpestimation/train.py
+ENTRYPOINT cd /code && python3 -m mlbpestimation.train

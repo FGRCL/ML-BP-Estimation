@@ -8,4 +8,6 @@ notebooks/
 slurm-*
 wandb/
 models/
+data/
 .env
+environments/local/variables.env
