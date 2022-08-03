@@ -29,10 +29,10 @@ pipeline{
         }
         stage('Replace secrets') {
             steps {
-                withCredentials(
-                    string(variable:'wandb-api-key', credentialsId:'wandb-api-key')
-                ){
-                    script {
+                script {
+                    withCredentials(
+                        string(variable:'wandb-api-key', credentialsId:'wandb-api-key')
+                    ){
                              def secrets = [
                             'wandb-api-key':'$wandb-api-key'
                         ]
