@@ -38,7 +38,7 @@ pipeline{
                             wandbApiKey:'$wandb-api-key'
                         ]
                         def templateFile = readFile("environments/${DEPLOYMENT_ENVIRONMENT}/template.env")
-                        println(template)
+                        println(templateFile)
                         def environmentVariables = renderTemplate(templateFile, secrets)
                         writeFile("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env", environmentVariables.toString())
                         archiveArtifacts("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env")
