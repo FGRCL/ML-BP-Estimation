@@ -6,11 +6,6 @@ if (currentBuild.getBuildCauses().toString().contains('BranchIndexingCause')) {
   return
 }
 
-def renderTemplate(input, variables) {
-  def engine = new StreamingTemplateEngine()
-  return engine.createTemplate(input).make(variables).toString()
-}
-
 pipeline{
     agent any
     environment {
@@ -39,7 +34,7 @@ pipeline{
                         ]
                         def templateFile = readFile("environments/${DEPLOYMENT_ENVIRONMENT}/template.env")
                         println(templateFile)
-                        def environmentVariables = renderTemplate(templateFile, secrets)
+                        def environmentVariables = new SimpleTemplateEngine().createTemplate(templateFile).make(secrets)
                         writeFile("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env", environmentVariables.toString())
                         archiveArtifacts("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env")
                     }
