@@ -2,11 +2,10 @@ from typing import Any, Tuple
 
 from heartpy import process_segmentwise
 from numpy import asarray, empty, ndarray
-from tensorflow import DType, Tensor, float64
-from tensorflow.python.ops.array_ops import size
+from tensorflow import DType, float64
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, NumpyTransformOperation
-from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation
+from mlbpestimation.preprocessing.shared.filters import FilterHasWindows, FilterPressureWithinBounds, HasData
 from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, RemoveNan, \
     SetTensorShape, SignalFilter, StandardizeArray
 
@@ -69,8 +68,3 @@ class SplitWindows(NumpyTransformOperation):
             window = asarray([track_lowpass[start:end], track_bandpass[start:end]])
             windows[i] = window
         return windows
-
-
-class FilterHasWindows(FilterOperation):
-    def filter(self, x: Tensor, y: Tensor = None) -> bool:
-        return size(x) > 1
