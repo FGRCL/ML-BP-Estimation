@@ -39,7 +39,7 @@ pipeline{
                         ]
                         def templateFile = readFile("environments/${DEPLOYMENT_ENVIRONMENT}/template.env")
                         println(templateFile)
-                        def environmentVariables = renderTemplate(templateFile, secrets)
+                        def environmentVariables = renderTemplate(templateFile.toString(), secrets)
                         writeFile("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env", environmentVariables.toString())
                         archiveArtifacts("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env")
                     }
