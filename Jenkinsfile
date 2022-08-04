@@ -39,7 +39,6 @@ pipeline{
                         def templateFile = readFile("environments/${DEPLOYMENT_ENVIRONMENT}/template.env")
                         def environmentVariables = renderTemplate(templateFile.toString(), secrets)
                         writeFile(file: "environments/${DEPLOYMENT_ENVIRONMENT}/variables.env", text: environmentVariables.toString())
-                        archiveArtifacts("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env")
                     }
                 }
             }
@@ -64,7 +63,7 @@ pipeline{
                     sh """
                         ssh fgrcl@cedar.computecanada.ca mkdir ${SCRIPT_PATH}
                         scp ${SCRIPT_NAME} fgrcl@cedar.computecanada.ca:${SCRIPT_PATH}
-                        scp environments/${DEPLOYMENT_ENVIRONMENT}/variables.env ${SCRIPT_PATH}
+                        scp environments/${DEPLOYMENT_ENVIRONMENT}/variables.env fgrcl@cedar.computecanada.ca:${SCRIPT_PATH}
                         ssh fgrcl@cedar.computecanada.ca <<- EOF
                             cd ${SCRIPT_PATH}
                             chmod +x ${SCRIPT_NAME}
