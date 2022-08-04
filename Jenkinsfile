@@ -33,15 +33,13 @@ pipeline{
                     withCredentials(
                         [string(variable:'WANDB_API_KEY', credentialsId:'wandb-api-key')]
                     ){
-                        println(env.WANDB_API_KEY)
                         def secrets = [
                             WANDB_API_KEY: env.WANDB_API_KEY
                         ]
                         def templateFile = readFile("environments/${DEPLOYMENT_ENVIRONMENT}/template.env")
-                        println(templateFile)
                         def environmentVariables = renderTemplate(templateFile.toString(), secrets)
-                        writeFile("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env", environmentVariables.toString())
-//                         archiveArtifacts("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env")
+                        writeFile(file: "environments/${DEPLOYMENT_ENVIRONMENT}/variables.env", text: environmentVariables.toString())
+                        archiveArtifacts("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env")
                     }
                 }
             }
