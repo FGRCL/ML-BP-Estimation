@@ -7,7 +7,7 @@ from scipy.signal import find_peaks
 from tensorflow import DType, Tensor, float64
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyFilterOperation, NumpyTransformOperation
-from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData, HasFrames
+from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
 from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, RemoveNan, \
     SetTensorShape, SignalFilter, StandardizeArray
 
@@ -20,7 +20,7 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             RemoveNan(),
             SignalFilter(float64, frequency, lowpass_cutoff, bandpass_cutoff),
             SplitHeartbeats(float64, frequency, beat_length),
-            HasFrames(),
+            HasData(),
             FlattenDataset(),
             AddBloodPressureOutput(),
             RemoveLowpassTrack(),
