@@ -28,6 +28,8 @@ pipeline{
                     withCredentials(
                         [string(variable:'wandb-api-key', credentialsId:'wandb-api-key')]
                     ){
+                        import groovy.text.StreamingTemplateEngine
+
                         println("starting script")
                         def secrets = [
                             wandbApiKey:'$wandb-api-key'
