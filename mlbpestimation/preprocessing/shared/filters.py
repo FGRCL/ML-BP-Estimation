@@ -21,6 +21,6 @@ class FilterPressureWithinBounds(FilterOperation):
         return sbp < self.max_pressure and dbp > self.min_pressure
 
 
-class FilterHasWindows(FilterOperation):
+class HasFrames(FilterOperation):
     def filter(self, x: Tensor, y: Tensor = None) -> bool:
         return size(x) > 1
