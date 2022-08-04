@@ -6,6 +6,11 @@ if (currentBuild.getBuildCauses().toString().contains('BranchIndexingCause')) {
   return
 }
 
+def renderTemplate(input, variables) {
+  def engine = new StreamingTemplateEngine()
+  return engine.createTemplate(input).make(variables).toString()
+}
+
 pipeline{
     agent any
     environment {
@@ -28,15 +33,13 @@ pipeline{
                     withCredentials(
                         [string(variable:'wandb-api-key', credentialsId:'wandb-api-key')]
                     ){
-                        import groovy.text.StreamingTemplateEngine
-
                         println("starting script")
                         def secrets = [
                             wandbApiKey:'$wandb-api-key'
                         ]
                         def templateFile = readFile("environments/${DEPLOYMENT_ENVIRONMENT}/template.env")
                         println(templateFile)
-                        def environmentVariables = new SimpleTemplateEngine().createTemplate(templateFile).make(secrets)
+                        def environmentVariables = renderTemplate(templateFile, secrets)
                         writeFile("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env", environmentVariables.toString())
                         archiveArtifacts("environments/${DEPLOYMENT_ENVIRONMENT}/variables.env")
                     }
