@@ -31,11 +31,11 @@ pipeline{
             steps {
                 script {
                     withCredentials(
-                        [string(variable:'wandb-api-key', credentialsId:'wandb-api-key')]
+                        [string(variable:'WANDB_API_KEY', credentialsId:'wandb-api-key')]
                     ){
-                        println(wandb-api-key)
+                        println(env.WANDB_API_KEY)
                         def secrets = [
-                            wandbApiKey:'$wandb-api-key'
+                            WANDB_API_KEY: env.WANDB_API_KEY
                         ]
                         def templateFile = readFile("environments/${DEPLOYMENT_ENVIRONMENT}/template.env")
                         println(templateFile)
