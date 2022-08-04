@@ -1,6 +1,6 @@
 from keras.metrics import MeanAbsoluteError
 from tensorflow import keras
-from wandb import init
+from wandb import Settings, init
 from wandb.integration.keras import WandbCallback
 
 from mlbpestimation.configuration import configuration
@@ -12,7 +12,7 @@ from mlbpestimation.vitaldb.casesplit import load_vitaldb_dataset
 def main():
     epochs = 10
     init(project=configuration['wandb.project_name'], entity=configuration['wandb.entity'],
-         config=configuration['wandb.config'], mode=configuration['wandb.mode'])
+         config=configuration['wandb.config'], mode=configuration['wandb.mode'], settings=Settings(start_method='fork'))
 
     train, val, _ = load_vitaldb_dataset()
     (train, val), model = build_heartbeat_cnn_model([train, val])
