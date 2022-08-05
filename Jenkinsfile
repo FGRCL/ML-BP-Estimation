@@ -60,7 +60,7 @@ pipeline{
         stage('Train') {
             steps {
                 sshagent(credentials: ['ssh-key-cc']){
-                    sh """
+                    sh '''
                         ssh fgrcl@cedar.computecanada.ca mkdir ${SCRIPT_PATH}
                         scp ${SCRIPT_NAME} fgrcl@cedar.computecanada.ca:${SCRIPT_PATH}
                         scp environments/${DEPLOYMENT_ENVIRONMENT}/variables.env fgrcl@cedar.computecanada.ca:${SCRIPT_PATH}
@@ -70,7 +70,7 @@ pipeline{
                             sbatch --export=IMAGE_TAG=${IMAGE_TAG} --output=console.out --wait ${SCRIPT_NAME} &
                             tail --pid=$! -F console.out
                         EOF
-                    """.stripIndent()
+                    '''.stripIndent()
                 }
             }
         }
