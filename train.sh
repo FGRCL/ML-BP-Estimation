@@ -9,5 +9,5 @@
 #SBATCH --time=0-02:00             # time (DD-HH:MM)
 
 # Setup and run task -------------
-module load apptainer/1.0 cuda/11.7
+module load apptainer/1.0 cuda/11.7 nss/3.51
 apptainer run --nv --env-file variables.env docker://fgrcl/ml-bp-estimation:"$IMAGE_TAG"
