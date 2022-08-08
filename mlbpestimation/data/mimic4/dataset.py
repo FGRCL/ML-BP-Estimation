@@ -7,7 +7,8 @@ from numpy import split
 from tensorflow import TensorSpec, float32
 from tensorflow.python.data import Dataset
 
-from src.data.mimic4.generator import MimicCaseGenerator
+from mlbpestimation.configuration import configuration
+from mlbpestimation.data.mimic4.generator import MimicCaseGenerator
 
 SEED = 106
 
@@ -34,5 +35,5 @@ def load_mimic_dataset() -> list[Dataset]:
 
 def get_paths():
     return [splitext(path)[0] for path in
-            Path('data/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves').rglob('*hea') if
+            Path(configuration['data.mimic.file_location']).rglob('*hea') if
             match(r'(\d)*.hea', path.name)]
