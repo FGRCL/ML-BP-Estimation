@@ -28,8 +28,6 @@ def main():
 
     model.fit(train, epochs=epochs, callbacks=[WandbCallback()], validation_data=val)
 
-    model.save('models')
-
 
 if __name__ == '__main__':
     main()
