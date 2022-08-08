@@ -4,7 +4,7 @@ from neurokit2 import ppg_simulate
 from tensorflow import TensorSpec, float64
 from tensorflow.python.data import Dataset
 
-from src.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
+from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 
 
 class TestWindowPreprocessing(TestCase):

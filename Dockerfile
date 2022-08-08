@@ -4,12 +4,12 @@ ENV POETRY_VERSION=1.1.4
 
 WORKDIR /code
 
-COPY src/ ./src
-COPY train.py pyproject.toml poetry.lock ./
+COPY mlbpestimation/ ./mlbpestimation
+COPY pyproject.toml poetry.lock ./
 COPY --chown=55 train.sh ./
 
 RUN pip install "poetry==$POETRY_VERSION"
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev --no-interaction --no-ansi
 
-ENTRYPOINT python /code/train.py
+ENTRYPOINT cd /code && python3 -m mlbpestimation.train

@@ -1,0 +1,6 @@
+wandb:
+  project_name: test-project
+  entity: warpfive
+  mode: $WANDB_RUN_MODE
+  config:
+    testing: true
