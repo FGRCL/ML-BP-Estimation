@@ -1,7 +1,7 @@
 from keras import Sequential
-from keras.layers import Conv1D, BatchNormalization, MaxPooling1D, Dropout, LSTM, Dense
+from keras.layers import BatchNormalization, Conv1D, Dense, Dropout, LSTM, MaxPooling1D
 
-from src.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
+from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
 
 
 def build_heartbeat_cnn_model(datasets):

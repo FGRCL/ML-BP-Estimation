@@ -4,7 +4,7 @@ import heartpy as hp
 import numpy as np
 import tensorflow as tf
 
-import src.preprocessing.shared.transforms as transforms
+import mlbpestimation.preprocessing.shared.transforms as transforms
 
 
 class TestTransforms(unittest.TestCase):

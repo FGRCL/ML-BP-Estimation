@@ -1,6 +1,6 @@
 from keras import Sequential, layers
 
-from src.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
+from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 
 
 def build_baseline_model(datasets):
