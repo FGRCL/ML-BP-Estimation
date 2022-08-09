@@ -4,3 +4,6 @@ wandb:
   mode: $WANDB_RUN_MODE
   config:
     testing: true
+data:
+  mimic:
+    file_location: /mnt/mimic4/physionet.org/files/mimic4wdb/0.1.0/waves

@@ -4,10 +4,10 @@ from typing import Any, Tuple
 import tensorflow as tf
 from heartpy import filter_signal
 from numpy import ndarray
-from tensorflow import DType, Tensor, ensure_shape, reduce_max, reduce_min
+from tensorflow import DType, Tensor, reduce_max, reduce_min, reshape
 from tensorflow.python.data import Dataset
 
-from mlbpestimation.preprocessing.base import DatasetOperation, NumpyTransformOperation, TransformOperation
+from src.preprocessing.base import DatasetOperation, NumpyTransformOperation, TransformOperation
 
 
 class RemoveNan(TransformOperation):
@@ -66,4 +66,4 @@ class SetTensorShape(TransformOperation):
         self.input_length = input_length
 
     def transform(self, x: Tensor, y: Tensor = None) -> Any:
-        return ensure_shape(x, self.input_length), ensure_shape(y, 2)
+        return reshape(x, [self.input_length, 1]), reshape(y, [2])

@@ -5,8 +5,7 @@ from numpy import float64
 from tensorflow import TensorSpec
 from tensorflow.python.data import Dataset
 
-from mlbpestimation.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, \
-    VitalFileOptions
+from mlbpestimation.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, VitalFileOptions
 from mlbpestimation.vitaldb.fetchingstrategy.DatasetApi import DatasetApi
 
 
@@ -22,7 +21,7 @@ def load_vitaldb_dataset():
     for case_split in case_splits:
         datasets.append(
             Dataset.from_generator(
-                lambda: VitalDBGenerator(options, DatasetApi(), case_split),
+                lambda c=case_split: VitalDBGenerator(options, DatasetApi(), c),
                 output_signature=(
                     TensorSpec(shape=(None, 1), dtype=float64)
                 )
