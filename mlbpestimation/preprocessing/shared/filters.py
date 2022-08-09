@@ -1,5 +1,5 @@
-import tensorflow as tf
 from tensorflow import Tensor
+from tensorflow.python.ops.array_ops import size
 
 from mlbpestimation.preprocessing.base import FilterOperation
 
@@ -7,7 +7,7 @@ from mlbpestimation.preprocessing.base import FilterOperation
 class HasData(FilterOperation):
 
     def filter(self, x: Tensor, y: Tensor = None) -> bool:
-        return tf.size(x) != 0
+        return size(x) != 0
 
 
 class FilterPressureWithinBounds(FilterOperation):
