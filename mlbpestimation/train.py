@@ -4,9 +4,9 @@ from wandb import Settings, init
 from wandb.integration.keras import WandbCallback
 
 from mlbpestimation.configuration import configuration
+from mlbpestimation.data.mimic4.dataset import load_mimic_dataset
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
-from mlbpestimation.models.heartbeat import build_heartbeat_cnn_model
-from mlbpestimation.vitaldb.casesplit import load_vitaldb_dataset
+from mlbpestimation.models.baseline import build_baseline_model
 
 
 def main():
@@ -14,9 +14,8 @@ def main():
     init(project=configuration['wandb.project_name'], entity=configuration['wandb.entity'],
          config=configuration['wandb.config'], mode=configuration['wandb.mode'], settings=Settings(start_method='fork'))
 
-    train, val, _ = load_vitaldb_dataset()
-    (train, val), model = build_heartbeat_cnn_model([train, val])
-    train, val = train.take(100), val.take(10)
+    train, val, _ = load_mimic_dataset()
+    (train, val), model = build_baseline_model([train, val], frequency=63)
 
     model.summary()
     model.compile(optimizer='Adam', loss=keras.losses.MeanSquaredError(),
