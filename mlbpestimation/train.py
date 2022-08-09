@@ -10,7 +10,6 @@ from mlbpestimation.models.baseline import build_baseline_model
 
 
 def main():
-    epochs = 10
     init(project=configuration['wandb.project_name'], entity=configuration['wandb.entity'],
          config=configuration['wandb.config'], mode=configuration['wandb.mode'], settings=Settings(start_method='fork'))
 
@@ -25,7 +24,7 @@ def main():
                   ]
                   )
 
-    model.fit(train, epochs=epochs, callbacks=[WandbCallback()], validation_data=val)
+    model.fit(train, epochs=100, callbacks=[WandbCallback()], validation_data=val, steps_per_epoch=10000)
 
 
 if __name__ == '__main__':
