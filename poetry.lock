@@ -313,6 +313,17 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "envyaml"
+version = "1.10.211231"
+description = "Simple YAML configuration file parser with easy access for structured data"
+category = "main"
+optional = false
+python-versions = ">=2.7"
+
+[package.dependencies]
+PyYAML = "*"
+
+[[package]]
 name = "executing"
 version = "0.9.1"
 description = "Get the currently executing AST node of a frame, and other information"
@@ -1968,7 +1979,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10, <3.11"
-content-hash = "7a6d950c1eddea8b0a1ab8640baacb04610e91cfba608dc3a85805d355bc4879"
+content-hash = "9e27a0ded66c29dfc822aea1c0136191a11ffd3daa46f5d9ba4484c6feef5f5e"
 
 [metadata.files]
 absl-py = [
@@ -2243,6 +2254,10 @@ docker-pycreds = [
 entrypoints = [
     {file = "entrypoints-0.4-py3-none-any.whl", hash = "sha256:f174b5ff827504fd3cd97cc3f8649f3693f51538c7e4bdf3ef002c8429d42f9f"},
     {file = "entrypoints-0.4.tar.gz", hash = "sha256:b706eddaa9218a19ebcd67b56818f05bb27589b1ca9e8d797b74affad4ccacd4"},
+]
+envyaml = [
+    {file = "envyaml-1.10.211231-py2.py3-none-any.whl", hash = "sha256:8d7a7a6be12587cc5da32a587067506b47b849f4643981099ad148015a72de52"},
+    {file = "envyaml-1.10.211231.tar.gz", hash = "sha256:88f8a076159e3c317d3450a5f404132b6ac91aecee4934ea72eac65f911f1244"},
 ]
 executing = [
     {file = "executing-0.9.1-py2.py3-none-any.whl", hash = "sha256:4ce4d6082d99361c0231fc31ac1a0f56979363cc6819de0b1410784f99e49105"},
