@@ -1,4 +1,5 @@
 wandb:
+  run_name: $WANDB_RUN_NAME
   project_name: test-project
   entity: warpfive
   mode: $WANDB_RUN_MODE
