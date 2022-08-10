@@ -1,6 +1,3 @@
-from argparse import ArgumentParser
-from sys import argv
-
 from keras.metrics import MeanAbsoluteError
 from tensorflow import keras
 from wandb import Settings, init
@@ -12,11 +9,11 @@ from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDevia
 from mlbpestimation.models.baseline import build_baseline_model
 
 
-def main(run_name):
+def main():
     epochs = 10
     init(project=configuration['wandb.project_name'], entity=configuration['wandb.entity'],
          config=configuration['wandb.config'], mode=configuration['wandb.mode'], settings=Settings(start_method='fork'),
-         name=run_name)
+         name=configuration['wandb.run_name'])
 
     train, val, _ = load_mimic_dataset()
     (train, val), model = build_baseline_model([train, val], frequency=63)
@@ -33,8 +30,4 @@ def main(run_name):
 
 
 if __name__ == '__main__':
-    parser = ArgumentParser()
-    parser.add_argument('--run_name')
-    arguments = parser.parse_args(argv[1:])
-    print(argv)
-    main(arguments.run_name)
+    main()

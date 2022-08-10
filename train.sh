@@ -10,4 +10,4 @@
 
 # Setup and run task -------------
 module load apptainer/1.0 cuda/11.7
-apptainer run --nv --env-file variables.env --bind /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data/mimic-IV:/mnt/mimic4 docker://fgrcl/ml-bp-estimation:"$IMAGE_TAG" --run_name "$IMAGE_TAG"
+apptainer run --nv --env-file variables.env --env WANDB_RUN_NAME="$IMAGE_TAG" --bind /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data/mimic-IV:/mnt/mimic4 docker://fgrcl/ml-bp-estimation:"$IMAGE_TAG" -- --run_name "$IMAGE_TAG"
