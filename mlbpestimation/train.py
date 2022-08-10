@@ -13,7 +13,6 @@ from mlbpestimation.models.baseline import build_baseline_model
 
 
 def main(run_name):
-    print(run_name)
     epochs = 10
     init(project=configuration['wandb.project_name'], entity=configuration['wandb.entity'],
          config=configuration['wandb.config'], mode=configuration['wandb.mode'], settings=Settings(start_method='fork'),
@@ -37,4 +36,5 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--run_name')
     arguments = parser.parse_args(argv[1:])
+    print(argv)
     main(arguments.run_name)
