@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sbatch --watch <<EOT &
+sbatch <<EOT &
 #!/bin/bash
 
 # Request resources --------------
@@ -8,6 +8,7 @@ sbatch --watch <<EOT &
 #SBATCH --account def-bentahar
 #SBATCH --job-name=$1
 #SBATCH --output=console.out
+#SBATCH --wait
 #SBATCH --gres=gpu:v100l:1               # Number of GPUs (per node)
 #SBATCH --cpus-per-task=8          # Number of cores (not cpus)sa
 #SBATCH --mem=64G               # memory (per node)
