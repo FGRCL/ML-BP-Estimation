@@ -67,7 +67,7 @@ pipeline{
                         ssh fgrcl@cedar.computecanada.ca <<- EOF
                             cd ${SCRIPT_PATH}
                             chmod +x ${SCRIPT_NAME}
-                            ./${SCRIPT_NAME}
+                            ./${SCRIPT_NAME} ${IMAGE_TAG}
                         EOF
                     '''.stripIndent()
                 }
