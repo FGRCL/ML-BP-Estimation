@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src.data.mimic4.dataset import load_mimic_dataset
+from mlbpestimation.data.mimic4.dataset import load_mimic_dataset
 
 
 class TestMimicDataset(TestCase):

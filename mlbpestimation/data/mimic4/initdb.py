@@ -10,11 +10,11 @@ from sqlalchemy.orm import Session
 from tqdm.auto import tqdm
 from wfdb import Record, rdrecord
 
-from src.configuration import Configuration
-from src.data.database.base import Base
-from src.data.database.entities.mimicrecord import MimicRecord
-from src.data.database.entities.mimicsignal import MimicSignal
-from src.data.database.entities.mimicsignalvalue import MimicSignalValue
+from mlbpestimation.configuration import Configuration
+from mlbpestimation.data.database.base import Base
+from mlbpestimation.data.database.entities.mimicrecord import MimicRecord
+from mlbpestimation.data.database.entities.mimicsignal import MimicSignal
+from mlbpestimation.data.database.entities.mimicsignalvalue import MimicSignalValue
 
 
 def main():

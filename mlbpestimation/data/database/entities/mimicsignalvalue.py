@@ -1,7 +1,7 @@
-from sqlalchemy import Integer, Column, Float, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, Float, ForeignKey, Integer
+from sqlalchemy.orm import relationship
 
-from src.data.database.base import Base
+from mlbpestimation.data.database.base import Base
 
 
 class MimicSignalValue(Base):

@@ -57,7 +57,7 @@ pipeline{
                 sh "docker push ${DOCKERHUB_PROJECT}:${IMAGE_TAG}"
             }
         }
-        stage('Train') {
+        stage('Submit job') {
             steps {
                 sshagent(credentials: ['ssh-key-cc']){
                     sh '''

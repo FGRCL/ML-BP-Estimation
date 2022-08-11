@@ -4,9 +4,9 @@ from neurokit2 import ppg_simulate
 from tensorflow import TensorSpec, float64
 from tensorflow.python.data import Dataset
 
-from src.data.mimic4.dataset import load_mimic_dataset
-from src.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
-from src.vitaldb.casesplit import load_vitaldb_dataset
+from mlbpestimation.data.mimic4.dataset import load_mimic_dataset
+from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
+from mlbpestimation.vitaldb.casesplit import load_vitaldb_dataset
 
 
 class TestWindowPreprocessing(TestCase):
