@@ -7,10 +7,7 @@ sbatch <<EOT
 # Graham GPU node: 32 cores, 128G ram, 2 GPUs (12G each)
 #SBATCH --account def-bentahar
 #SBATCH --job-name=$1
-#SBATCH --output=console.out
-#SBATCH --wait
-#SBATCH --gres=gpu:v100l:1               # Number of GPUs (per node)
-#SBATCH --cpus-per-task=8          # Number of cores (not cpus)sa
+#SBATCH --cpus-per-task=4          # Number of cores (not cpus)sa
 #SBATCH --mem=32G               # memory (per node)
 #SBATCH --time=0-05:00             # time (DD-HH:MM)
 
