@@ -19,7 +19,6 @@ from mlbpestimation.data.database.properties import database_url
 
 
 def main():
-    print(database_url)
     engine = create_engine(database_url, echo=True)
 
     Base.metadata.create_all(engine)
@@ -31,8 +30,6 @@ def main():
         session.commit()
 
     record_paths = get_paths()
-    print(record_paths)
-    print(configuration['data.mimic.file_location'])
     for path in tqdm(record_paths, position=0):
         save_record_entity(path, engine)
 
