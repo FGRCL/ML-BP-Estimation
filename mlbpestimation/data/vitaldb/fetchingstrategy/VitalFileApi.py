@@ -1,7 +1,7 @@
 from numpy import ndarray
 from vitaldb import VitalFile
 
-from mlbpestimation.vitaldb.fetchingstrategy.VitalDBFetchingStrategy import VitalDBFetchingStrategy
+from mlbpestimation.data.vitaldb.fetchingstrategy.VitalDBFetchingStrategy import VitalDBFetchingStrategy
 
 
 class VitalFileApi(VitalDBFetchingStrategy):

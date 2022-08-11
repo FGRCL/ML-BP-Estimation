@@ -1,7 +1,7 @@
 import vitaldb
 from numpy import empty, ndarray
 
-from mlbpestimation.vitaldb.fetchingstrategy.VitalDBFetchingStrategy import VitalDBFetchingStrategy
+from mlbpestimation.data.vitaldb.fetchingstrategy.VitalDBFetchingStrategy import VitalDBFetchingStrategy
 
 
 class DatasetApi(VitalDBFetchingStrategy):

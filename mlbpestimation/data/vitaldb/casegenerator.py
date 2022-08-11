@@ -3,7 +3,7 @@ from typing import Iterable
 
 from numpy import ndarray
 
-from mlbpestimation.vitaldb.fetchingstrategy.VitalDBFetchingStrategy import VitalDBFetchingStrategy
+from mlbpestimation.data.vitaldb.fetchingstrategy.VitalDBFetchingStrategy import VitalDBFetchingStrategy
 
 MIN_VITAL_DB_CASE = 1
 MAX_VITAL_DB_CASE = 6388

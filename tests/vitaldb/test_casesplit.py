@@ -1,6 +1,6 @@
 import unittest
 
-from mlbpestimation.vitaldb.casesplit import get_splits
+from mlbpestimation.data.vitaldb.casesplit import get_splits
 
 
 class TestCaseSplit(unittest.TestCase):
