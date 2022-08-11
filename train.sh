@@ -21,5 +21,5 @@ EOT
 
 SBATCH_PID=$!
 touch console.out
-echo "Following logs fof process $SBATCH_PID"
+echo "Following logs of process $SBATCH_PID"
 tail --pid=$SBATCH_PID --follow console.out
