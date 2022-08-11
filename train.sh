@@ -19,5 +19,7 @@ module load apptainer/1.0 cuda/11.7
 apptainer run --nv --env-file variables.env --env WANDB_RUN_NAME=$1 --bind /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data/mimic-IV:/mnt/mimic4 docker://fgrcl/ml-bp-estimation:$1
 EOT
 
+SBATCH_PID=$!
 touch console.out
-tail --pid=$! --follow console.out
+echo "Following logs fof process $SBATCH_PID"
+tail --pid=$SBATCH_PID --follow console.out
