@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sbatch <<EOT &
+sbatch <<EOT
 #!/bin/bash
 
 # Request resources --------------
@@ -18,6 +18,3 @@ sbatch <<EOT &
 module load apptainer/1.0 cuda/11.7
 apptainer run --nv --env-file variables.env --env WANDB_RUN_NAME=$1 --bind /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data/mimic-IV:/mnt/mimic4 docker://fgrcl/ml-bp-estimation:$1
 EOT
-
-touch console.out
-tail --pid=$! --follow console.out
