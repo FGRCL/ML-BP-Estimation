@@ -10,15 +10,17 @@ from sqlalchemy.orm import Session
 from tqdm.auto import tqdm
 from wfdb import Record, rdrecord
 
-from mlbpestimation.configuration import Configuration
+from mlbpestimation.configuration import configuration
 from mlbpestimation.data.database.base import Base
 from mlbpestimation.data.database.entities.mimicrecord import MimicRecord
 from mlbpestimation.data.database.entities.mimicsignal import MimicSignal
 from mlbpestimation.data.database.entities.mimicsignalvalue import MimicSignalValue
+from mlbpestimation.data.database.properties import database_url
 
 
 def main():
-    engine = create_engine(Configuration.databaseUrl, echo=True)
+    print(database_url)
+    engine = create_engine(database_url, echo=True)
 
     Base.metadata.create_all(engine)
 
@@ -29,13 +31,15 @@ def main():
         session.commit()
 
     record_paths = get_paths()
+    print(record_paths)
+    print(configuration['data.mimic.file_location'])
     for path in tqdm(record_paths, position=0):
         save_record_entity(path, engine)
 
 
 def get_paths():
     return [splitext(path)[0] for path in
-            Path('../../../data/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves').rglob('*hea') if
+            Path(configuration['data.mimic.file_location']).rglob('*hea') if
             match(r'(\d)*.hea', path.name)]
 
 
