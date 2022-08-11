@@ -3,9 +3,9 @@ import unittest
 from keras.losses import MeanSquaredError
 from keras.optimizers import Adam
 
-from src.data.mimic4.dataset import load_mimic_dataset
-from src.models.baseline import build_baseline_model
-from src.vitaldb.casesplit import load_vitaldb_dataset
+from mlbpestimation.data.mimic4.dataset import load_mimic_dataset
+from mlbpestimation.models.baseline import build_baseline_model
+from mlbpestimation.vitaldb.casesplit import load_vitaldb_dataset
 
 
 class IntegrationTests(unittest.TestCase):

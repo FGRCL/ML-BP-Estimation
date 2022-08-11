@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, Float
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, Float, Integer
+from sqlalchemy.orm import relationship
 
-from src.data.database.base import Base
+from mlbpestimation.data.database.base import Base
 
 
 class MimicRecord(Base):
