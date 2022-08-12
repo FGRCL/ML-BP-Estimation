@@ -13,7 +13,7 @@ sbatch <<EOT
 
 # Setup and run task -------------
 module load scipy-stack/2022a python/3.10 python-build-bundle/2022a
-poetry export --without-hashes --without sqlalchemy --with SQLAlchemy -f requirements.txt --output requirements.txt
+poetry export --without-hashes -f requirements.txt --output requirements.txt
 virtualenv --no-download ENV
 source ENV/bin/activate
 pip install --no-index --upgrade pip
