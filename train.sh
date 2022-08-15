@@ -10,8 +10,8 @@ sbatch <<EOT
 #SBATCH --output=console.out
 #SBATCH --gres=gpu:1               # Number of GPUs (per node)
 #SBATCH --cpus-per-task=4          # Number of cores (not cpus)sa
-#SBATCH --mem=64G               # memory (per node)
-#SBATCH --time=0-05:00             # time (DD-HH:MM)
+#SBATCH --mem=128G               # memory (per node)
+#SBATCH --time=0-12:00             # time (DD-HH:MM)
 
 # Setup and run task -------------
 module load apptainer/1.0 cuda/11.7
