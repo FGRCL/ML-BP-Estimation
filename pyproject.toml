@@ -5,7 +5,7 @@ description = ""
 authors = ["François LaBerge <fgrclaberge@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.10, <3.11"
+python = "3.9.*"
 vitaldb = "1.1.5"
 matplotlib = "^3.5.2"
 heartpy = "^1.2.7"

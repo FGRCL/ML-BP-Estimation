@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from keras.metrics import Metric
 import tensorflow as tf
+from tensorflow.python.keras.metrics import Metric
 
 
 class StandardDeviationMetric(ABC):

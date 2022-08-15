@@ -1,4 +1,7 @@
-from keras import Input, Sequential, layers
+import tensorflow
+from tensorflow.python.keras import Input
+from tensorflow.python.keras.layers import Conv1D, Dense, Dropout, LSTM, MaxPooling1D
+from tensorflow.python.keras.models import Sequential
 
 from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 
@@ -10,12 +13,12 @@ def build_baseline_model(datasets, batch_size=20, frequency=500, window_size=8):
                              datasets]
     model = Sequential([
         Input(input_shape, batch_size),
-        layers.Conv1D(64, 15, activation='relu'),
-        layers.BatchNormalization(),
-        layers.MaxPooling1D(4),
-        layers.Dropout(0.1),
-        layers.LSTM(64, return_sequences=True),
-        layers.LSTM(64),
-        layers.Dense(2),
+        Conv1D(64, 15, activation='relu'),
+        tensorflow.keras.layers.BatchNormalization(),
+        MaxPooling1D(4),
+        Dropout(0.1),
+        LSTM(64, return_sequences=True),
+        LSTM(64),
+        Dense(2),
     ])
     return preprocessed_datasets, model

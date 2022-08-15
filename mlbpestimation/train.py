@@ -1,5 +1,4 @@
-from keras.metrics import MeanAbsoluteError
-from tensorflow import keras
+from tensorflow.python.keras.losses import MeanAbsoluteError, MeanSquaredError
 from wandb import Settings, init
 from wandb.integration.keras import WandbCallback
 
@@ -18,7 +17,7 @@ def main():
     (train, val), model = build_baseline_model([train, val], frequency=63)
 
     model.summary()
-    model.compile(optimizer='Adam', loss=keras.losses.MeanSquaredError(),
+    model.compile(optimizer='Adam', loss=MeanSquaredError(),
                   metrics=[
                       MeanAbsoluteError(),
                       StandardDeviation(AbsoluteError())
