@@ -14,8 +14,8 @@ def main():
          config=configuration['wandb.config'], mode=configuration['wandb.mode'], settings=Settings(start_method='fork'),
          name=configuration['wandb.run_name'])
 
-    train, val, _ = load_mimic_dataset()
-    (train, val), model = build_baseline_model([train, val], frequency=63)
+    datasets = load_mimic_dataset()
+    datasets, model = build_baseline_model(datasets, frequency=63)
 
     model.summary()
     model.compile(optimizer='Adam', loss=MeanSquaredError(),
@@ -25,7 +25,7 @@ def main():
                   ]
                   )
 
-    model.fit(train, epochs=100, callbacks=[WandbCallback()], validation_data=val)
+    model.fit(datasets.train, epochs=100, callbacks=[WandbCallback()], validation_data=datasets.validation)
 
 
 if __name__ == '__main__':

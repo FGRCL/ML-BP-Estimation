@@ -6,6 +6,7 @@ from numpy import float64
 from tensorflow import TensorSpec
 from tensorflow.python.data import Dataset
 
+from mlbpestimation.data.multipartdataset import MultipartDataset
 from mlbpestimation.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, \
     VitalFileOptions
 from mlbpestimation.vitaldb.fetchingstrategy.DatasetApi import DatasetApi
@@ -30,7 +31,7 @@ def load_vitaldb_dataset():
             )
         )
 
-    return datasets
+    return MultipartDataset(*datasets)
 
 
 def get_splits(split_percentages: List[float],
