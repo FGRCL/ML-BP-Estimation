@@ -25,7 +25,7 @@ def main():
                   ]
                   )
 
-    model.fit(train, epochs=100, callbacks=[WandbCallback()], validation_data=val, steps_per_epoch=10000)
+    model.fit(train, epochs=100, callbacks=[WandbCallback()], validation_data=val)
 
 
 if __name__ == '__main__':
