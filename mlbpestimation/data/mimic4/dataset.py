@@ -2,6 +2,7 @@ from os.path import splitext
 from pathlib import Path
 from random import Random
 from re import match
+from typing import List
 
 from numpy import split
 from tensorflow import TensorSpec, float32
@@ -13,7 +14,7 @@ from mlbpestimation.data.mimic4.generator import MimicCaseGenerator
 SEED = 106
 
 
-def load_mimic_dataset() -> list[Dataset]:
+def load_mimic_dataset() -> List[Dataset]:
     record_paths = get_paths()
     Random(SEED).shuffle(record_paths)
     nb_records = len(record_paths)

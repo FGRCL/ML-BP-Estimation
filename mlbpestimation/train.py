@@ -1,4 +1,5 @@
-from tensorflow.python.keras.losses import MeanAbsoluteError, MeanSquaredError
+from tensorflow.python.keras.losses import MeanSquaredError
+from tensorflow.python.keras.metrics import MeanAbsoluteError
 from wandb import Settings, init
 from wandb.integration.keras import WandbCallback
 

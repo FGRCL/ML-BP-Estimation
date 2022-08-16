@@ -1,3 +1,4 @@
+from typing import List
 from zlib import crc32
 
 import numpy as np
@@ -5,7 +6,8 @@ from numpy import float64
 from tensorflow import TensorSpec
 from tensorflow.python.data import Dataset
 
-from mlbpestimation.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, VitalFileOptions
+from mlbpestimation.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, \
+    VitalFileOptions
 from mlbpestimation.vitaldb.fetchingstrategy.DatasetApi import DatasetApi
 
 
@@ -31,8 +33,8 @@ def load_vitaldb_dataset():
     return datasets
 
 
-def get_splits(split_percentages: list[float],
-               case_range: list[int] = range(MIN_VITAL_DB_CASE, MAX_VITAL_DB_CASE + 1)) -> list[list[int]]:
+def get_splits(split_percentages: List[float],
+               case_range: List[int] = range(MIN_VITAL_DB_CASE, MAX_VITAL_DB_CASE + 1)) -> List[List[int]]:
     if not round(sum(split_percentages), 2) == 1:
         raise Exception(f'split percentages should sum up to 100%, but summed up to {sum(split_percentages) * 100}%')
 
