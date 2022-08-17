@@ -2,10 +2,10 @@ from typing import List
 from zlib import crc32
 
 import numpy as np
-from numpy import float64
-from tensorflow import TensorSpec
+from tensorflow import TensorSpec, float32
 from tensorflow.python.data import Dataset
 
+from mlbpestimation.data.multipartdataset import MultipartDataset
 from mlbpestimation.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, \
     VitalFileOptions
 from mlbpestimation.vitaldb.fetchingstrategy.DatasetApi import DatasetApi
@@ -25,12 +25,12 @@ def load_vitaldb_dataset():
             Dataset.from_generator(
                 lambda c=case_split: VitalDBGenerator(options, DatasetApi(), c),
                 output_signature=(
-                    TensorSpec(shape=(None, 1), dtype=float64)
+                    TensorSpec(shape=(None, 1), dtype=float32)
                 )
             )
         )
 
-    return datasets
+    return MultipartDataset(*datasets)
 
 
 def get_splits(split_percentages: List[float],
