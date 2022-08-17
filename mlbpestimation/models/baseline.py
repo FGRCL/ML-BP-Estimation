@@ -15,10 +15,14 @@ def build_baseline_model(datasets: MultipartDataset, batch_size=20, frequency=50
         lambda tensor: Dataset.from_tensors(tensor),
         num_parallel_calls=AUTOTUNE
     )
+    datasets.train = datasets.train.shuffle(100)
 
     pipeline = WindowPreprocessing(frequency=frequency, window_size=window_size)
-    datasets = MultipartDataset(*[pipeline.preprocess(dataset).batch(batch_size, drop_remainder=True) for dataset in
-                                  datasets])
+    datasets = MultipartDataset(
+        *[pipeline.preprocess(dataset).batch(batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE).prefetch(
+            AUTOTUNE)
+          for dataset in
+          datasets])
     model = Sequential([
         Input(input_shape, batch_size),
         Conv1D(64, 15, activation='relu'),

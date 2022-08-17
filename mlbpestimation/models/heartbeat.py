@@ -14,9 +14,12 @@ def build_heartbeat_cnn_model(datasets):
         lambda tensor: Dataset.from_tensors(tensor),
         num_parallel_calls=AUTOTUNE
     )
+    datasets.train = datasets.train.shuffle(100)
 
     pipeline = HeartbeatPreprocessing()
-    preprocessed_datasets = MultipartDataset(*[pipeline.preprocess(dataset).batch(20) for dataset in datasets])
+    preprocessed_datasets = MultipartDataset(
+        *[pipeline.preprocess(dataset).batch(20, num_parallel_calls=AUTOTUNE).prefetch(AUTOTUNE) for dataset in
+          datasets])
     model = Sequential([
         Conv1D(64, 15, activation='relu', input_shape=input_shape),
         tensorflow.keras.layers.BatchNormalization(),
