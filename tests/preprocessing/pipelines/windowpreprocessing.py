@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from neurokit2 import ppg_simulate
-from tensorflow import TensorSpec, float64
+from tensorflow import TensorSpec, float32
 from tensorflow.python.data import Dataset
 
 from mlbpestimation.data.mimic4.dataset import load_mimic_dataset
@@ -18,7 +18,7 @@ class TestWindowPreprocessing(TestCase):
 
         processed_dataset = pipeline.preprocess(dataset)
 
-        expected_specs = (TensorSpec(shape=(4000, 1), dtype=float64), TensorSpec(shape=2, dtype=float64))
+        expected_specs = (TensorSpec(shape=(4000, 1), dtype=float32), TensorSpec(shape=2, dtype=float32))
         self.assertEqual(expected_specs, processed_dataset.element_spec)
 
     def test_has_data(self):

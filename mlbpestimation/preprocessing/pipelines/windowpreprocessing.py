@@ -2,7 +2,7 @@ from typing import Any, Tuple, Union
 
 from heartpy import process_segmentwise
 from numpy import asarray, empty, ndarray
-from tensorflow import DType, float64
+from tensorflow import DType, float32
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
@@ -17,8 +17,8 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
         dataset_operations = [
             HasData(),
             RemoveNan(),
-            SignalFilter(float64, frequency, lowpass_cutoff, bandpass_cutoff),
-            SplitWindows(float64, frequency, window_size, window_step),
+            SignalFilter(float32, frequency, lowpass_cutoff, bandpass_cutoff),
+            SplitWindows(float32, frequency, window_size, window_step),
             HasData(),
             FlattenDataset(),
             AddBloodPressureOutput(),

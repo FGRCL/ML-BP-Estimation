@@ -4,9 +4,9 @@ from wandb import Settings, init
 from wandb.integration.keras import WandbCallback
 
 from mlbpestimation.configuration import configuration
-from mlbpestimation.data.mimic4.dataset import load_mimic_dataset
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
 from mlbpestimation.models.baseline import build_baseline_model
+from mlbpestimation.vitaldb.casesplit import load_vitaldb_dataset
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
          config=configuration['wandb.config'], mode=configuration['wandb.mode'], settings=Settings(start_method='fork'),
          name=configuration['wandb.run_name'])
 
-    datasets = load_mimic_dataset()
+    datasets = load_vitaldb_dataset()
     datasets, model = build_baseline_model(datasets, frequency=63)
 
     model.summary()
