@@ -1,8 +1,5 @@
 import sys
 from multiprocessing import Pool
-from os.path import splitext
-from pathlib import Path
-from re import match
 
 from numpy import array
 from sqlalchemy import create_engine
@@ -10,12 +7,12 @@ from sqlalchemy.orm import Session
 from tqdm.auto import tqdm
 from wfdb import Record, rdrecord
 
-from mlbpestimation.configuration import configuration
 from mlbpestimation.data.database.base import Base
 from mlbpestimation.data.database.entities.mimicrecord import MimicRecord
 from mlbpestimation.data.database.entities.mimicsignal import MimicSignal
 from mlbpestimation.data.database.entities.mimicsignalvalue import MimicSignalValue
 from mlbpestimation.data.database.properties import database_url
+from mlbpestimation.data.mimic4.dataset import get_paths
 
 
 def main():
@@ -32,12 +29,6 @@ def main():
     record_paths = get_paths()
     for path in tqdm(record_paths, position=0):
         save_record_entity(path, engine)
-
-
-def get_paths():
-    return [splitext(path)[0] for path in
-            Path(configuration['data.mimic.file_location']).rglob('*hea') if
-            match(r'(\d)*.hea', path.name)]
 
 
 def save_record_entity(path, engine):

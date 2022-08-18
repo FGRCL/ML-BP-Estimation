@@ -18,7 +18,6 @@ wandb = "^0.13.1"
 envyaml = "^1.10.211231"
 psycopg2 = "^2.9.3"
 numpy = "^1.23.1"
-grpcio = "1.47.0" # fixes a compatibility issue with CC's packages
 
 [tool.poetry.dev-dependencies]
 pandas = "^1.4.2"
