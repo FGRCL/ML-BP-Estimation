@@ -20,7 +20,7 @@ pipeline{
         DOCKERHUB_PROJECT = "fgrcl/ml-bp-estimation"
         GIT_URL = "github.com:FGRCL/ML-BP-Estimation.git"
         RUN_DIRECTORY = "/home/fgrcl/projects/def-bentahar/fgrcl/jenkins/${IMAGE_TAG}"
-        SCRIPT_NAME = "train.sh"
+        SCRIPT_NAME = "loaddb-mimic.sh"
         DEPLOYMENT_ENVIRONMENT = "cedar.computecanada.ca"
     }
     stages {
