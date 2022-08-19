@@ -8,7 +8,6 @@ sbatch <<EOT &
 #SBATCH --account def-bentahar
 #SBATCH --job-name=$1
 #SBATCH --output=console.out
-#SBATCH --wait
 #SBATCH --cpus-per-task=2          # Number of cores (not cpus)sa
 #SBATCH --mem=64G               # memory (per node)
 #SBATCH --time=0-12:00             # time (DD-HH:MM)
