@@ -6,9 +6,10 @@ WORKDIR /code
 
 COPY mlbpestimation/ ./mlbpestimation
 COPY pyproject.toml poetry.lock ./
-COPY --chown=55 train.sh ./
+COPY --chown=55 jobs/train.sh ./
 
-RUN apt update && apt install --yes libsndfile1
+RUN apt update
+RUN apt install --yes libsndfile1 libpq-dev gcc
 RUN pip install --upgrade pip
 RUN pip install "poetry==$POETRY_VERSION"
 RUN poetry config virtualenvs.create false

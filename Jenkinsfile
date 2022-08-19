@@ -19,7 +19,7 @@ pipeline{
         IMAGE_TAG = "${env.BRANCH_NAME}-${currentBuild.id}"
         DOCKERHUB_PROJECT = "fgrcl/ml-bp-estimation"
         GIT_URL = "github.com:FGRCL/ML-BP-Estimation.git"
-        SCRIPT_PATH = "/home/fgrcl/projects/def-bentahar/fgrcl/jenkins/${IMAGE_TAG}"
+        RUN_DIRECTORY = "/home/fgrcl/projects/def-bentahar/fgrcl/jenkins/${IMAGE_TAG}"
         SCRIPT_NAME = "train.sh"
         DEPLOYMENT_ENVIRONMENT = "cedar.computecanada.ca"
     }
@@ -63,11 +63,11 @@ pipeline{
             steps {
                 sshagent(credentials: ['ssh-key-cc']){
                     sh '''
-                        ssh fgrcl@cedar.computecanada.ca mkdir ${SCRIPT_PATH}
-                        scp ${SCRIPT_NAME} fgrcl@cedar.computecanada.ca:${SCRIPT_PATH}
-                        scp environments/${DEPLOYMENT_ENVIRONMENT}/variables.env fgrcl@cedar.computecanada.ca:${SCRIPT_PATH}
+                        ssh fgrcl@cedar.computecanada.ca mkdir ${RUN_DIRECTORY}
+                        scp jobs/${SCRIPT_NAME} fgrcl@cedar.computecanada.ca:${RUN_DIRECTORY}
+                        scp environments/${DEPLOYMENT_ENVIRONMENT}/variables.env fgrcl@cedar.computecanada.ca:${RUN_DIRECTORY}
                         ssh fgrcl@cedar.computecanada.ca <<- EOF
-                            cd ${SCRIPT_PATH}
+                            cd ${RUN_DIRECTORY}
                             chmod +x ${SCRIPT_NAME}
                             ./${SCRIPT_NAME} ${IMAGE_TAG}
                         EOF
