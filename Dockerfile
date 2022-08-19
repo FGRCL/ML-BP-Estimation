@@ -6,7 +6,6 @@ WORKDIR /code
 
 COPY mlbpestimation/ ./mlbpestimation
 COPY pyproject.toml poetry.lock ./
-COPY --chown=55 train.sh ./
 
 RUN apt update
 RUN apt install --yes libsndfile1
