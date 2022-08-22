@@ -7,4 +7,4 @@ wandb:
     testing: true
 data:
   mimic:
-    file_location: /mnt/mimic4/physionet.org/files/mimic4wdb/0.1.0/waves
+    file_location: $MIMIC_FILE_LOCATION
