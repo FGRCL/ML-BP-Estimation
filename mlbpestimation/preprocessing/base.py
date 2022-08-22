@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Any, Tuple
+from typing import Any, List, Tuple, Union
 
 import tensorflow as tf
 from numpy import ndarray
-from tensorflow import Tensor, numpy_function, py_function, DType
+from tensorflow import DType, Tensor, numpy_function, py_function
 from tensorflow.python.data import Dataset
 
 
@@ -32,7 +32,7 @@ class FilterOperation(DatasetOperation):
 
 
 class NumpyTransformOperation(DatasetOperation):
-    def __init__(self, out_type: DType | Tuple[DType]):
+    def __init__(self, out_type: Union[DType, Tuple[DType]]):
         self.out_type = out_type
 
     def apply(self, dataset: Dataset) -> Dataset:
@@ -50,7 +50,7 @@ class NumpyTransformOperation(DatasetOperation):
 
 
 class PythonFunctionTransformOperation(DatasetOperation):
-    def __init__(self, out_type: DType | Tuple[DType]):
+    def __init__(self, out_type: Union[DType, Tuple[DType]]):
         self.out_type = out_type
 
     def apply(self, dataset: Dataset) -> Dataset:
@@ -95,7 +95,7 @@ class Print(TransformOperation):
 
 
 class DatasetPreprocessingPipeline(ABC):
-    def __init__(self, dataset_operations: list[DatasetOperation], debug=False):
+    def __init__(self, dataset_operations: List[DatasetOperation], debug=False):
         self.dataset_operations = dataset_operations
         self.debug = debug
 

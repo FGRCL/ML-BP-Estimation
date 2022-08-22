@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Iterable, List
 
 from numpy import ndarray
 
@@ -11,7 +11,7 @@ MAX_VITAL_DB_CASE = 6388
 
 @dataclass
 class VitalFileOptions:
-    tracks: list[str]
+    tracks: List[str]
     interval: float
 
 

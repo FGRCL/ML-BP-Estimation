@@ -1,4 +1,4 @@
-FROM python:3-slim
+FROM tensorflow/tensorflow:latest-gpu
 
 ENV POETRY_VERSION=1.1.4
 
@@ -15,4 +15,4 @@ RUN pip install "poetry==$POETRY_VERSION"
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev --no-interaction --no-ansi
 
-ENTRYPOINT cd /code && python3 -m mlbpestimation.train
+ENTRYPOINT cd /code && python -m mlbpestimation.train

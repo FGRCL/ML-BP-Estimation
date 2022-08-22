@@ -1,14 +1,16 @@
-from typing import Any, Tuple
+from typing import Any, Tuple, Union
 
 from heartpy import process
 from heartpy.exceptions import BadSignalWarning
-from numpy import append, argmin, asarray, empty, ndarray
+from numpy import append, argmin, asarray, empty, float32 as nfloat32, ndarray
 from scipy.signal import find_peaks
-from tensorflow import DType, Tensor, float64
+from tensorflow import DType, Tensor, float32 as tfloat32
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyFilterOperation, NumpyTransformOperation
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyFilterOperation, \
+    NumpyTransformOperation
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, RemoveNan, \
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, \
+    RemoveNan, \
     SetTensorShape, SignalFilter, StandardizeArray
 
 
@@ -18,8 +20,8 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
         dataset_operations = [
             HasData(),
             RemoveNan(),
-            SignalFilter(float64, frequency, lowpass_cutoff, bandpass_cutoff),
-            SplitHeartbeats(float64, frequency, beat_length),
+            SignalFilter(tfloat32, frequency, lowpass_cutoff, bandpass_cutoff),
+            SplitHeartbeats(tfloat32, frequency, beat_length),
             HasData(),
             FlattenDataset(),
             AddBloodPressureOutput(),
@@ -33,7 +35,7 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
 
 
 class SplitHeartbeats(NumpyTransformOperation):
-    def __init__(self, out_type: DType | Tuple[DType], sample_rate, beat_length):
+    def __init__(self, out_type: Union[DType, Tuple[DType]], sample_rate, beat_length):
         super().__init__(out_type)
         self.beat_length = beat_length
         self.sample_rate = sample_rate
@@ -49,6 +51,7 @@ class SplitHeartbeats(NumpyTransformOperation):
         heartbeats_indices = self._get_clean_heartbeat_indices(track_lowpass, working_data)
 
         heartbeats = self._get_heartbeat_frames(heartbeats_indices, track_bandpass, track_lowpass)
+        heartbeats = asarray(heartbeats, dtype=nfloat32)
 
         return heartbeats
 
