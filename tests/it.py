@@ -1,7 +1,7 @@
 import unittest
 
-from keras.losses import MeanSquaredError
-from keras.optimizers import Adam
+from tensorflow.python.keras.losses import MeanSquaredError
+from tensorflow.python.keras.optimizer_v2.adam import Adam
 
 from mlbpestimation.data.mimic4.dataset import load_mimic_dataset
 from mlbpestimation.models.baseline import build_baseline_model

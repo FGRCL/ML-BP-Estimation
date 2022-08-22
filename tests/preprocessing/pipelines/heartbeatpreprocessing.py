@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from neurokit2 import ppg_simulate
-from tensorflow import TensorSpec, float64
+from tensorflow import TensorSpec, float32
 from tensorflow.python.data import Dataset
 
 from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
@@ -16,7 +16,7 @@ class TestHeartbeatPreprocessing(TestCase):
 
         processed_dataset = pipeline.preprocess(dataset)
 
-        expected_specs = (TensorSpec(shape=400, dtype=float64), TensorSpec(shape=2, dtype=float64))
+        expected_specs = (TensorSpec(shape=400, dtype=float32), TensorSpec(shape=2, dtype=float32))
         self.assertEqual(expected_specs, processed_dataset.element_spec)
 
     def test_has_data(self):

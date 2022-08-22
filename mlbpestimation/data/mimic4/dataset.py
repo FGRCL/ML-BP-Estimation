@@ -9,11 +9,12 @@ from tensorflow.python.data import Dataset
 
 from mlbpestimation.configuration import configuration
 from mlbpestimation.data.mimic4.generator import MimicCaseGenerator
+from mlbpestimation.data.multipartdataset import MultipartDataset
 
 SEED = 106
 
 
-def load_mimic_dataset() -> list[Dataset]:
+def load_mimic_dataset() -> MultipartDataset:
     record_paths = get_paths()
     Random(SEED).shuffle(record_paths)
     nb_records = len(record_paths)
@@ -30,7 +31,7 @@ def load_mimic_dataset() -> list[Dataset]:
             )
         )
 
-    return datasets
+    return MultipartDataset(*datasets)
 
 
 def get_paths():
