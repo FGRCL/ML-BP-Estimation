@@ -5,7 +5,7 @@ description = ""
 authors = ["François LaBerge <fgrclaberge@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.10, <3.11"
+python = "~3.8"
 vitaldb = "1.1.5"
 matplotlib = "^3.5.2"
 heartpy = "^1.2.7"
@@ -27,4 +27,4 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-train = "src.train"
+train = "mlbpestimation.train:main"

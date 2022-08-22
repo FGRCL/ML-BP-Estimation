@@ -1,12 +1,13 @@
-from typing import Any, Tuple
+from typing import Any, Tuple, Union
 
 from heartpy import process_segmentwise
 from numpy import asarray, empty, ndarray
-from tensorflow import DType, float64
+from tensorflow import DType, float32
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, RemoveNan, \
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, \
+    RemoveNan, \
     SetTensorShape, SignalFilter, StandardizeArray
 
 
@@ -16,8 +17,8 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
         dataset_operations = [
             HasData(),
             RemoveNan(),
-            SignalFilter(float64, frequency, lowpass_cutoff, bandpass_cutoff),
-            SplitWindows(float64, frequency, window_size, window_step),
+            SignalFilter(float32, frequency, lowpass_cutoff, bandpass_cutoff),
+            SplitWindows(float32, frequency, window_size, window_step),
             HasData(),
             FlattenDataset(),
             AddBloodPressureOutput(),
@@ -30,7 +31,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
 
 
 class SplitWindows(NumpyTransformOperation):
-    def __init__(self, out_type: DType | Tuple[DType], sample_rate: int, window_size: int, step_size: int, ):
+    def __init__(self, out_type: Union[DType, Tuple[DType]], sample_rate: int, window_size: int, step_size: int, ):
         super().__init__(out_type)
         self.sample_rate = sample_rate
         self.window_size = window_size

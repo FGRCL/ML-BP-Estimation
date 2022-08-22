@@ -1,5 +1,5 @@
-from keras.metrics import MeanAbsoluteError
-from tensorflow import keras
+from tensorflow.python.keras.losses import MeanSquaredError
+from tensorflow.python.keras.metrics import MeanAbsoluteError
 from wandb import Settings, init
 from wandb.integration.keras import WandbCallback
 
@@ -14,18 +14,18 @@ def main():
          config=configuration['wandb.config'], mode=configuration['wandb.mode'], settings=Settings(start_method='fork'),
          name=configuration['wandb.run_name'])
 
-    train, val, _ = load_mimic_dataset()
-    (train, val), model = build_baseline_model([train, val], frequency=63)
+    datasets = load_mimic_dataset()
+    datasets, model = build_baseline_model(datasets, frequency=63)
 
     model.summary()
-    model.compile(optimizer='Adam', loss=keras.losses.MeanSquaredError(),
+    model.compile(optimizer='Adam', loss=MeanSquaredError(),
                   metrics=[
                       MeanAbsoluteError(),
                       StandardDeviation(AbsoluteError())
                   ]
                   )
 
-    model.fit(train, epochs=100, callbacks=[WandbCallback()], validation_data=val, steps_per_epoch=10000)
+    model.fit(datasets.train, epochs=100, callbacks=[WandbCallback()], validation_data=datasets.validation)
 
 
 if __name__ == '__main__':

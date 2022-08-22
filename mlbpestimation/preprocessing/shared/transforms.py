@@ -1,9 +1,8 @@
-from collections import namedtuple
-from typing import Any, Tuple
+from typing import Any, Tuple, Union
 
 import tensorflow as tf
 from heartpy import filter_signal
-from numpy import ndarray
+from numpy import asarray, float32, ndarray
 from tensorflow import DType, Tensor, reduce_max, reduce_min, reshape
 from tensorflow.python.data import Dataset
 
@@ -24,7 +23,7 @@ class StandardizeArray(TransformOperation):
 
 
 class SignalFilter(NumpyTransformOperation):
-    def __init__(self, out_type: DType | Tuple[DType], sample_rate, lowpass_cutoff, bandpass_cutoff):
+    def __init__(self, out_type: Union[DType, Tuple[DType]], sample_rate, lowpass_cutoff, bandpass_cutoff):
         super().__init__(out_type)
         self.bandpass_cutoff = bandpass_cutoff
         self.lowpass_cutoff = lowpass_cutoff
@@ -35,8 +34,9 @@ class SignalFilter(NumpyTransformOperation):
                                       filtertype='lowpass')
         track_bandpass = filter_signal(data=track, cutoff=self.bandpass_cutoff, sample_rate=self.sample_rate,
                                        filtertype='bandpass')
-        FilteredTracks = namedtuple('FilteredTracks', ['lowpass', 'bandpass'])
-        return [FilteredTracks(track_lowpass, track_bandpass)]
+
+        filtered_tracks = asarray([track_lowpass, track_bandpass], dtype=float32)
+        return filtered_tracks
 
 
 class AddBloodPressureOutput(TransformOperation):
