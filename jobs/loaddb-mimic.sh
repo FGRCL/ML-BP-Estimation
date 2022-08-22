@@ -14,5 +14,5 @@ sbatch <<EOT &
 
 # Setup and run task -------------
 module load apptainer/1.0
-apptainer exec --env-file variables.env --env WANDB_RUN_NAME=$1 --bind /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data/mimic-IV:/mnt/mimic4 docker://fgrcl/ml-bp-estimation:$1 python -m mlbpestimation.data.mimic4.initdb
+apptainer exec --env-file variables.env --env WANDB_RUN_NAME=$1 --bind /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data/mimic-IV:/mnt/mimic4 docker://fgrcl/ml-bp-estimation:$1 bash -c "cd /code; python -m mlbpestimation.data.mimic4.initdb"
 EOT
