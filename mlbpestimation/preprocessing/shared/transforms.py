@@ -6,7 +6,7 @@ from numpy import asarray, float32, ndarray
 from tensorflow import DType, Tensor, reduce_max, reduce_min, reshape
 from tensorflow.python.data import Dataset
 
-from mlbpestimation.preprocessing.base import DatasetOperation, NumpyTransformOperation, TransformOperation
+from src.preprocessing.base import DatasetOperation, NumpyTransformOperation, TransformOperation
 
 
 class RemoveNan(TransformOperation):
