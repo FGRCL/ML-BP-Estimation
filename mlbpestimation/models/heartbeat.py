@@ -7,7 +7,7 @@ from mlbpestimation.data.multipartdataset import MultipartDataset
 from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
 
 
-def build_heartbeat_cnn_model(datasets):
+def build_heartbeat_cnn_model(datasets, frequency=500):
     input_shape = (400, 1)
 
     datasets.train = datasets.train.interleave(
@@ -16,7 +16,8 @@ def build_heartbeat_cnn_model(datasets):
     )
     datasets.train = datasets.train.shuffle(100)
 
-    pipeline = HeartbeatPreprocessing()
+    # TODO improve readability
+    pipeline = HeartbeatPreprocessing(frequency=frequency)
     preprocessed_datasets = MultipartDataset(
         *[pipeline.preprocess(dataset).batch(20, num_parallel_calls=AUTOTUNE).prefetch(AUTOTUNE) for dataset in
           datasets])
