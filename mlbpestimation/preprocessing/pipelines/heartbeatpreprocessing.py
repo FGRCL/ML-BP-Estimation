@@ -2,9 +2,9 @@ from typing import Any, Tuple, Union
 
 from heartpy import process
 from heartpy.exceptions import BadSignalWarning
-from numpy import append, argmin, asarray, empty, ndarray
+from numpy import append, argmin, asarray, empty, float32 as nfloat32, ndarray
 from scipy.signal import find_peaks
-from tensorflow import DType, Tensor, float32
+from tensorflow import DType, Tensor, float32 as tfloat32
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyFilterOperation, \
     NumpyTransformOperation
@@ -20,8 +20,8 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
         dataset_operations = [
             HasData(),
             RemoveNan(),
-            SignalFilter(float32, frequency, lowpass_cutoff, bandpass_cutoff),
-            SplitHeartbeats(float32, frequency, beat_length),
+            SignalFilter(tfloat32, frequency, lowpass_cutoff, bandpass_cutoff),
+            SplitHeartbeats(tfloat32, frequency, beat_length),
             HasData(),
             FlattenDataset(),
             AddBloodPressureOutput(),
@@ -51,6 +51,7 @@ class SplitHeartbeats(NumpyTransformOperation):
         heartbeats_indices = self._get_clean_heartbeat_indices(track_lowpass, working_data)
 
         heartbeats = self._get_heartbeat_frames(heartbeats_indices, track_bandpass, track_lowpass)
+        heartbeats = asarray(heartbeats, dtype=nfloat32)
 
         return heartbeats
 
