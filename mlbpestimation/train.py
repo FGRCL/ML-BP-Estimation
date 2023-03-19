@@ -1,31 +1,20 @@
-from tensorflow.python.keras.losses import MeanSquaredError
-from tensorflow.python.keras.metrics import MeanAbsoluteError
-from wandb import Settings, init
-from wandb.integration.keras import WandbCallback
+import argparse
 
-from mlbpestimation.configuration import configuration
-from mlbpestimation.data.mimic4.dataset import load_mimic_dataset
-from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
-from mlbpestimation.models.baseline import build_baseline_model
+from mlbpestimation.data.datasource.mimic4.dataset import MimicDataSource
+from mlbpestimation.data.featureset import FeatureSet
+from mlbpestimation.hypothesis import hypotheses_repository
+from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 
 
 def main():
-    init(project=configuration['wandb.project_name'], entity=configuration['wandb.entity'],
-         config=configuration['wandb.config'], mode=configuration['wandb.mode'], settings=Settings(start_method='fork'),
-         name=configuration['wandb.run_name'])
+    parser = argparse.ArgumentParser()
+    parser.add_argument('hypothesis', choices=hypotheses_repository.keys(), nargs=1)
+    args = parser.parse_args()
 
-    datasets = load_mimic_dataset()
-    datasets, model = build_baseline_model(datasets, frequency=63)
-
-    model.summary()
-    model.compile(optimizer='Adam', loss=MeanSquaredError(),
-                  metrics=[
-                      MeanAbsoluteError(),
-                      StandardDeviation(AbsoluteError())
-                  ]
-                  )
-
-    model.fit(datasets.train, epochs=100, callbacks=[WandbCallback()], validation_data=datasets.validation)
+    for test in FeatureSet(MimicDataSource(), WindowPreprocessing()).build_featuresets(32).train:
+        print(test)
+    h = hypotheses_repository[args.hypothesis[0]]
+    h.train()
 
 
 if __name__ == '__main__':

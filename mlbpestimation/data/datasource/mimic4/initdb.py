@@ -35,7 +35,7 @@ def main():
 
 def get_paths():
     return [splitext(path)[0] for path in
-            Path('../../../data/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves').rglob('*hea') if
+            Path('../../../../data/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves').rglob('*hea') if
             match(r'(\d)*.hea', path.name)]
 
 

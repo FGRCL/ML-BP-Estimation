@@ -6,7 +6,8 @@ from tensorflow import DType, float32
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, \
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, \
+    RemoveLowpassTrack, \
     RemoveNan, \
     SetTensorShape, SignalFilter, StandardizeArray
 
@@ -27,7 +28,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             StandardizeArray(),
             SetTensorShape(frequency * window_size),
         ]
-        super().__init__(dataset_operations)
+        super().__init__(dataset_operations, debug=True)
 
 
 class SplitWindows(NumpyTransformOperation):
@@ -41,14 +42,15 @@ class SplitWindows(NumpyTransformOperation):
         track_lowpass, track_bandpass = tracks
         segment_overlap = self.step_size / self.window_size
 
-        try:
-            working_data, b = process_segmentwise(track_lowpass, self.sample_rate, segment_width=self.window_size,
-                                                  segment_overlap=segment_overlap)
-        except (RuntimeWarning, UserWarning):
-            pass
-
+        print(f'segment overlap: {segment_overlap}')
+        # try:
+        working_data, b = process_segmentwise(track_lowpass, self.sample_rate, segment_width=self.window_size,
+                                              segment_overlap=segment_overlap)
+        # except (RuntimeWarning, UserWarning):
+        #     pass
+        print("working data")
         window_indices = self.get_clean_window_indices(working_data)
-
+        print('window_indices')
         window_length = self.window_size * self.sample_rate
         windows = self.get_windows_from_indices(track_bandpass, track_lowpass, window_indices, window_length)
         return windows

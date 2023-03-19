@@ -1,3 +1,4 @@
+random_seed: 106
 wandb:
   run_name: $WANDB_RUN_NAME
   project_name: test-project

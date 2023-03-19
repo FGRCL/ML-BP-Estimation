@@ -1,12 +1,12 @@
 from unittest import TestCase
 
-from mlbpestimation.data.mimic4.dataset import load_mimic_dataset
+from mlbpestimation.data.datasource.mimic4.dataset import MimicDataSource
 
 
 class TestMimicDataset(TestCase):
 
     def test_can_load_signal(self):
-        dataset, _, _ = load_mimic_dataset()
+        dataset, _, _ = MimicDataSource().get_datasets()
         dataset = dataset.take(1)
 
         self.assertIsNotNone(dataset)

@@ -3,15 +3,14 @@ import unittest
 from tensorflow.python.keras.losses import MeanSquaredError
 from tensorflow.python.keras.optimizer_v2.adam import Adam
 
-from mlbpestimation.data.mimic4.dataset import load_mimic_dataset
+from mlbpestimation.data.datasource.mimic4.dataset import MimicDataSource
 from mlbpestimation.models.baseline import build_baseline_model
-from mlbpestimation.vitaldb.casesplit import load_vitaldb_dataset
 
 
 class IntegrationTests(unittest.TestCase):
 
     def test_train_vitaldb_dataset_baseline_model(self):
-        train, validate, test = load_vitaldb_dataset()
+        train, validate, test = MimicDataSource().get_datasets()
         train = train.take(1)
 
         (train, validate, test), model = build_baseline_model([train, validate, test], 500)
@@ -25,7 +24,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertIsNotNone(predictions)
 
     def test_train_mimic_dataset_baseline_model(self):
-        train, validate, test = load_mimic_dataset()
+        train, validate, test = MimicDataSource().get_datasets()
         train = train.take(1)
 
         (train, validate, test), model = build_baseline_model([train, validate, test], 64, 8)

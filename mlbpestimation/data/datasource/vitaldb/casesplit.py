@@ -5,32 +5,35 @@ import numpy as np
 from tensorflow import TensorSpec, float32
 from tensorflow.python.data import Dataset
 
-from mlbpestimation.data.multipartdataset import MultipartDataset
-from mlbpestimation.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, \
+from mlbpestimation.data.datasource.database import Database
+from mlbpestimation.data.datasource.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, \
     VitalFileOptions
-from mlbpestimation.vitaldb.fetchingstrategy.DatasetApi import DatasetApi
+from mlbpestimation.data.datasource.vitaldb.fetchingstrategy.DatasetApi import DatasetApi
+from mlbpestimation.data.multipartdataset import MultipartDataset
 
 
-def load_vitaldb_dataset():
-    options = VitalFileOptions(
-        ['SNUADC/ART'],
-        1 / 500
-    )
+class VitalDBDataSource(Database):
 
-    case_splits = get_splits([0.7, 0.15, 0.15])
-
-    datasets = []
-    for case_split in case_splits:
-        datasets.append(
-            Dataset.from_generator(
-                lambda c=case_split: VitalDBGenerator(options, DatasetApi(), c),
-                output_signature=(
-                    TensorSpec(shape=(None, 1), dtype=float32)
-                )
-            )
+    def get_datasets(self) -> MultipartDataset:
+        options = VitalFileOptions(
+            ['SNUADC/ART'],
+            1 / 500
         )
 
-    return MultipartDataset(*datasets)
+        case_splits = get_splits([0.7, 0.15, 0.15])
+
+        datasets = []
+        for case_split in case_splits:
+            datasets.append(
+                Dataset.from_generator(
+                    lambda c=case_split: VitalDBGenerator(options, DatasetApi(), c),
+                    output_signature=(
+                        TensorSpec(shape=(None, 1), dtype=float32)
+                    )
+                )
+            )
+
+        return MultipartDataset(*datasets)
 
 
 def get_splits(split_percentages: List[float],

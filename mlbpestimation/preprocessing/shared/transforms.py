@@ -3,7 +3,7 @@ from typing import Any, Tuple, Union
 import tensorflow as tf
 from heartpy import filter_signal
 from numpy import asarray, float32, ndarray
-from tensorflow import DType, Tensor, reduce_max, reduce_min, reshape
+from tensorflow import DType, Tensor, cast, reduce_max, reduce_min, reshape
 from tensorflow.python.data import Dataset
 
 from mlbpestimation.preprocessing.base import DatasetOperation, NumpyTransformOperation, TransformOperation
@@ -67,3 +67,11 @@ class SetTensorShape(TransformOperation):
 
     def transform(self, x: Tensor, y: Tensor = None) -> Any:
         return reshape(x, [self.input_length, 1]), reshape(y, [2])
+
+
+class Cast(TransformOperation):
+    def __init__(self, dtype):
+        self.dtype = dtype
+
+    def transform(self, x: Tensor, y: Tensor = None) -> Any:
+        return cast(x, self.dtype), cast(y, self.dtype)
