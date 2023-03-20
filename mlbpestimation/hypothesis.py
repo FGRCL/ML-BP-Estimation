@@ -8,6 +8,7 @@ from mlbpestimation.data.datasource.vitaldb.casesplit import VitalDBDataSource
 from mlbpestimation.data.featureset import FeatureSet
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
 from mlbpestimation.models.baseline import Baseline
+from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
 from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 
 
@@ -40,6 +41,8 @@ class Hypothesis:
 
 
 hypotheses_repository = {
-    'baseline': Hypothesis(FeatureSet(MimicDataSource(), WindowPreprocessing()), Baseline()),
-    'baseline_vitaldb': Hypothesis(FeatureSet(VitalDBDataSource(), WindowPreprocessing()), Baseline())
+    'baseline_window_mimic': Hypothesis(FeatureSet(MimicDataSource(), WindowPreprocessing()), Baseline()),
+    'baseline_window_vitaldb': Hypothesis(FeatureSet(VitalDBDataSource(), WindowPreprocessing()), Baseline()),
+    'baseline_heartbeat_mimic': Hypothesis(FeatureSet(MimicDataSource(), HeartbeatPreprocessing()), Baseline()),
+    'baseline_heartbeat_vitaldb': Hypothesis(FeatureSet(MimicDataSource(), HeartbeatPreprocessing()), Baseline()),
 }

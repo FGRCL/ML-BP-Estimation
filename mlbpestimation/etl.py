@@ -8,7 +8,10 @@ from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPre
 def main():
     # fs = FeatureSet(VitalDBDataSource(), HeartbeatPreprocessing()).build_featuresets(20)
     fs = FeatureSet(VitalDBDataSource(), WindowPreprocessing()).build_featuresets(32)
-    fs.save(Path(__file__).parent.parent / 'data' / 'exmaple-test')
+    try:
+        fs.save(Path(__file__).parent.parent / 'data' / 'exmaple-test')
+    except(RuntimeWarning, UserWarning):
+        pass
 
 
 if __name__ == '__main__':

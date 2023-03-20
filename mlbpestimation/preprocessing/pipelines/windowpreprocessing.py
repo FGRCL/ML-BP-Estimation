@@ -28,7 +28,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             StandardizeArray(),
             SetTensorShape(frequency * window_size),
         ]
-        super().__init__(dataset_operations, debug=True)
+        super().__init__(dataset_operations)
 
 
 class SplitWindows(NumpyTransformOperation):
@@ -45,7 +45,8 @@ class SplitWindows(NumpyTransformOperation):
         print(f'segment overlap: {segment_overlap}')
         # try:
         working_data, b = process_segmentwise(track_lowpass, self.sample_rate, segment_width=self.window_size,
-                                              segment_overlap=segment_overlap)
+                                              segment_overlap=segment_overlap,
+                                              segment_min_size=self.window_size)
         # except (RuntimeWarning, UserWarning):
         #     pass
         print("working data")
