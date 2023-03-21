@@ -23,7 +23,7 @@ class StandardizeArray(TransformOperation):
 
 
 class SignalFilter(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType]], sample_rate, lowpass_cutoff, bandpass_cutoff):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], sample_rate, lowpass_cutoff, bandpass_cutoff):
         super().__init__(out_type)
         self.bandpass_cutoff = bandpass_cutoff
         self.lowpass_cutoff = lowpass_cutoff
@@ -57,8 +57,8 @@ class FlattenDataset(DatasetOperation):
         return dataset.flat_map(self.element_to_dataset)
 
     @staticmethod
-    def element_to_dataset(x: Tensor, y: Tensor = None) -> Dataset:
-        return Dataset.from_tensor_slices(x)
+    def element_to_dataset(*args) -> Dataset:
+        return Dataset.from_tensor_slices(args)
 
 
 class SetTensorShape(TransformOperation):

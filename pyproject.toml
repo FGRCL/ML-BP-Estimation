@@ -16,6 +16,7 @@ SQLAlchemy = "^1.4.39"
 tqdm = "^4.64.0"
 wandb = "^0.13.1"
 envyaml = "^1.10.211231"
+vital-sqi = "^0.1.0"
 
 [tool.poetry.dev-dependencies]
 pandas = "^1.4.2"

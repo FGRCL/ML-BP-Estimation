@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Any, List, Tuple, Union
 
 import tensorflow as tf
-from numpy import ndarray
 from tensorflow import DType, Tensor, numpy_function, py_function
 from tensorflow.python.data import Dataset
 
@@ -18,7 +17,7 @@ class TransformOperation(DatasetOperation):
         return dataset.map(self.transform)
 
     @abstractmethod
-    def transform(self, x: Tensor, y: Tensor = None) -> Any:
+    def transform(self, *args) -> Any:
         ...
 
 
@@ -27,30 +26,31 @@ class FilterOperation(DatasetOperation):
         return dataset.filter(self.filter)
 
     @abstractmethod
-    def filter(self, x: Tensor, y: Tensor = None) -> bool:
+    def filter(self, *args) -> bool:
         ...
 
 
 class NumpyTransformOperation(DatasetOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType]]):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], stateful: bool = False):
         self.out_type = out_type
+        self.stateful = stateful
 
     def apply(self, dataset: Dataset) -> Dataset:
         return dataset.map(self.adapted_function)
 
     def adapted_function(self, x: Tensor, y: Tensor = None):
         if y is None:
-            return numpy_function(self.transform, [x], self.out_type)
+            return numpy_function(self.transform, [x], self.out_type, self.stateful)
         else:
-            return numpy_function(self.transform, [x, y], self.out_type)
+            return numpy_function(self.transform, [x, y], self.out_type, self.stateful)
 
     @abstractmethod
-    def transform(self, x: ndarray, y: ndarray = None) -> Any:
+    def transform(self, *args) -> Any:
         ...
 
 
 class PythonFunctionTransformOperation(DatasetOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType]]):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]]):
         self.out_type = out_type
 
     def apply(self, dataset: Dataset) -> Dataset:
@@ -63,7 +63,7 @@ class PythonFunctionTransformOperation(DatasetOperation):
             return py_function(self.transform, [x, y], self.out_type)
 
     @abstractmethod
-    def transform(self, x: Tensor, y: Tensor = None) -> Any:
+    def transform(self, *args) -> Any:
         ...
 
 
@@ -78,7 +78,7 @@ class NumpyFilterOperation(DatasetOperation):
             return numpy_function(self.filter, [x, y], bool)
 
     @abstractmethod
-    def filter(self, x: ndarray, y: ndarray = None) -> Any:
+    def filter(self, *args) -> Any:
         ...
 
 
@@ -86,12 +86,11 @@ class Print(TransformOperation):
     def __init__(self, operation_name):
         self.operation_name = operation_name
 
-    def transform(self, x: Tensor, y: Tensor = None) -> Any:
+    def transform(self, *args) -> Any:
         tf.print(self.operation_name)
-        tf.print("x:", x)
-        if y is not None:
-            tf.print("y:", y)
-        return x, y
+        for i, tensor in enumerate(args):
+            tf.print(f'{i}:', tensor)
+        return args
 
 
 class DatasetPreprocessingPipeline(ABC):
