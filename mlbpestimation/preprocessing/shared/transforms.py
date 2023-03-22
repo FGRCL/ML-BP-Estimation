@@ -6,7 +6,7 @@ from numpy import asarray, float32, ndarray
 from tensorflow import DType, Tensor, cast, reduce_max, reduce_min, reshape
 from tensorflow.python.data import Dataset
 
-from mlbpestimation.preprocessing.base import DatasetOperation, NumpyTransformOperation, TransformOperation
+from mlbpestimation.preprocessing.base import FlatMap, NumpyTransformOperation, TransformOperation
 
 
 class RemoveNan(TransformOperation):
@@ -15,11 +15,11 @@ class RemoveNan(TransformOperation):
 
 
 class StandardizeArray(TransformOperation):
-    def transform(self, x: Tensor, y: Tensor = None) -> Any:
-        mean = tf.math.reduce_mean(x)
-        std = tf.math.reduce_std(x)
-        scaled = (x - mean) / std
-        return scaled, y
+    def transform(self, bandpass_window: Tensor, pressures: Tensor) -> (Tensor, Tensor):
+        mean = tf.math.reduce_mean(bandpass_window)
+        std = tf.math.reduce_std(bandpass_window)
+        scaled = (bandpass_window - mean) / std
+        return scaled, pressures
 
 
 class SignalFilter(NumpyTransformOperation):
@@ -40,24 +40,20 @@ class SignalFilter(NumpyTransformOperation):
 
 
 class AddBloodPressureOutput(TransformOperation):
-    def transform(self, tracks: Tensor, y: Tensor = None) -> Any:
-        track_lowpass = tracks[0]
-        sbp = reduce_max(track_lowpass)
-        dbp = reduce_min(track_lowpass)
-        return tracks, [sbp, dbp]
+    def transform(self, lowpass_window: Tensor, bandpass_window: Tensor = None) -> Any:
+        sbp = reduce_max(lowpass_window)
+        dbp = reduce_min(lowpass_window)
+        return lowpass_window, bandpass_window, [sbp, dbp]
 
 
 class RemoveLowpassTrack(TransformOperation):
-    def transform(self, x: Tensor, y: Tensor = None) -> Any:
-        return x[1], y
+    def transform(self, lowpass_window: Tensor, bandpass_window: Tensor, pressures: Tensor) -> Any:
+        return bandpass_window, pressures
 
 
-class FlattenDataset(DatasetOperation):
-    def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.flat_map(self.element_to_dataset)
-
+class FlattenDataset(FlatMap):
     @staticmethod
-    def element_to_dataset(*args) -> Dataset:
+    def flatten(*args) -> Dataset:
         return Dataset.from_tensor_slices(args)
 
 
@@ -65,8 +61,8 @@ class SetTensorShape(TransformOperation):
     def __init__(self, input_length):
         self.input_length = input_length
 
-    def transform(self, x: Tensor, y: Tensor = None) -> Any:
-        return reshape(x, [self.input_length, 1]), reshape(y, [2])
+    def transform(self, bandpass_window: Tensor, pressures: Tensor = None) -> Any:
+        return reshape(bandpass_window, [self.input_length, 1]), reshape(pressures, [2])
 
 
 class Cast(TransformOperation):

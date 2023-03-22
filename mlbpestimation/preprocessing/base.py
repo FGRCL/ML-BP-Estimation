@@ -3,7 +3,7 @@ from typing import Any, List, Tuple, Union
 
 import tensorflow as tf
 from tensorflow import DType, Tensor, numpy_function, py_function
-from tensorflow.python.data import Dataset
+from tensorflow.python.data import AUTOTUNE, Dataset
 
 
 class DatasetOperation(ABC):
@@ -14,7 +14,7 @@ class DatasetOperation(ABC):
 
 class TransformOperation(DatasetOperation):
     def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.map(self.transform)
+        return dataset.map(self.transform, num_parallel_calls=AUTOTUNE, deterministic=False)
 
     @abstractmethod
     def transform(self, *args) -> Any:
@@ -36,7 +36,7 @@ class NumpyTransformOperation(DatasetOperation):
         self.stateful = stateful
 
     def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.map(self.adapted_function)
+        return dataset.map(self.adapted_function, num_parallel_calls=AUTOTUNE, deterministic=False)
 
     def adapted_function(self, x: Tensor, y: Tensor = None):
         if y is None:
@@ -54,7 +54,7 @@ class PythonFunctionTransformOperation(DatasetOperation):
         self.out_type = out_type
 
     def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.map(self.adapted_function)
+        return dataset.map(self.adapted_function, num_parallel_calls=AUTOTUNE, deterministic=False)
 
     def adapted_function(self, x: Tensor, y: Tensor = None):
         if y is None:
@@ -79,6 +79,23 @@ class NumpyFilterOperation(DatasetOperation):
 
     @abstractmethod
     def filter(self, *args) -> Any:
+        ...
+
+
+class Batch(DatasetOperation):
+    def __init__(self, batch_size):
+        self.batch_size = batch_size
+
+    def apply(self, dataset: Dataset) -> Dataset:
+        return dataset.batch(self.batch_size, num_parallel_calls=AUTOTUNE, deterministic=False)
+
+
+class FlatMap(DatasetOperation):
+    def apply(self, dataset: Dataset) -> Dataset:
+        return dataset.flat_map(self.flatten)
+
+    @abstractmethod
+    def flatten(self, *args) -> Tuple[Dataset, ...]:
         ...
 
 
