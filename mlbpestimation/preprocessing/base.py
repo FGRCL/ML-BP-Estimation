@@ -83,11 +83,12 @@ class NumpyFilterOperation(DatasetOperation):
 
 
 class Batch(DatasetOperation):
-    def __init__(self, batch_size):
-        self.batch_size = batch_size
-
     def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.batch(self.batch_size, num_parallel_calls=AUTOTUNE, deterministic=False)
+        return dataset.batch(self.get_batch_size(), num_parallel_calls=AUTOTUNE, deterministic=False)
+
+    @abstractmethod
+    def get_batch_size(self):
+        ...
 
 
 class FlatMap(DatasetOperation):

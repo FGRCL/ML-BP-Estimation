@@ -30,13 +30,12 @@ class SignalFilter(NumpyTransformOperation):
         self.sample_rate = sample_rate
 
     def transform(self, track: ndarray, y: ndarray = None) -> Any:
-        track_lowpass = filter_signal(data=track, cutoff=self.lowpass_cutoff, sample_rate=self.sample_rate,
-                                      filtertype='lowpass')
-        track_bandpass = filter_signal(data=track, cutoff=self.bandpass_cutoff, sample_rate=self.sample_rate,
-                                       filtertype='bandpass')
+        track_lowpass = asarray(filter_signal(data=track, cutoff=self.lowpass_cutoff, sample_rate=self.sample_rate,
+                                              filtertype='lowpass'), dtype=float32)
+        track_bandpass = asarray(filter_signal(data=track, cutoff=self.bandpass_cutoff, sample_rate=self.sample_rate,
+                                               filtertype='bandpass'), dtype=float32)
 
-        filtered_tracks = asarray([track_lowpass, track_bandpass], dtype=float32)
-        return filtered_tracks
+        return [track_lowpass, track_bandpass]
 
 
 class AddBloodPressureOutput(TransformOperation):

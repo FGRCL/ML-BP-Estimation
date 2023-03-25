@@ -25,7 +25,7 @@ def main():
     with Profile('logdir'):
         fs = FeatureSet(MimicDataSource(), WindowPreprocessing(63)).build_featuresets(32)
         try:
-            fs.save(Path(__file__).parent.parent / 'data' / 'exmaple-test')
+            fs.save(Path(__file__).parent.parent / 'data' / 'example-test')
         except(RuntimeWarning, UserWarning):
             pass
 

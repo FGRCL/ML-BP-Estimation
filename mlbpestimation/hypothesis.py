@@ -41,8 +41,8 @@ class Hypothesis:
 
 
 hypotheses_repository = {
-    'baseline_window_mimic': Hypothesis(FeatureSet(MimicDataSource(), WindowPreprocessing()), Baseline()),
-    'baseline_window_vitaldb': Hypothesis(FeatureSet(VitalDBDataSource(), WindowPreprocessing()), Baseline()),
-    'baseline_heartbeat_mimic': Hypothesis(FeatureSet(MimicDataSource(), HeartbeatPreprocessing()), Baseline()),
-    'baseline_heartbeat_vitaldb': Hypothesis(FeatureSet(MimicDataSource(), HeartbeatPreprocessing()), Baseline()),
+    'baseline_window_mimic': Hypothesis(FeatureSet(MimicDataSource(), WindowPreprocessing(63)), Baseline()),
+    'baseline_window_vitaldb': Hypothesis(FeatureSet(VitalDBDataSource(), WindowPreprocessing(500)), Baseline()),
+    'baseline_heartbeat_mimic': Hypothesis(FeatureSet(MimicDataSource(), HeartbeatPreprocessing(63)), Baseline()),
+    'baseline_heartbeat_vitaldb': Hypothesis(FeatureSet(MimicDataSource(), HeartbeatPreprocessing(500)), Baseline()),
 }
