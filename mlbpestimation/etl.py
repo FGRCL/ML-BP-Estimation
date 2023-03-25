@@ -2,15 +2,15 @@ from pathlib import Path
 
 from tensorflow.python.profiler.profiler_v2 import Profile
 
-from mlbpestimation.data.datasource.mimic4.dataset import MimicDataSource
-from mlbpestimation.data.datasource.vitaldb.casesplit import VitalDBDataSource
+from mlbpestimation.data.datasource.mimic4.mimicdatabase import MimicDatabase
+from mlbpestimation.data.datasource.vitaldb.vitaldatabase import VitalDatabase
 from mlbpestimation.data.featureset import FeatureSet
 from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
 from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 
 data_sources = {
-    'mimic': MimicDataSource,
-    'vitaldb': VitalDBDataSource,
+    'mimic': MimicDatabase,
+    'vitaldb': VitalDatabase,
 }
 
 preprocessing_pipelines = {
@@ -23,7 +23,7 @@ def main():
     # enable_debug_mode()
     # run_functions_eagerly(True)
     with Profile('logdir'):
-        fs = FeatureSet(MimicDataSource(), WindowPreprocessing(63)).build_featuresets(32)
+        fs = FeatureSet(MimicDatabase(), WindowPreprocessing(63)).build_featuresets(32)
         try:
             fs.save(Path(__file__).parent.parent / 'data' / 'example-test')
         except(RuntimeWarning, UserWarning):

@@ -4,6 +4,7 @@ from random import Random
 from re import match
 
 from numpy import split
+from numpy.random import choice
 from tensorflow import TensorSpec, float32
 from tensorflow.python.data import Dataset
 
@@ -15,11 +16,16 @@ from mlbpestimation.data.multipartdataset import MultipartDataset
 SEED = 106
 
 
-class MimicDataSource(Database):
+class MimicDatabase(Database):
+    def __init__(self, subsample: float = 1.0):
+        self.subsample = subsample
+
     def get_datasets(self) -> MultipartDataset:
         record_paths = get_paths()
         Random(SEED).shuffle(record_paths)
         nb_records = len(record_paths)
+        subsample_size = int(nb_records * self.subsample)
+        record_paths = choice(record_paths, subsample_size, False)
         record_paths_splits = split(record_paths, [int(nb_records * 0.70), int(nb_records * 0.85)])
 
         datasets = []

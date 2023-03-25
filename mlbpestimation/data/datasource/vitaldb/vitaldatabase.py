@@ -8,11 +8,11 @@ from tensorflow.python.data import Dataset
 from mlbpestimation.data.datasource.database import Database
 from mlbpestimation.data.datasource.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, \
     VitalFileOptions
-from mlbpestimation.data.datasource.vitaldb.fetchingstrategy.DatasetApi import DatasetApi
+from mlbpestimation.data.datasource.vitaldb.fetchingstrategy.VitalFileApi import VitalFileApi
 from mlbpestimation.data.multipartdataset import MultipartDataset
 
 
-class VitalDBDataSource(Database):
+class VitalDatabase(Database):
 
     def get_datasets(self) -> MultipartDataset:
         options = VitalFileOptions(
@@ -26,7 +26,7 @@ class VitalDBDataSource(Database):
         for case_split in case_splits:
             datasets.append(
                 Dataset.from_generator(
-                    lambda c=case_split: VitalDBGenerator(options, DatasetApi(), c),
+                    lambda c=case_split: VitalDBGenerator(options, VitalFileApi(), c),
                     output_signature=(
                         TensorSpec(shape=(None, 1), dtype=float32)
                     )

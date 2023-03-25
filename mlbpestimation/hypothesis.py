@@ -3,8 +3,8 @@ from wandb import Settings, init
 from wandb.integration.keras import WandbCallback
 
 from mlbpestimation.configuration import configuration
-from mlbpestimation.data.datasource.mimic4.dataset import MimicDataSource
-from mlbpestimation.data.datasource.vitaldb.casesplit import VitalDBDataSource
+from mlbpestimation.data.datasource.mimic4.mimicdatabase import MimicDatabase
+from mlbpestimation.data.datasource.vitaldb.vitaldatabase import VitalDatabase
 from mlbpestimation.data.featureset import FeatureSet
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
 from mlbpestimation.models.baseline import Baseline
@@ -41,8 +41,8 @@ class Hypothesis:
 
 
 hypotheses_repository = {
-    'baseline_window_mimic': Hypothesis(FeatureSet(MimicDataSource(), WindowPreprocessing(63)), Baseline()),
-    'baseline_window_vitaldb': Hypothesis(FeatureSet(VitalDBDataSource(), WindowPreprocessing(500)), Baseline()),
-    'baseline_heartbeat_mimic': Hypothesis(FeatureSet(MimicDataSource(), HeartbeatPreprocessing(63)), Baseline()),
-    'baseline_heartbeat_vitaldb': Hypothesis(FeatureSet(MimicDataSource(), HeartbeatPreprocessing(500)), Baseline()),
+    'baseline_window_mimic': Hypothesis(FeatureSet(MimicDatabase(), WindowPreprocessing(63)), Baseline()),
+    'baseline_window_vitaldb': Hypothesis(FeatureSet(VitalDatabase(), WindowPreprocessing(500)), Baseline()),
+    'baseline_heartbeat_mimic': Hypothesis(FeatureSet(MimicDatabase(), HeartbeatPreprocessing(63)), Baseline()),
+    'baseline_heartbeat_vitaldb': Hypothesis(FeatureSet(VitalDatabase(), HeartbeatPreprocessing(500)), Baseline()),
 }
