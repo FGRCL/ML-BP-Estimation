@@ -80,4 +80,3 @@ slurm-*
 /notebooks
 /logs
 /logdir
-requirements.txt
