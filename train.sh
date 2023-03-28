@@ -7,8 +7,6 @@
 
 module load python/3.8 cuda cudnn
 
-rm -rf venv
-virtualenv --no-download venv
 source venv/bin/activate
 pip install --no-index --upgrade pip
 pip install -r requirements.txt
