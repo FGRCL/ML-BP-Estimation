@@ -1,6 +1,5 @@
 random_seed: 106
 wandb:
-  run_name: $WANDB_RUN_NAME
   project_name: ml-bp-estimation
   entity: warpfive
   mode: $WANDB_RUN_MODE

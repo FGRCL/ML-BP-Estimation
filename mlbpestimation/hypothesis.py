@@ -22,8 +22,7 @@ class Hypothesis:
              entity=configuration['wandb.entity'],
              config=configuration['wandb.config'],
              mode=configuration['wandb.mode'],
-             settings=Settings(start_method='fork'),
-             name=configuration['wandb.run_name'])
+             settings=Settings(start_method='fork'))
 
         self.featureset.build_featuresets(20)
         # self.model.build()
