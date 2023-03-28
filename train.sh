@@ -5,12 +5,12 @@
 #SBATCH --mem=64G          # Memory proportional to GPUs: 32000 Cedar, 47000 Béluga, 64000 Graham.
 #SBATCH --time=0-03:00     # DD-HH:MM:SS
 
-module load python/3.8 python-build-bundle/2023a cuda cudnn
+module load python/3.8 cuda cudnn
 
 rm -rf venv
 virtualenv --no-download venv
 source venv/bin/activate
-pip install --no-index -r requirements.txt
+pip install -r requirements.txt
 
 cp -r /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves "$SLURM_TMPDIR"
 export MIMIC_FILE_LOCATION="$SLURM_TMPDIR"
