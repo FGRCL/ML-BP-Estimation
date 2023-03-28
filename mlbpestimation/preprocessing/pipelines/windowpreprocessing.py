@@ -28,7 +28,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             BatchWindows(window_size, frequency),
             FlattenWindows(),
             ComputeSqi((float32, float32, float32)),
-            FilterSqi(0.9),
+            FilterSqi(0.35, 0.8),
             RemoveSqi(),
             AddBloodPressureOutput(),
             RemoveLowpassTrack(),
@@ -89,11 +89,12 @@ class ComputeSqi(NumpyTransformOperation):
 
 
 class FilterSqi(FilterOperation):
-    def __init__(self, threshold):
-        self.threshold = threshold
+    def __init__(self, low_threshold, high_theshold):
+        self.low_threshold = low_threshold
+        self.high_threshold = high_theshold
 
     def filter(self, lowpass_window: ndarray, bandpass_window: ndarray, sqi: ndarray) -> bool:
-        return sqi < self.threshold
+        return self.low_threshold < sqi < self.high_threshold
 
 
 class RemoveSqi(TransformOperation):
