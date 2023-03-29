@@ -25,8 +25,6 @@ class Hypothesis:
              settings=Settings(start_method='fork'))
 
         self.featureset.build_featuresets(20)
-        # self.model.build()
-        # self.model.summary()
         self.model.compile(optimizer='Adam',
                            loss=MeanSquaredError(),
                            metrics=[
@@ -40,8 +38,8 @@ class Hypothesis:
 
 
 hypotheses_repository = {
-    'baseline_window_mimic': Hypothesis(FeatureSet(MimicDatabase(), WindowPreprocessing(63)), Baseline()),
-    'baseline_window_vitaldb': Hypothesis(FeatureSet(VitalDatabase(), WindowPreprocessing(500)), Baseline()),
-    'baseline_heartbeat_mimic': Hypothesis(FeatureSet(MimicDatabase(), HeartbeatPreprocessing(63)), Baseline()),
-    'baseline_heartbeat_vitaldb': Hypothesis(FeatureSet(VitalDatabase(), HeartbeatPreprocessing(500)), Baseline()),
+    'baseline_window_mimic': Hypothesis(FeatureSet(MimicDatabase(), WindowPreprocessing(63)), Baseline(63)),
+    'baseline_window_vitaldb': Hypothesis(FeatureSet(VitalDatabase(), WindowPreprocessing(500)), Baseline(500)),
+    'baseline_heartbeat_mimic': Hypothesis(FeatureSet(MimicDatabase(), HeartbeatPreprocessing(63)), Baseline(63)),
+    'baseline_heartbeat_vitaldb': Hypothesis(FeatureSet(VitalDatabase(), HeartbeatPreprocessing(500)), Baseline(500)),
 }
