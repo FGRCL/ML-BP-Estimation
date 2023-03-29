@@ -13,7 +13,7 @@ pip install -r requirements.txt
 
 cp -r /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves "$SLURM_TMPDIR"
 
-export MIMIC_FILE_LOCATION="$SLURM_TMPDIR"
+export MIMIC_FILE_LOCATION=$SLURM_TMPDIR
 set -a
 source .env
 set +a
