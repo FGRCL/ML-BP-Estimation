@@ -13,3 +13,4 @@ tensorboard-plugin-profile
 tensorflow-datasets
 pandas
 jupyter
+memory-profiler

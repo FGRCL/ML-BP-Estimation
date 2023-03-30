@@ -1,4 +1,5 @@
 from keras.losses import MeanAbsoluteError, MeanSquaredError
+from tensorflow.python.data import AUTOTUNE
 from wandb import Settings, init
 from wandb.integration.keras import WandbCallback
 
@@ -24,14 +25,17 @@ class Hypothesis:
              mode=configuration['wandb.mode'],
              settings=Settings(start_method='fork'))
 
-        self.featureset.build_featuresets(20)
+        self.featureset.build_featuresets()
+        train_set = self.featureset.train \
+            .batch(20, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
+            .prefetch(AUTOTUNE)
         self.model.compile(optimizer='Adam',
                            loss=MeanSquaredError(),
                            metrics=[
                                MeanAbsoluteError(),
                                StandardDeviation(AbsoluteError())
                            ])
-        self.model.fit(self.featureset.train,
+        self.model.fit(train_set,
                        epochs=100,
                        callbacks=[WandbCallback()],
                        validation_data=self.featureset.validation)

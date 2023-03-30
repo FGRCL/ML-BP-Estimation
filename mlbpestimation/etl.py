@@ -20,8 +20,6 @@ preprocessing_pipelines = {
 
 
 def main():
-    # enable_debug_mode()
-    # run_functions_eagerly(True)
     with Profile('logdir'):
         fs = FeatureSet(MimicDatabase(), WindowPreprocessing(63)).build_featuresets(32)
         try:

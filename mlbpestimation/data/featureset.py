@@ -1,7 +1,5 @@
 from pathlib import Path
 
-from tensorflow.python.data import AUTOTUNE
-
 from mlbpestimation.data.datasource.database import Database
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline
 
@@ -14,12 +12,10 @@ class FeatureSet:
         self.validation = None
         self.test = None
 
-    def build_featuresets(self, batch_size):
+    def build_featuresets(self):
         featuresets = []
         for dataset in self._database.get_datasets():
-            featureset = self._preprocessing.preprocess(dataset) \
-                .batch(batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
-                .prefetch(AUTOTUNE)
+            featureset = self._preprocessing.preprocess(dataset)
             featuresets.append(featureset)
 
         self.train = featuresets[0]
