@@ -21,7 +21,7 @@ preprocessing_pipelines = {
 
 def main():
     with Profile('logdir'):
-        fs = FeatureSet(MimicDatabase(), WindowPreprocessing(63)).build_featuresets(32)
+        fs = FeatureSet(MimicDatabase(), WindowPreprocessing(63)).build_featuresets()
         try:
             fs.save(Path(__file__).parent.parent / 'data' / 'example-test')
         except(RuntimeWarning, UserWarning):

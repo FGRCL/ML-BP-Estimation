@@ -3,17 +3,16 @@ from pathlib import Path
 from random import Random
 from re import match
 
-from numpy import split
+import tensorflow
+from numpy import empty, split
 from numpy.random import choice
-from tensorflow import TensorSpec, float32
+from tensorflow import TensorSpec, constant, float32, reshape
 from tensorflow.python.data import Dataset
+from wfdb import rdrecord
 
 from mlbpestimation.configuration import configuration
 from mlbpestimation.data.datasource.database import Database
-from mlbpestimation.data.datasource.mimic4.generator import MimicCaseGenerator
 from mlbpestimation.data.multipartdataset import MultipartDataset
-
-SEED = 106
 
 
 class MimicDatabase(Database):
@@ -22,7 +21,7 @@ class MimicDatabase(Database):
 
     def get_datasets(self) -> MultipartDataset:
         record_paths = get_paths()
-        Random(SEED).shuffle(record_paths)
+        Random(configuration['random_seed']).shuffle(record_paths)
         nb_records = len(record_paths)
         subsample_size = int(nb_records * self.subsample)
         record_paths = choice(record_paths, subsample_size, False)
@@ -30,16 +29,27 @@ class MimicDatabase(Database):
 
         datasets = []
         for path_split in record_paths_splits:
-            datasets.append(
-                Dataset.from_generator(
-                    lambda p=path_split: MimicCaseGenerator(p),
-                    output_signature=(
-                        TensorSpec(shape=(None,), dtype=float32)
-                    )
-                )
-            )
+            dataset = Dataset.from_tensor_slices(path_split) \
+                .map(self._tf_read_ap) \
+                .map(self._set_shape)
+            datasets.append(dataset)
 
         return MultipartDataset(*datasets)
+
+    def _tf_read_ap(self, path):
+        return tensorflow.py_function(self._read_abp, [path], TensorSpec([None], float32))
+
+    @staticmethod
+    def _read_abp(record_path):
+        record = rdrecord(record_path.numpy().decode('ASCII'), channel_names=['ABP'])
+        if record.sig_name is not None:
+            i = record.sig_name.index('ABP')
+            return constant(record.p_signal[:, i], dtype=float32)
+        else:
+            return empty(0)
+
+    def _set_shape(self, signal):
+        return reshape(signal, [-1])
 
 
 def get_paths():
