@@ -3,7 +3,7 @@ from typing import List
 import vitaldb
 from numpy import empty, ndarray
 
-from mlbpestimation.data.datasource.vitaldb.fetchingstrategy.VitalDBFetchingStrategy import VitalDBFetchingStrategy
+from mlbpestimation.data.vitaldb.fetchingstrategy.VitalDBFetchingStrategy import VitalDBFetchingStrategy
 
 
 class DatasetApi(VitalDBFetchingStrategy):

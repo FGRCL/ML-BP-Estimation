@@ -4,7 +4,7 @@ from neurokit2 import ppg_simulate
 from tensorflow import TensorSpec, float32
 from tensorflow.python.data import Dataset
 
-from mlbpestimation.data.datasource.mimic4.mimicdatabase import MimicDatabase
+from mlbpestimation.data.mimic4 import MimicDatabase
 from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 
 
@@ -34,7 +34,7 @@ class TestWindowPreprocessing(TestCase):
         self.assertIsNotNone(element)
 
     def test_preprocess_mimic(self):
-        dataset, _, _ = MimicDatabase().get_datasets()
+        dataset, _, _ = MimicDatabase().load_datasets()
         dataset = dataset.take(1)
         pipeline = WindowPreprocessing(frequency=64)
 
@@ -43,7 +43,7 @@ class TestWindowPreprocessing(TestCase):
         self.assertIsNotNone(dataset)
 
     def test_preprocess_vitaldb(self):
-        dataset, _, _ = MimicDatabase().get_datasets()
+        dataset, _, _ = MimicDatabase().load_datasets()
         dataset = dataset.take(1)
         pipeline = WindowPreprocessing(frequency=500)
 

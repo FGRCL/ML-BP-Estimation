@@ -5,16 +5,16 @@ import numpy as np
 from tensorflow import TensorSpec, float32
 from tensorflow.python.data import Dataset
 
-from mlbpestimation.data.datasource.database import Database
-from mlbpestimation.data.datasource.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, \
+from mlbpestimation.data.datasetloader import DatasetLoader
+from mlbpestimation.data.splitdataset import SplitDataset
+from mlbpestimation.data.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, \
     VitalFileOptions
-from mlbpestimation.data.datasource.vitaldb.fetchingstrategy.VitalFileApi import VitalFileApi
-from mlbpestimation.data.multipartdataset import MultipartDataset
+from mlbpestimation.data.vitaldb.fetchingstrategy.VitalFileApi import VitalFileApi
 
 
-class VitalDatabase(Database):
+class VitalDatasetLoader(DatasetLoader):
 
-    def get_datasets(self) -> MultipartDataset:
+    def load_datasets(self) -> SplitDataset:
         options = VitalFileOptions(
             ['SNUADC/ART'],
             1 / 500
@@ -33,7 +33,7 @@ class VitalDatabase(Database):
                 )
             )
 
-        return MultipartDataset(*datasets)
+        return SplitDataset(*datasets)
 
 
 def get_splits(split_percentages: List[float],

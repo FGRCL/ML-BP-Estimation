@@ -11,17 +11,17 @@ from tensorflow.python.data import Dataset
 from wfdb import rdrecord
 
 from mlbpestimation.configuration import configuration
-from mlbpestimation.data.datasource.database import Database
-from mlbpestimation.data.multipartdataset import MultipartDataset
+from mlbpestimation.data.datasetloader import DatasetLoader
+from mlbpestimation.data.splitdataset import SplitDataset
 
 
-class MimicDatabase(Database):
+class MimicDatasetLoader(DatasetLoader):
     def __init__(self, subsample: float = 1.0):
         self.subsample = subsample
         self.files_directory = Path(
             configuration['data.directory']) / 'mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves'
 
-    def get_datasets(self) -> MultipartDataset:
+    def load_datasets(self) -> SplitDataset:
         record_paths = self._get_paths()
         Random(configuration['random_seed']).shuffle(record_paths)
         nb_records = len(record_paths)
@@ -36,7 +36,7 @@ class MimicDatabase(Database):
                 .map(self._set_shape)
             datasets.append(dataset)
 
-        return MultipartDataset(*datasets)
+        return SplitDataset(*datasets)
 
     def _tf_read_ap(self, path):
         return tensorflow.py_function(self._read_abp, [path], TensorSpec([None], float32))

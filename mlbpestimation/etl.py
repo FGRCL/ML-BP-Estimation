@@ -1,29 +1,13 @@
 from pathlib import Path
 
-from mlbpestimation.data.datasource.mimic4.mimicdatabase import MimicDatabase
-from mlbpestimation.data.datasource.vitaldb.vitaldatabase import VitalDatabase
-from mlbpestimation.data.featureset import FeatureSet
-from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
+from mlbpestimation.data.mimic4.mimicdatabase import MimicDatasetLoader
+from mlbpestimation.data.preprocessedloader import PreprocessedLoader
 from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
-
-data_sources = {
-    'mimic': MimicDatabase,
-    'vitaldb': VitalDatabase,
-}
-
-preprocessing_pipelines = {
-    'window': WindowPreprocessing,
-    'beat': HeartbeatPreprocessing,
-}
 
 
 def main():
-    # with Profile('logdir'):
-    fs = FeatureSet(MimicDatabase(0.05), WindowPreprocessing(63)).build_featuresets()
-    try:
-        fs.save(Path(__file__).parent.parent / 'data' / 'example-test')
-    except(RuntimeWarning, UserWarning):
-        pass
+    datasets = PreprocessedLoader(MimicDatasetLoader(), WindowPreprocessing(63)).load_datasets()
+    datasets.save(Path(__file__).parent.parent / 'data' / 'mimic-window')
 
 
 if __name__ == '__main__':
