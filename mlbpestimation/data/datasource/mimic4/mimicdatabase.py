@@ -18,9 +18,11 @@ from mlbpestimation.data.multipartdataset import MultipartDataset
 class MimicDatabase(Database):
     def __init__(self, subsample: float = 1.0):
         self.subsample = subsample
+        self.files_directory = Path(
+            configuration['data.directory']) / 'mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves'
 
     def get_datasets(self) -> MultipartDataset:
-        record_paths = get_paths()
+        record_paths = self._get_paths()
         Random(configuration['random_seed']).shuffle(record_paths)
         nb_records = len(record_paths)
         subsample_size = int(nb_records * self.subsample)
@@ -51,8 +53,7 @@ class MimicDatabase(Database):
     def _set_shape(self, signal):
         return reshape(signal, [-1])
 
-
-def get_paths():
-    return [splitext(path)[0] for path in
-            Path(configuration['data.mimic.file_location']).rglob('*hea') if
-            match(r'(\d)*.hea', path.name)]
+    def _get_paths(self):
+        return [splitext(path)[0] for path in
+                Path(self.files_directory).rglob('*hea') if
+                match(r'(\d)*.hea', path.name)]

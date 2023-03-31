@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from mlbpestimation.configuration import configuration
 from mlbpestimation.data.datasource.database import Database
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline
 
@@ -23,7 +24,8 @@ class FeatureSet:
         self.test = featuresets[2]
         return self
 
-    def save(self, path: Path):
-        self.train.save(str(path / 'train'))
-        self.validation.save(str(path / 'validation'))
-        self.test.save(str(path / 'test'))
+    def save(self, database_name: Path):
+        database_path = Path(configuration['data.directory']) / database_name
+        self.train.save(str(database_path / 'train'))
+        self.validation.save(str(database_path / 'validation'))
+        self.test.save(str(database_path / 'test'))

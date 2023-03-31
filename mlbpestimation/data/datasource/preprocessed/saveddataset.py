@@ -2,17 +2,18 @@ from pathlib import Path
 
 from tensorflow.python.data import Dataset
 
+from mlbpestimation.configuration import configuration
 from mlbpestimation.data.datasource.database import Database
 from mlbpestimation.data.multipartdataset import MultipartDataset
 
 
 class SavedDataset(Database):
-    def __init__(self, base_path: Path):
-        self.base_path = base_path
+    def __init__(self, database_name: str):
+        self.directory_path = Path(configuration['data.directory']) / database_name
 
     def get_datasets(self):
-        train = Dataset.load(self.base_path / 'train')
-        validation = Dataset.load(self.base_path / 'validation')
-        test = Dataset.load(self.base_path / 'test')
+        train = Dataset.load(str(self.directory_path / 'train'))
+        validation = Dataset.load(str(self.directory_path / 'validation'))
+        test = Dataset.load(str(self.directory_path / 'test'))
 
         return MultipartDataset(train, validation, test)

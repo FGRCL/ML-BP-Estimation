@@ -6,5 +6,4 @@ wandb:
   config:
     testing: true
 data:
-  mimic:
-    file_location: $MIMIC_FILE_LOCATION
+  directory: $DATA_DIRECTORY_PATH
