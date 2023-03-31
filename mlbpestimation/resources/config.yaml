@@ -1,10 +1,9 @@
+random_seed: 106
 wandb:
-  run_name: $WANDB_RUN_NAME
-  project_name: test-project
+  project_name: ml-bp-estimation
   entity: warpfive
   mode: $WANDB_RUN_MODE
   config:
     testing: true
 data:
-  mimic:
-    file_location: $MIMIC_FILE_LOCATION
+  directory: $DATA_DIRECTORY_PATH

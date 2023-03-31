@@ -35,7 +35,7 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
 
 
 class SplitHeartbeats(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType]], sample_rate, beat_length):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], sample_rate, beat_length):
         super().__init__(out_type)
         self.beat_length = beat_length
         self.sample_rate = sample_rate

@@ -1,12 +1,16 @@
 from typing import Any, Tuple, Union
 
-from heartpy import process_segmentwise
-from numpy import asarray, empty, ndarray
-from tensorflow import DType, float32
+from numpy import asarray, float32 as float32, ndarray
+from scipy.stats import skew
+from tensorflow import DType, Tensor, bool
+from tensorflow.python.data import Dataset
+from tensorflow.python.ops.array_ops import size
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, \
+    FlatMap, NumpyTransformOperation, \
+    TransformOperation
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, \
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, RemoveLowpassTrack, \
     RemoveNan, \
     SetTensorShape, SignalFilter, StandardizeArray
 
@@ -17,55 +21,82 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
         dataset_operations = [
             HasData(),
             RemoveNan(),
-            SignalFilter(float32, frequency, lowpass_cutoff, bandpass_cutoff),
-            SplitWindows(float32, frequency, window_size, window_step),
-            HasData(),
-            FlattenDataset(),
+            FilterSize(window_size, frequency),
+            SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
+            MakeWindows(window_size, window_step, frequency),
+            FlattenWindows(),
+            BatchWindows(window_size, frequency),
+            FlattenWindows(),
+            ComputeSqi((float32, float32, float32)),
+            FilterSqi(0.35, 0.8),
+            RemoveSqi(),
             AddBloodPressureOutput(),
             RemoveLowpassTrack(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
             StandardizeArray(),
             SetTensorShape(frequency * window_size),
         ]
-        super().__init__(dataset_operations)
+        super().__init__(dataset_operations, debug=False)
 
 
-class SplitWindows(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType]], sample_rate: int, window_size: int, step_size: int, ):
-        super().__init__(out_type)
-        self.sample_rate = sample_rate
+class FilterSize(FilterOperation):
+    def __init__(self, window_size: int, frequency: int):
+        self.window_size = window_size
+        self.frequency = frequency
+
+    def filter(self, signal: Tensor) -> bool:
+        return size(signal) > self.window_size * self.frequency
+
+
+class MakeWindows(TransformOperation):
+    def __init__(self, window_size, step_size, frequency):
         self.window_size = window_size
         self.step_size = step_size
+        self.frequency = frequency
 
-    def transform(self, tracks: ndarray, y: ndarray = None) -> Any:
-        track_lowpass, track_bandpass = tracks
-        segment_overlap = self.step_size / self.window_size
+    def transform(self, lowpass_signal: Tensor, highpass_signal: Tensor) -> Tuple[Dataset, Dataset]:
+        window_size_frequency = self.frequency * self.window_size
+        step_size_frequency = self.frequency * self.step_size
+        lowpass_windows = Dataset.from_tensor_slices(lowpass_signal) \
+            .window(window_size_frequency, step_size_frequency, drop_remainder=True)
+        highpass_windows = Dataset.from_tensor_slices(highpass_signal) \
+            .window(window_size_frequency, step_size_frequency, drop_remainder=True)
+        return lowpass_windows, highpass_windows
 
-        try:
-            working_data, b = process_segmentwise(track_lowpass, self.sample_rate, segment_width=self.window_size,
-                                                  segment_overlap=segment_overlap)
-        except (RuntimeWarning, UserWarning):
-            pass
 
-        window_indices = self.get_clean_window_indices(working_data)
+class BatchWindows(TransformOperation):
+    def __init__(self, window_size, frequency):
+        self.window_size = window_size
+        self.frequency = frequency
 
-        window_length = self.window_size * self.sample_rate
-        windows = self.get_windows_from_indices(track_bandpass, track_lowpass, window_indices, window_length)
-        return windows
+    def transform(self, lowpass_window_dataset, bandpass_window_dataset) -> Any:
+        window_size_frequency = self.window_size * self.frequency
+        return lowpass_window_dataset.batch(window_size_frequency), bandpass_window_dataset.batch(window_size_frequency)
 
-    @staticmethod
-    def get_clean_window_indices(working_data):
-        window_indices = []
-        if 'segment_indices' in working_data:
-            for i, (start, end) in enumerate(working_data['segment_indices']):
-                if len(working_data['removed_beats'][i]) == 0:
-                    window_indices.append((start, end))
-        return window_indices
 
-    @staticmethod
-    def get_windows_from_indices(track_bandpass, track_lowpass, window_indices, window_length):
-        windows = empty(shape=(len(window_indices), 2, window_length))
-        for i, (start, end) in enumerate(window_indices):
-            window = asarray([track_lowpass[start:end], track_bandpass[start:end]])
-            windows[i] = window
-        return windows
+class FlattenWindows(FlatMap):
+    def flatten(self, lowpass_windows: Dataset, bandpass_windows: Dataset) -> Union[Dataset, Tuple[Dataset, ...]]:
+        return Dataset.zip((lowpass_windows, bandpass_windows))
+
+
+class ComputeSqi(NumpyTransformOperation):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]]):
+        super().__init__(out_type)
+
+    def transform(self, window_lowpass: ndarray, window_bandpass: ndarray) -> Any:
+        sqi = skew(window_bandpass)
+        return window_lowpass, window_bandpass, asarray(sqi, dtype=float32)
+
+
+class FilterSqi(FilterOperation):
+    def __init__(self, low_threshold, high_theshold):
+        self.low_threshold = low_threshold
+        self.high_threshold = high_theshold
+
+    def filter(self, lowpass_window: ndarray, bandpass_window: ndarray, sqi: ndarray) -> bool:
+        return self.low_threshold < sqi < self.high_threshold
+
+
+class RemoveSqi(TransformOperation):
+    def transform(self, lowpass_window: ndarray, bandpass_window: ndarray, sqi: ndarray) -> Any:
+        return lowpass_window, bandpass_window

@@ -1,0 +1,16 @@
+vitaldb
+matplotlib
+heartpy
+neurokit2
+tensorflow
+wfdb
+SQLAlchemy
+tqdm
+wandb
+envyaml
+vital-sqi
+tensorboard-plugin-profile
+tensorflow-datasets
+pandas
+jupyter
+memory-profiler

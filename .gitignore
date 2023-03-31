@@ -79,3 +79,4 @@ environments/local/variables.env
 slurm-*
 /notebooks
 /logs
+/logdir

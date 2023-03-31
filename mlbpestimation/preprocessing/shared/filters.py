@@ -15,6 +15,6 @@ class FilterPressureWithinBounds(FilterOperation):
         self.min_pressure = min_pressure
         self.max_pressure = max_pressure
 
-    def filter(self, tracks: Tensor, blood_pressures: Tensor = None) -> bool:
+    def filter(self, bandpass_window: Tensor, blood_pressures: Tensor = None) -> bool:
         sbp, dbp = blood_pressures[0], blood_pressures[1]
         return sbp < self.max_pressure and dbp > self.min_pressure
