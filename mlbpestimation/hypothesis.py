@@ -6,10 +6,10 @@ from wandb.integration.keras import WandbCallback
 
 from mlbpestimation.configuration import configuration
 from mlbpestimation.data.datasetloader import DatasetLoader
-from mlbpestimation.data.mimic4.mimicdatabase import MimicDatasetLoader
+from mlbpestimation.data.mimic4.mimicdatasetloader import MimicDatasetLoader
 from mlbpestimation.data.preprocessed.saveddatasetloader import SavedDatasetLoader
 from mlbpestimation.data.preprocessedloader import PreprocessedLoader
-from mlbpestimation.data.vitaldb.vitaldatabase import VitalDatasetLoader
+from mlbpestimation.data.vitaldb.vitaldatasetloader import VitalDatasetLoader
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
 from mlbpestimation.models.baseline import Baseline
 from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
