@@ -56,5 +56,5 @@ hypotheses_repository = {
                                            Baseline(63)),
     'baseline_heartbeat_vitaldb': Hypothesis(PreprocessedLoader(VitalDatasetLoader(), HeartbeatPreprocessing(500)),
                                              Baseline(500)),
-    'baseline_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('example-test'), Baseline(63))
+    'baseline_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), Baseline(63))
 }
