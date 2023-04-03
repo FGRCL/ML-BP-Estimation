@@ -47,7 +47,7 @@ class VitalDatasetLoader(DatasetLoader):
     def _subsample_items(self, case_ids):
         nb_cases = len(case_ids)
         subsample_size = int(nb_cases * self.subsample)
-        return choice(nb_cases, subsample_size, False)
+        return choice(case_ids, subsample_size, False)
 
     def _make_splits(self, case_ids):
         nb_cases = len(case_ids)
