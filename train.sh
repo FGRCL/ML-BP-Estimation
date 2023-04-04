@@ -11,7 +11,7 @@ source venv/bin/activate
 pip install --no-index --upgrade pip
 pip install -r requirements.txt
 
-cp -r /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data "$SLURM_TMPDIR"
+cp -r /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data/. "$SLURM_TMPDIR"
 
 export DATA_DIRECTORY_PATH=$SLURM_TMPDIR
 set -a
