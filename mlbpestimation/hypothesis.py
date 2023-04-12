@@ -1,8 +1,11 @@
+from pathlib import Path
+
+import wandb
 from keras.losses import MeanAbsoluteError, MeanSquaredError
 from tensorflow.python.data import AUTOTUNE
 from tensorflow.python.keras.models import Model
 from wandb import Settings, init
-from wandb.integration.keras import WandbCallback
+from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
 from mlbpestimation.configuration import configuration
 from mlbpestimation.data.datasetloader import DatasetLoader
@@ -43,8 +46,19 @@ class Hypothesis:
                            ])
         self.model.fit(train,
                        epochs=100,
-                       callbacks=[WandbCallback()],
+                       callbacks=[*self._get_wandb_callbacks()],
                        validation_data=validation)
+
+    @staticmethod
+    def _get_wandb_callbacks():
+        return [
+            WandbMetricsLogger(
+                log_freq="batch"
+            ),
+            WandbModelCheckpoint(
+                filepath=Path(configuration['output.models']) / wandb.run.name
+            )
+        ]
 
 
 hypotheses_repository = {

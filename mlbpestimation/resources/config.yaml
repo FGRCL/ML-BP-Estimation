@@ -7,3 +7,5 @@ wandb:
     testing: true
 data:
   directory: $DATA_DIRECTORY_PATH
+output:
+  models: $MODEL_OUTPUT_DIRECTORY
