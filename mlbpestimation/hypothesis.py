@@ -12,6 +12,7 @@ from mlbpestimation.data.preprocessedloader import PreprocessedLoader
 from mlbpestimation.data.vitaldb.vitaldatabase import VitalDatasetLoader
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
 from mlbpestimation.models.baseline import Baseline
+from mlbpestimation.models.resnet import ResNet
 from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
 from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 
@@ -35,12 +36,13 @@ class Hypothesis:
         validation = datasets.validation \
             .batch(20, drop_remainder=True, num_parallel_calls=AUTOTUNE)
 
-        self.model.compile(optimizer='Adam',
-                           loss=MeanSquaredError(),
-                           metrics=[
-                               MeanAbsoluteError(),
-                               StandardDeviation(AbsoluteError())
-                           ])
+        loss = MeanSquaredError()
+        metrics = [
+            MeanAbsoluteError(),
+            StandardDeviation(AbsoluteError())
+        ]
+        self.model.compile(optimizer='Adam', loss=loss, metrics=metrics)
+
         self.model.fit(train,
                        epochs=100,
                        callbacks=[WandbCallback()],
@@ -56,5 +58,6 @@ hypotheses_repository = {
                                            Baseline(63)),
     'baseline_heartbeat_vitaldb': Hypothesis(PreprocessedLoader(VitalDatasetLoader(), HeartbeatPreprocessing(500)),
                                              Baseline(500)),
-    'baseline_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('example-test'), Baseline(63))
+    'baseline_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), Baseline(63)),
+    'resnet_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), ResNet())
 }

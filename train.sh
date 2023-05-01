@@ -18,4 +18,4 @@ set -a
 source .env
 set +a
 
-python -m mlbpestimation.train baseline_window_mimic
+python -m mlbpestimation.train resnet_window_mimic_preprocessed
