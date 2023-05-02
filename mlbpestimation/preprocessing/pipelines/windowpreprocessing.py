@@ -89,9 +89,9 @@ class ComputeSqi(NumpyTransformOperation):
 
 
 class FilterSqi(FilterOperation):
-    def __init__(self, low_threshold, high_theshold):
+    def __init__(self, low_threshold, high_threshold):
         self.low_threshold = low_threshold
-        self.high_threshold = high_theshold
+        self.high_threshold = high_threshold
 
     def filter(self, lowpass_window: ndarray, bandpass_window: ndarray, sqi: ndarray) -> bool:
         return self.low_threshold < sqi < self.high_threshold

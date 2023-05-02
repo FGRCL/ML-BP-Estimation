@@ -1,15 +1,18 @@
+from pathlib import Path
+
+import wandb
 from keras.losses import MeanAbsoluteError, MeanSquaredError
 from tensorflow.python.data import AUTOTUNE
 from tensorflow.python.keras.models import Model
 from wandb import Settings, init
-from wandb.integration.keras import WandbCallback
+from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
 from mlbpestimation.configuration import configuration
 from mlbpestimation.data.datasetloader import DatasetLoader
-from mlbpestimation.data.mimic4.mimicdatabase import MimicDatasetLoader
+from mlbpestimation.data.mimic4.mimicdatasetloader import MimicDatasetLoader
 from mlbpestimation.data.preprocessed.saveddatasetloader import SavedDatasetLoader
 from mlbpestimation.data.preprocessedloader import PreprocessedLoader
-from mlbpestimation.data.vitaldb.vitaldatabase import VitalDatasetLoader
+from mlbpestimation.data.vitaldb.vitaldatasetloader import VitalDatasetLoader
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
 from mlbpestimation.models.baseline import Baseline
 from mlbpestimation.models.resnet import ResNet
@@ -45,8 +48,19 @@ class Hypothesis:
 
         self.model.fit(train,
                        epochs=100,
-                       callbacks=[WandbCallback()],
+                       callbacks=[*self._get_wandb_callbacks()],
                        validation_data=validation)
+
+    @staticmethod
+    def _get_wandb_callbacks():
+        return [
+            WandbMetricsLogger(
+                log_freq="batch"
+            ),
+            WandbModelCheckpoint(
+                filepath=Path(configuration['output.models']) / wandb.run.name
+            )
+        ]
 
 
 hypotheses_repository = {
