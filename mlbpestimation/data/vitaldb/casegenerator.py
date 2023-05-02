@@ -29,8 +29,5 @@ class VitalDBGenerator(object):
     def __iter__(self):
         return self
 
-    def __next__(self):
-        return self.next()
-
-    def next(self) -> ndarray:
+    def __next__(self) -> ndarray:
         return self.fetching_strategy.fetch_tracks(next(self.case_ids), self.options.tracks, self.options.interval)
