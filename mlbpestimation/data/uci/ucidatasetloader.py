@@ -1,9 +1,9 @@
 from pathlib import Path
 
-import tensorflow
 from mat73 import loadmat
 from numpy.random import seed, shuffle
 from tensorflow.python.data import Dataset
+from tensorflow.python.ops.ragged.ragged_factory_ops import constant
 
 from mlbpestimation.configuration import configuration
 from mlbpestimation.data.datasetloader import DatasetLoader
@@ -23,20 +23,19 @@ class UciDatasetLoader(DatasetLoader):
 
         datasets = []
         for set in sets:
-            dataset = Dataset.from_tensor_slices(tensorflow.ragged.constant(set))
+            dataset = Dataset.from_tensor_slices(constant(set))
             datasets.append(dataset)
 
         return SplitDataset(*datasets)
 
     def _get_abp_list(self):
         signals = []
-        # for file in self.files_directory.glob('*.mat'):
-        file = next(self.files_directory.glob('*.mat'))
-        mat = loadmat(file)
-        for key in mat:
-            for record in mat[key]:
-                abp = record[1].tolist()
-                signals.append(abp)
+        for file in self.files_directory.glob('*.mat'):
+            mat = loadmat(file)
+            for key in mat:
+                for record in mat[key]:
+                    abp = record[1]
+                    signals.append(abp)
 
         return signals
 

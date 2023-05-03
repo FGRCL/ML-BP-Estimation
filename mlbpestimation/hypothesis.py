@@ -75,6 +75,6 @@ hypotheses_repository = {
                                              Baseline(500)),
     'baseline_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), Baseline(63)),
     'resnet_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), ResNet()),
-    'baseline_window_uci': Hypothesis(PreprocessedLoader(UciDatasetLoader(), HeartbeatPreprocessing(125)),
+    'baseline_window_uci': Hypothesis(PreprocessedLoader(UciDatasetLoader(), WindowPreprocessing(125)),
                                       Baseline(125))
 }
