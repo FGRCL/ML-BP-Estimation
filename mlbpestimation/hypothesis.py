@@ -12,6 +12,7 @@ from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.data.mimic4.mimicdatasetloader import MimicDatasetLoader
 from mlbpestimation.data.preprocessed.saveddatasetloader import SavedDatasetLoader
 from mlbpestimation.data.preprocessedloader import PreprocessedLoader
+from mlbpestimation.data.uci.ucidatasetloader import UciDatasetLoader
 from mlbpestimation.data.vitaldb.vitaldatasetloader import VitalDatasetLoader
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
 from mlbpestimation.models.baseline import Baseline
@@ -73,5 +74,7 @@ hypotheses_repository = {
     'baseline_heartbeat_vitaldb': Hypothesis(PreprocessedLoader(VitalDatasetLoader(), HeartbeatPreprocessing(500)),
                                              Baseline(500)),
     'baseline_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), Baseline(63)),
-    'resnet_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), ResNet())
+    'resnet_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), ResNet()),
+    'baseline_window_uci': Hypothesis(PreprocessedLoader(UciDatasetLoader(), HeartbeatPreprocessing(125)),
+                                      Baseline(125))
 }
