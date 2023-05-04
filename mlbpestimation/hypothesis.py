@@ -4,6 +4,7 @@ import wandb
 from keras.losses import MeanAbsoluteError, MeanSquaredError
 from tensorflow.python.data import AUTOTUNE
 from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.optimizer_v2.adam import Adam
 from wandb import Settings, init
 from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
@@ -44,7 +45,7 @@ class Hypothesis:
             MeanAbsoluteError(),
             StandardDeviation(AbsoluteError())
         ]
-        self.model.compile(optimizer='Adam', loss=loss, metrics=metrics)
+        self.model.compile(Adam(1e-6), loss=loss, metrics=metrics)
 
         self.model.fit(train,
                        epochs=100,
