@@ -2,7 +2,8 @@ from pathlib import Path
 
 import wandb
 from tensorflow.python.data import AUTOTUNE
-from tensorflow.python.keras.metrics import MeanAbsoluteError, MeanSquaredError
+from tensorflow.python.keras.losses import MeanSquaredError
+from tensorflow.python.keras.metrics import MeanAbsoluteError
 from tensorflow.python.keras.models import Model
 from wandb import Settings, init
 from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
