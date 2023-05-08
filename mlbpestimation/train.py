@@ -1,28 +1,12 @@
-import argparse
-from dataclasses import dataclass
-
 from hydra import main
-from hydra.core.config_store import ConfigStore
+from hydra.utils import instantiate
 from omegaconf import DictConfig
 
-from mlbpestimation.hypothesis import Hypothesis, hypotheses_repository
 
-
-@dataclass
-class TrainConfig:
-    hypothesis: Hypothesis
-
-
-ConfigStore.instance()
-
-
-@main(version_base=None, config_path='', config_name='')
+@main(version_base=None, config_path='conf', config_name='train_configuration')
 def main(configuration: DictConfig):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('hypothesis', choices=hypotheses_repository.keys(), nargs=1)
-    args = parser.parse_args()
-    h = hypotheses_repository[args.hypothesis[0]]
-    h.train()
+    hypothesis = instantiate(configuration.hypothesis)
+    hypothesis.train()
 
 
 if __name__ == '__main__':
