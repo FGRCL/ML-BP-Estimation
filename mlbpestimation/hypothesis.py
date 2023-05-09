@@ -66,13 +66,13 @@ class Hypothesis:
 
 hypotheses_repository = {
     'baseline_window_mimic': Hypothesis(PreprocessedLoader(MimicDatasetLoader(), WindowPreprocessing(63)),
-                                        Baseline(63)),
+                                        Baseline()),
     'baseline_window_vitaldb': Hypothesis(PreprocessedLoader(VitalDatasetLoader(), WindowPreprocessing(500)),
-                                          Baseline(500)),
+                                          Baseline()),
     'baseline_heartbeat_mimic': Hypothesis(PreprocessedLoader(MimicDatasetLoader(), HeartbeatPreprocessing(63)),
-                                           Baseline(63)),
+                                           Baseline()),
     'baseline_heartbeat_vitaldb': Hypothesis(PreprocessedLoader(VitalDatasetLoader(), HeartbeatPreprocessing(500)),
-                                             Baseline(500)),
-    'baseline_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), Baseline(63)),
+                                             Baseline()),
+    'baseline_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), Baseline()),
     'resnet_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), ResNet())
 }
