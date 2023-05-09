@@ -1,9 +1,6 @@
 defaults:
   - model: baseline
+  - dataset_loader: mimic_window_saved
 
 _target_: mlbpestimation.hypothesis.Hypothesis
-dataset_loader:
-  _target_: mlbpestimation.data.preprocessed.saveddatasetloader.SavedDatasetLoader
-  database_name: mimic-window
-
 

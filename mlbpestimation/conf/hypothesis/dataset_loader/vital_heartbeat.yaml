@@ -1,0 +1,6 @@
+_target_: mlbpestimation.data.preprocessedloader.PreprocessedLoader
+dataset_loader:
+  _target_: mlbpestimation.data.vitaldb.vitaldatasetloader.VitalDatasetLoader
+preprocessing:
+  _target_: mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing.HeartbeatPreprocessing
+  frequency: 500
