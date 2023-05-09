@@ -10,15 +10,7 @@ from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
 from mlbpestimation.configuration import configuration
 from mlbpestimation.data.datasetloader import DatasetLoader
-from mlbpestimation.data.mimic4.mimicdatasetloader import MimicDatasetLoader
-from mlbpestimation.data.preprocessed.saveddatasetloader import SavedDatasetLoader
-from mlbpestimation.data.preprocessedloader import PreprocessedLoader
-from mlbpestimation.data.vitaldb.vitaldatasetloader import VitalDatasetLoader
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
-from mlbpestimation.models.baseline import Baseline
-from mlbpestimation.models.resnet import ResNet
-from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
-from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 
 
 class Hypothesis:
@@ -62,17 +54,3 @@ class Hypothesis:
                 filepath=Path(configuration['output.models']) / wandb.run.name
             )
         ]
-
-
-hypotheses_repository = {
-    'baseline_window_mimic': Hypothesis(PreprocessedLoader(MimicDatasetLoader(), WindowPreprocessing(63)),
-                                        Baseline()),
-    'baseline_window_vitaldb': Hypothesis(PreprocessedLoader(VitalDatasetLoader(), WindowPreprocessing(500)),
-                                          Baseline()),
-    'baseline_heartbeat_mimic': Hypothesis(PreprocessedLoader(MimicDatasetLoader(), HeartbeatPreprocessing(63)),
-                                           Baseline()),
-    'baseline_heartbeat_vitaldb': Hypothesis(PreprocessedLoader(VitalDatasetLoader(), HeartbeatPreprocessing(500)),
-                                             Baseline()),
-    'baseline_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), Baseline()),
-    'resnet_window_mimic_preprocessed': Hypothesis(SavedDatasetLoader('mimic-window'), ResNet())
-}
