@@ -1,0 +1,4 @@
+_target_: mlbpestimation.models.baseline.Baseline
+frequency: 63
+window_size: 8
+batch_size: 20

@@ -1,10 +1,2 @@
-hypothesis:
-  _target_: mlbpestimation.hypothesis.Hypothesis
-  dataset_loader:
-    _target_: mlbpestimation.data.preprocessed.saveddatasetloader.SavedDatasetLoader
-    database_name: mimic-window
-  model:
-    _target_: mlbpestimation.models.baseline.Baseline
-    frequency: 63
-    window_size: 8
-    batch_size: 20
+defaults:
+  - hypothesis: hypothesis
