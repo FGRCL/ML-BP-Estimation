@@ -2,7 +2,8 @@ from typing import Any, Tuple, Union
 
 from heartpy import process
 from heartpy.exceptions import BadSignalWarning
-from numpy import append, argmin, asarray, empty, float32 as nfloat32, ndarray
+from neurokit2 import ppg_clean, ppg_findpeaks
+from numpy import append, argmin, asarray, float32 as nfloat32, ndarray, zeros
 from scipy.signal import find_peaks
 from tensorflow import DType, Tensor, float32 as tfloat32
 
@@ -20,8 +21,8 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
         dataset_operations = [
             HasData(),
             RemoveNan(),
-            SignalFilter(tfloat32, frequency, lowpass_cutoff, bandpass_cutoff),
-            SplitHeartbeats(tfloat32, frequency, beat_length),
+            SignalFilter((tfloat32, tfloat32), frequency, lowpass_cutoff, bandpass_cutoff),
+            SplitHeartbeats((tfloat32, tfloat32), frequency, beat_length),
             HasData(),
             FlattenDataset(),
             AddBloodPressureOutput(),
@@ -31,32 +32,31 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             StandardizeArray(),
             SetTensorShape(beat_length)
         ]
-        super().__init__(dataset_operations)
+        super().__init__(dataset_operations, debug=True)
 
 
 class SplitHeartbeats(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], sample_rate, beat_length):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], frequency, beat_length):
         super().__init__(out_type)
         self.beat_length = beat_length
-        self.sample_rate = sample_rate
+        self.frequency = frequency
 
-    def transform(self, tracks: Tensor, y: Tensor = None) -> Any:
-        track_lowpass, track_bandpass = tracks
-
+    def transform(self, lowpass_signal: Tensor, bandpass_signal: Tensor = None) -> Any:
+        ppg_findpeaks(ppg_clean(bandpass_signal), self.frequency)
         try:
-            working_data, measure = process(track_lowpass, self.sample_rate)
+            working_data, measure = process(lowpass_signal, self.frequency)
         except BadSignalWarning:
-            return []
+            return [zeros(0, nfloat32), zeros(0, nfloat32)]
 
-        heartbeats_indices = self._get_clean_heartbeat_indices(track_lowpass, working_data)
+        heartbeats_indices = self._get_clean_heartbeat_indices(lowpass_signal, working_data)
 
-        heartbeats = self._get_heartbeat_frames(heartbeats_indices, track_bandpass, track_lowpass)
+        heartbeats = self._get_heartbeat_frames(heartbeats_indices, bandpass_signal, lowpass_signal)
         heartbeats = asarray(heartbeats, dtype=nfloat32)
 
-        return heartbeats
+        return [heartbeats[:, 0], heartbeats[:, 1]]
 
     def _get_heartbeat_frames(self, heartbeats_indices, track_bandpass, track_lowpass):
-        heartbeats = empty(shape=(len(heartbeats_indices), 2, self.beat_length))
+        heartbeats = zeros(shape=(len(heartbeats_indices), 2, self.beat_length), dtype=nfloat32)
         for i, indices in enumerate(heartbeats_indices):
             heartbeats[i][0] = self._standardize_heartbeat_length(asarray(track_lowpass[indices[0]:indices[1]]))
             heartbeats[i][1] = self._standardize_heartbeat_length(asarray(track_bandpass[indices[0]:indices[1]]))
