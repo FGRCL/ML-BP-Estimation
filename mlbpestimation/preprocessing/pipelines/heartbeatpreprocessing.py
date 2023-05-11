@@ -28,7 +28,6 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             AddBloodPressureOutput(),
             RemoveLowpassTrack(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
-            FilterExtraPeaks(max_peak_count),
             StandardizeArray(),
             SetTensorShape(beat_length),
         ]
