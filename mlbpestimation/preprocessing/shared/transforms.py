@@ -3,6 +3,7 @@ from typing import Any, Tuple, Union
 import tensorflow as tf
 from heartpy import filter_signal
 from numpy import asarray, float32, ndarray
+from scipy.stats import skew
 from tensorflow import DType, Tensor, cast, reduce_max, reduce_min, reshape
 from tensorflow.python.data import Dataset
 
@@ -70,3 +71,17 @@ class Cast(TransformOperation):
 
     def transform(self, x: Tensor, y: Tensor = None) -> Any:
         return cast(x, self.dtype), cast(y, self.dtype)
+
+
+class ComputeSqi(NumpyTransformOperation):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]]):
+        super().__init__(out_type)
+
+    def transform(self, window_lowpass: ndarray, window_bandpass: ndarray) -> Any:
+        sqi = skew(window_bandpass)
+        return window_lowpass, window_bandpass, asarray(sqi, dtype=float32)
+
+
+class RemoveSqi(TransformOperation):
+    def transform(self, lowpass_window: ndarray, bandpass_window: ndarray, sqi: ndarray) -> Any:
+        return lowpass_window, bandpass_window
