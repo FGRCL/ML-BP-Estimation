@@ -1,20 +1,20 @@
 from typing import Any, Tuple, Union
 
 from neurokit2 import ppg_clean, ppg_findpeaks
-from numpy import append, argmin, empty, float32 as nfloat32, ndarray, zeros
-from scipy.signal import find_peaks
+from numpy import argmin, empty, float32 as nfloat32, ndarray, zeros
+from scipy.signal import find_peaks, resample
 from tensorflow import DType, Tensor, float32 as tfloat32
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyFilterOperation, \
     NumpyTransformOperation
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, FilterSqi, HasData
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, ComputeSqi, FlattenDataset, RemoveLowpassTrack, RemoveNan, \
-    RemoveSqi, SetTensorShape, SignalFilter, StandardizeArray
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, ComputeSqi, FlattenDataset, RemoveLowpassTrack, RemoveNan, RemoveSqi, \
+    SetTensorShape, SignalFilter, StandardizeArray
 
 
 class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
     def __init__(self, frequency=500, lowpass_cutoff=5, bandpass_cutoff=(0.1, 8), min_pressure=30, max_pressure=230,
-                 beat_length=400, max_peak_count=2):
+                 beat_length=400):
         dataset_operations = [
             HasData(),
             RemoveNan(),
@@ -23,7 +23,7 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             HasData(),
             FlattenDataset(),
             ComputeSqi((tfloat32, tfloat32, tfloat32)),
-            FilterSqi(1, 2),
+            FilterSqi(0.5, 2),
             RemoveSqi(),
             AddBloodPressureOutput(),
             RemoveLowpassTrack(),
@@ -41,9 +41,7 @@ class SplitHeartbeats(NumpyTransformOperation):
         self.frequency = frequency
 
     def transform(self, lowpass_signal: Tensor, bandpass_signal: Tensor = None) -> Any:
-        print(bandpass_signal.shape)
         peak_indices = ppg_findpeaks(ppg_clean(bandpass_signal, self.frequency), self.frequency)['PPG_Peaks']
-        # peak_indices = ppg_findpeaks(bandpass_signal, self.frequency)['PPG_Peaks']
         if len(peak_indices) < 3:
             return [zeros(0, nfloat32), zeros(0, nfloat32)]
 
@@ -52,7 +50,6 @@ class SplitHeartbeats(NumpyTransformOperation):
         lowpass_beats = self._get_beats(trough_indices, lowpass_signal)
         bandpass_beats = self._get_beats(trough_indices, bandpass_signal)
 
-        print(bandpass_beats.shape)
         return [lowpass_beats, bandpass_beats]
 
     def _get_troughs(self, peak_indices, lowpass_signal):
@@ -72,19 +69,10 @@ class SplitHeartbeats(NumpyTransformOperation):
 
         for i, (pulse_onset_index, diastolic_foot_index) in enumerate(zip(trough_indices[:-1], trough_indices[1:])):
             beat = signal[pulse_onset_index: diastolic_foot_index]
-            beat_padded = self._standardize_heartbeat_length(beat)
-            beats[i] = beat_padded
+            beat_resampled = resample(beat, self.beat_length)
+            beats[i] = beat_resampled
 
         return beats
-
-    def _standardize_heartbeat_length(self, heartbeat):
-        missing_length = self.beat_length - len(heartbeat)
-        if missing_length > 0:
-            last_element = heartbeat[-1]
-            padding = [last_element] * missing_length
-            return append(heartbeat, padding)
-        else:
-            return heartbeat[0:self.beat_length]
 
 
 class FilterExtraPeaks(NumpyFilterOperation):
