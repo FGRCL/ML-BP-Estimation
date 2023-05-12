@@ -1,13 +1,13 @@
 from pathlib import Path
 
+from mlbpestimation.data.mimic4.mimicdatasetloader import MimicDatasetLoader
 from mlbpestimation.data.preprocessedloader import PreprocessedLoader
-from mlbpestimation.data.uci.ucidatasetloader import UciDatasetLoader
-from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
+from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
 
 
 def main():
-    datasets = PreprocessedLoader(UciDatasetLoader(), WindowPreprocessing(125)).load_datasets()
-    datasets.save(Path('uci-window'))
+    datasets = PreprocessedLoader(MimicDatasetLoader(), HeartbeatPreprocessing(63, beat_length=100)).load_datasets()
+    datasets.save(Path('mimic-beat'))
 
 
 if __name__ == '__main__':
