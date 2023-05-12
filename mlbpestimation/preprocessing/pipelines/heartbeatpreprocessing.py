@@ -5,8 +5,7 @@ from numpy import argmin, empty, float32 as nfloat32, ndarray, zeros
 from scipy.signal import find_peaks, resample
 from tensorflow import DType, Tensor, float32 as tfloat32
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyFilterOperation, \
-    NumpyTransformOperation
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyFilterOperation, NumpyTransformOperation
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, FilterSqi, HasData
 from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, ComputeSqi, FlattenDataset, RemoveLowpassTrack, RemoveNan, RemoveSqi, \
     SetTensorShape, SignalFilter, StandardizeArray
@@ -41,7 +40,11 @@ class SplitHeartbeats(NumpyTransformOperation):
         self.frequency = frequency
 
     def transform(self, lowpass_signal: Tensor, bandpass_signal: Tensor = None) -> Any:
-        peak_indices = ppg_findpeaks(ppg_clean(bandpass_signal, self.frequency), self.frequency)['PPG_Peaks']
+        try:
+            peak_indices = ppg_findpeaks(ppg_clean(bandpass_signal, self.frequency), self.frequency)['PPG_Peaks']
+        except:
+            return [zeros(0, nfloat32), zeros(0, nfloat32)]
+
         if len(peak_indices) < 3:
             return [zeros(0, nfloat32), zeros(0, nfloat32)]
 
