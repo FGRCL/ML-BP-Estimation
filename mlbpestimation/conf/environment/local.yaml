@@ -1,5 +1,5 @@
 wandb:
-  api_key: ${oc.env:WANDB_API_KEY}
+  api_key: ${oc.env:WANDB_API_KEYgi}
   run_mode: disabled
   run_name: dev
 directories:
