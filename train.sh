@@ -13,9 +13,4 @@ pip install -r requirements.txt
 
 cp -r /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data/. "$SLURM_TMPDIR"
 
-export DATA_DIRECTORY_PATH=$SLURM_TMPDIR
-set -a
-source .env
-set +a
-
 python -m mlbpestimation.train resnet_window_mimic_preprocessed
