@@ -9,7 +9,7 @@ from tensorflow import TensorSpec, constant, float32, reshape
 from tensorflow.python.data import Dataset
 from wfdb import rdrecord
 
-from mlbpestimation.configuration import configuration
+from mlbpestimation.conf import configuration
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.data.splitdataset import SplitDataset
 

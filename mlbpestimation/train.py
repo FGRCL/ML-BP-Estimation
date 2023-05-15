@@ -1,6 +1,6 @@
 from hydra.utils import instantiate
 
-from mlbpestimation.configuration import configuration
+from mlbpestimation.conf import configuration
 
 
 def main():

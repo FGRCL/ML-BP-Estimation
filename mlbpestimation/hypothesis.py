@@ -8,7 +8,7 @@ from tensorflow.python.keras.optimizer_v2.adam import Adam
 from wandb import Settings, init
 from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
-from mlbpestimation.configuration import configuration
+from mlbpestimation.conf import configuration
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
 

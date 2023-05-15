@@ -2,7 +2,7 @@ from pathlib import Path
 
 from tensorflow.python.data import Dataset
 
-from mlbpestimation.configuration import configuration
+from mlbpestimation.conf import configuration
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.data.splitdataset import SplitDataset
 

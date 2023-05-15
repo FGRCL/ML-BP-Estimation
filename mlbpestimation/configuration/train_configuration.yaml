@@ -1,6 +1,8 @@
 defaults:
+  - base_train_configuration
   - hypothesis: hypothesis
   - directories: local
   - wandb: disabled
+  - _self_
 
 random_seed: 106
