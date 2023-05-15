@@ -4,7 +4,6 @@ from mlbpestimation.configuration import configuration
 
 
 def main():
-    print(configuration.wandb.api_key)
     hypothesis = instantiate(configuration.hypothesis)
     hypothesis.train()
 
