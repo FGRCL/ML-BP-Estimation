@@ -1,8 +1,7 @@
-from envyaml import EnvYAML
+from dotenv import load_dotenv
+from hydra import compose, initialize
 
-from mlbpestimation.resources.importer import get_resource
+load_dotenv()
 
-CONFIG_FILE_NAME = 'config.yaml'
-
-with get_resource(CONFIG_FILE_NAME) as config_file_path:
-    configuration = EnvYAML(str(config_file_path))
+initialize(version_base=None, config_path='conf')
+configuration = compose(config_name='train_configuration')

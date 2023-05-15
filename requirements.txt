@@ -15,3 +15,4 @@ pandas
 jupyter
 memory-profiler
 hydra-core
+python-dotenv

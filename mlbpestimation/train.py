@@ -1,11 +1,10 @@
-from hydra import main
 from hydra.utils import instantiate
-from omegaconf import DictConfig
+
+from mlbpestimation.configuration import configuration
 
 
-@main(version_base=None, config_path='conf', config_name='train_configuration')
-def main(configuration: DictConfig):
-    print(configuration.environment.wandb.api_key)
+def main():
+    print(configuration.wandb.api_key)
     hypothesis = instantiate(configuration.hypothesis)
     hypothesis.train()
 

@@ -1,3 +1,6 @@
 defaults:
   - hypothesis: hypothesis
-  - environment: local
+  - directories: local
+  - wandb: disabled
+
+random_seed: 106

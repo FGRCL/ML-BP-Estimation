@@ -9,7 +9,7 @@ from mlbpestimation.data.splitdataset import SplitDataset
 
 class SavedDatasetLoader(DatasetLoader):
     def __init__(self, database_name: str):
-        self.directory_path = Path(configuration['data.directory']) / database_name
+        self.directory_path = Path(configuration.directories.data) / database_name
 
     def load_datasets(self):
         train = Dataset.load(str(self.directory_path / 'train'))

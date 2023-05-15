@@ -1,7 +1,0 @@
-wandb:
-  api_key: ${oc.env:WANDB_API_KEYgi}
-  run_mode: disabled
-  run_name: dev
-directories:
-  data: /Users/francois/git/ML-BP-Estimation/data
-  output: /Users/francois/git/ML-BP-Estimation/out

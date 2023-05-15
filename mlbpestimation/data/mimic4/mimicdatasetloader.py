@@ -18,7 +18,7 @@ class MimicDatasetLoader(DatasetLoader):
     def __init__(self, subsample: float = 1.0):
         self.subsample = subsample
         self.files_directory = Path(
-            configuration['data.directory']) / 'mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves'
+            configuration.directories.data) / 'mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves'
 
     def load_datasets(self) -> SplitDataset:
         record_paths = self._get_paths()
@@ -56,7 +56,7 @@ class MimicDatasetLoader(DatasetLoader):
                 match(r'(\d)*.hea', path.name)]
 
     def _suffle_items(self, record_paths):
-        seed(configuration['random_seed'])
+        seed(configuration.random_seed)
         shuffle(record_paths)
         return record_paths
 

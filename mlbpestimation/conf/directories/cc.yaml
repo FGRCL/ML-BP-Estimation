@@ -1,0 +1,2 @@
+data: ${oc.env:SLURM_TMPDIR}
+output: /Users/francois/git/ML-BP-Estimation/out

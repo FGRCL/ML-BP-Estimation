@@ -40,7 +40,7 @@ class VitalDatasetLoader(DatasetLoader):
 
     def _get_random_case_id_list(self):
         case_ids = arange(MIN_VITAL_DB_CASE, MAX_VITAL_DB_CASE + 1)
-        seed(configuration['random_seed'])
+        seed(configuration.random_seed)
         shuffle(case_ids)
         return case_ids
 

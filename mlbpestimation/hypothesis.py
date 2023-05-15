@@ -19,10 +19,9 @@ class Hypothesis:
         self.model = model
 
     def train(self):
-        init(project=configuration['wandb.project_name'],
-             entity=configuration['wandb.entity'],
-             config=configuration['wandb.config'],
-             mode=configuration['wandb.mode'],
+        init(project=configuration.wandb.project_name,
+             entity=configuration.wandb.entity,
+             mode=configuration.wandb.mode,
              settings=Settings(start_method='fork'))
 
         datasets = self.dataset_loader.load_datasets()
@@ -51,6 +50,6 @@ class Hypothesis:
                 log_freq="batch"
             ),
             WandbModelCheckpoint(
-                filepath=Path(configuration['output.models']) / wandb.run.name
+                filepath=Path(configuration.directories.output) / wandb.run.name
             )
         ]
