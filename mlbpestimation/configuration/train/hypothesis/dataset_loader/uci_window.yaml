@@ -1,7 +1,7 @@
 _target_: mlbpestimation.data.preprocessedloader.PreprocessedLoader
 dataset_loader:
   _target_: mlbpestimation.data.uci.ucidatasetloader.UciDatasetLoader
-  uci_files_directory: ${directories.data}/uci
+  uci_files_directory: ${directories.data}/ucip
   random_seed: ${random_seed}
 preprocessing:
   _target_: mlbpestimation.preprocessing.pipelines.windowpreprocessing.WindowPreprocessing
