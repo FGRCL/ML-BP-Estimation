@@ -7,8 +7,8 @@ from tensorflow.python.keras.regularizers import L2
 class ResNet(Model):
     def __init__(self):
         super().__init__()
-        n_residual_blocks = [10, 15, 10]
-        n_filters = [16, 32, 64]
+        n_residual_blocks = [10, 15, 20, 10]
+        n_filters = [16, 32, 64, 128]
 
         self.octaves = Sequential()
         for n_residual_block, n_filter in zip(n_residual_blocks, n_filters):

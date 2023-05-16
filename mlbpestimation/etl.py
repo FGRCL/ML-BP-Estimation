@@ -1,13 +1,15 @@
-from pathlib import Path
+from hydra import main
+from hydra.utils import instantiate
 
-from mlbpestimation.data.mimic4.mimicdatasetloader import MimicDatasetLoader
-from mlbpestimation.data.preprocessedloader import PreprocessedLoader
-from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
+from mlbpestimation.configuration.etl.etlconfiguration import EtlConfiguration
+from mlbpestimation.data.datasetloader import DatasetLoader
 
 
-def main():
-    datasets = PreprocessedLoader(MimicDatasetLoader(), HeartbeatPreprocessing(63, beat_length=100)).load_datasets()
-    datasets.save(Path('mimic-beat'))
+@main('configuration/etl', 'etl', None)
+def main(configuration: EtlConfiguration):
+    dataset_loader: DatasetLoader = instantiate(configuration.save_dataset.dataset)
+    datasets = dataset_loader.load_datasets()
+    datasets.save(configuration.save_dataset.save_directory)
 
 
 if __name__ == '__main__':
