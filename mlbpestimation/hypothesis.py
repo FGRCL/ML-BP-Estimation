@@ -1,8 +1,9 @@
 from pathlib import Path
 
 import wandb
-from keras.losses import MeanAbsoluteError, MeanSquaredError
 from tensorflow.python.data import AUTOTUNE
+from tensorflow.python.keras.losses import MeanSquaredError
+from tensorflow.python.keras.metrics import MeanAbsoluteError
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.optimizer_v2.adam import Adam
 from wandb import Settings, init

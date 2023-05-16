@@ -1,6 +1,6 @@
-from keras.layers import BatchNormalization, Flatten
+import tensorflow
 from tensorflow.python.keras import Model, Sequential
-from tensorflow.python.keras.layers import Add, Conv1D, Dense, Dropout, ReLU
+from tensorflow.python.keras.layers import Add, Conv1D, Dense, Dropout, Flatten, ReLU
 from tensorflow.python.keras.regularizers import L2
 
 
@@ -88,7 +88,7 @@ class ConvBlock(Model):
 
         self.block = Sequential([
             Conv1D(n_filter, kernel_size, strides=stride, padding="same"),
-            BatchNormalization(),
+            tensorflow.keras.layers.BatchNormalization(),
         ])
         if activation:
             self.block.add(ReLU())

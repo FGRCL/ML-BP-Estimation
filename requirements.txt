@@ -14,5 +14,6 @@ tensorflow-datasets
 pandas
 jupyter
 memory-profiler
+mat73
 hydra-core
 python-dotenv
