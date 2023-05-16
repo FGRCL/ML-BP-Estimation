@@ -1,13 +1,15 @@
-from pathlib import Path
+from hydra import main
+from hydra.utils import instantiate
 
-from mlbpestimation.data.preprocessedloader import PreprocessedLoader
-from mlbpestimation.data.vitaldb.vitaldatasetloader import VitalDatasetLoader
-from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
+from mlbpestimation.configuration.etl.etlconfiguration import EtlConfiguration
+from mlbpestimation.data.datasetloader import DatasetLoader
 
 
-def main():
-    datasets = PreprocessedLoader(VitalDatasetLoader(), WindowPreprocessing(500)).load_datasets()
-    datasets.save(Path(__file__).parent.parent / 'data' / 'vitaldb-window')
+@main('configuration/etl', 'etl', None)
+def main(configuration: EtlConfiguration):
+    dataset_loader: DatasetLoader = instantiate(configuration.save_dataset.dataset)
+    datasets = dataset_loader.load_datasets()
+    datasets.save(configuration.save_dataset.save_directory)
 
 
 if __name__ == '__main__':

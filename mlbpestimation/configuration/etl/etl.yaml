@@ -1,0 +1,6 @@
+defaults:
+  - base_etl_configuration
+  - _self_
+
+data_directory: /Users/francois/git/ML-BP-Estimation/data
+random_seed: 106

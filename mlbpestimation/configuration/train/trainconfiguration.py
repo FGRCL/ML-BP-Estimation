@@ -3,8 +3,8 @@ from typing import Any
 
 from hydra.core.config_store import ConfigStore
 
-from mlbpestimation.configuration.directories.directoriesconfiguration import DirectoriesConfiguration
-from mlbpestimation.configuration.wandb.wandbconfiguration import WandbConfiguration
+from mlbpestimation.configuration.train.directories.directoriesconfiguration import DirectoriesConfiguration
+from mlbpestimation.configuration.train.wandb.wandbconfiguration import WandbConfiguration
 
 
 @dataclass
