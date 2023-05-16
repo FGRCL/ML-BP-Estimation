@@ -5,4 +5,4 @@ dataset_loader:
   random_seed: ${random_seed}
 preprocessing:
   _target_: mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing.HeartbeatPreprocessing
-  frequency: 63
+  frequency: 125
