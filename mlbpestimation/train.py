@@ -1,14 +1,16 @@
-import argparse
+from dotenv import load_dotenv
+from hydra import main
+from hydra.utils import instantiate
 
-from mlbpestimation.hypothesis import hypotheses_repository
+from mlbpestimation.configuration.train.trainconfiguration import TrainConfiguration
+
+load_dotenv()
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('hypothesis', choices=hypotheses_repository.keys(), nargs=1)
-    args = parser.parse_args()
-    h = hypotheses_repository[args.hypothesis[0]]
-    h.train()
+@main('configuration/train', 'train', None)
+def main(configuration: TrainConfiguration):
+    hypothesis = instantiate(configuration.hypothesis)
+    hypothesis.train()
 
 
 if __name__ == '__main__':

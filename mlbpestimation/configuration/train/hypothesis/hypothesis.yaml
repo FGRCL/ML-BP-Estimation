@@ -1,0 +1,8 @@
+defaults:
+  - model: baseline
+  - dataset_loader: mimic_window_saved
+
+_target_: mlbpestimation.hypothesis.Hypothesis
+wandb_configuration: ${wandb}
+output_directory: ${directories.output}
+
