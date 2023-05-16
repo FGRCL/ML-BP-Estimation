@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import wandb
+from keras.callbacks import EarlyStopping
 from tensorflow.python.data import AUTOTUNE
 from tensorflow.python.keras.losses import MeanSquaredError
 from tensorflow.python.keras.metrics import MeanAbsoluteError
@@ -50,7 +51,7 @@ class Hypothesis:
 
         self.model.fit(train,
                        epochs=100,
-                       callbacks=[*self._get_wandb_callbacks()],
+                       callbacks=[*self._get_wandb_callbacks(), EarlyStopping(patience=5)],
                        validation_data=validation)
 
     @staticmethod
@@ -66,7 +67,7 @@ class Hypothesis:
 
 
 hypotheses_repository = {
-    'baseline_window_mimic': Hypothesis(PreprocessedLoader(MimicDatasetLoader(), WindowPreprocessing(63)),
+    'baseline_window_mimic': Hypothesis(PreprocessedLoader(MimicDatasetLoader(0.03), WindowPreprocessing(63)),
                                         Baseline(63)),
     'baseline_window_vitaldb': Hypothesis(PreprocessedLoader(VitalDatasetLoader(), WindowPreprocessing(500)),
                                           Baseline(500)),
