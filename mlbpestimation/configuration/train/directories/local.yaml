@@ -1,0 +1,7 @@
+defaults:
+  - base_directories_configuration
+  - _self_
+
+
+data: /Users/francois/git/ML-BP-Estimation/data
+output: /Users/francois/git/ML-BP-Estimation/out
