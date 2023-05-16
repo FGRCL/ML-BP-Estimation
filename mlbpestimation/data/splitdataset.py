@@ -2,8 +2,6 @@ from pathlib import Path
 
 from tensorflow.python.data import Dataset
 
-from mlbpestimation.conf import configuration
-
 
 class SplitDataset:
     def __init__(self, train: Dataset, validation: Dataset, test: Dataset):
@@ -14,8 +12,7 @@ class SplitDataset:
     def __iter__(self):
         return iter([self.train, self.validation, self.test])
 
-    def save(self, database_name: Path):
-        database_path = Path(configuration.directories.data) / database_name
-        self.train.save(str(database_path / 'train'))
-        self.validation.save(str(database_path / 'validation'))
-        self.test.save(str(database_path / 'test'))
+    def save(self, database_directory: Path):
+        self.train.save(str(database_directory / 'train'))
+        self.validation.save(str(database_directory / 'validation'))
+        self.test.save(str(database_directory / 'test'))

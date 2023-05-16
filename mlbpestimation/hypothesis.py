@@ -8,21 +8,23 @@ from tensorflow.python.keras.optimizer_v2.adam import Adam
 from wandb import Settings, init
 from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
-from mlbpestimation.conf import configuration
+from mlbpestimation.configuration.wandb.wandbconfiguration import WandbConfiguration
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
 
 
 class Hypothesis:
-    def __init__(self, dataset_loader: DatasetLoader, model: Model):
+    def __init__(self, dataset_loader: DatasetLoader, model: Model, wandb_configuration: WandbConfiguration, output_directory: str):
         self.dataset_loader = dataset_loader
         self.model = model
+        self.wandb_configuration = wandb_configuration
+        self.output_directory = str(output_directory)
 
     def train(self):
-        init(project=configuration.wandb.project_name,
-             entity=configuration.wandb.entity,
-             mode=configuration.wandb.mode,
-             settings=Settings(start_method='fork'))
+        init(project=self.wandb_configuration.project_name,
+             entity=self.wandb_configuration.entity,
+             mode=self.wandb_configuration.mode,
+             settings=Settings(start_method='fork'))  # TODO: check that this is still needed
 
         datasets = self.dataset_loader.load_datasets()
         train = datasets.train \
@@ -43,13 +45,12 @@ class Hypothesis:
                        callbacks=[*self._get_wandb_callbacks()],
                        validation_data=validation)
 
-    @staticmethod
-    def _get_wandb_callbacks():
+    def _get_wandb_callbacks(self):
         return [
             WandbMetricsLogger(
                 log_freq="batch"
             ),
             WandbModelCheckpoint(
-                filepath=Path(configuration.directories.output) / wandb.run.name
+                filepath=Path(self.output_directory) / wandb.run.name
             )
         ]

@@ -9,16 +9,15 @@ from tensorflow import TensorSpec, constant, float32, reshape
 from tensorflow.python.data import Dataset
 from wfdb import rdrecord
 
-from mlbpestimation.conf import configuration
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.data.splitdataset import SplitDataset
 
 
 class MimicDatasetLoader(DatasetLoader):
-    def __init__(self, subsample: float = 1.0):
+    def __init__(self, mimic_wave_files_directory: str, random_seed: int, subsample: float = 1.0):
+        self.mimic_wave_files_directory = Path(mimic_wave_files_directory)
+        self.random_seed = random_seed
         self.subsample = subsample
-        self.files_directory = Path(
-            configuration.directories.data) / 'mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves'
 
     def load_datasets(self) -> SplitDataset:
         record_paths = self._get_paths()
@@ -52,11 +51,11 @@ class MimicDatasetLoader(DatasetLoader):
 
     def _get_paths(self):
         return [splitext(path)[0] for path in
-                Path(self.files_directory).rglob('*hea') if
+                Path(self.mimic_wave_files_directory).rglob('*hea') if
                 match(r'(\d)*.hea', path.name)]
 
     def _suffle_items(self, record_paths):
-        seed(configuration.random_seed)
+        seed(self.random_seed)
         shuffle(record_paths)
         return record_paths
 

@@ -1,2 +1,2 @@
 _target_: mlbpestimation.data.preprocessed.saveddatasetloader.SavedDatasetLoader
-database_name: mimic-window
+dataset_directory: ${directories.data}/mimic-window
