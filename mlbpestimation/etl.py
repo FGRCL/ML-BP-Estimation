@@ -1,8 +1,11 @@
+from dotenv import load_dotenv
 from hydra import main
 from hydra.utils import instantiate
 
 from mlbpestimation.configuration.etl.etlconfiguration import EtlConfiguration
 from mlbpestimation.data.datasetloader import DatasetLoader
+
+load_dotenv()
 
 
 @main('configuration/etl', 'etl', None)
