@@ -1,4 +1,6 @@
 #!/bin/bash
+sbatch <<EOT
+#!/bin/bash
 #SBATCH --account def-bentahar
 #SBATCH --gres=gpu:2       # Request GPU "generic resources"
 #SBATCH --cpus-per-task=2  # Refer to cluster's documentation for the right CPU/GPU ratio
@@ -13,4 +15,5 @@ pip install -r requirements.txt
 
 cp -r /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data/. "$SLURM_TMPDIR"
 
-python -m mlbpestimation.train directories=cc wandb=online hypothesis/model=baseline hypothesis/dataset_loader=mimic_window_saved
+python -m mlbpestimation.train directories=cc wandb=online "$a"
+EOT

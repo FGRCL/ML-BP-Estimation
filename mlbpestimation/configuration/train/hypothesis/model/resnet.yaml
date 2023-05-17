@@ -1,1 +1,11 @@
 _target_: mlbpestimation.models.resnet.ResNet
+n_residual_blocks:
+  - 10
+  - 15
+  - 20
+  - 10
+n_filters:
+  - 16
+  - 32
+  - 64
+  - 128
