@@ -3,12 +3,12 @@ from pathlib import Path
 import wandb
 from omegaconf import DictConfig
 from tensorflow.python.data import AUTOTUNE
-from tensorflow.python.keras.metrics import MeanAbsoluteError
+from tensorflow.python.keras.metrics import MeanAbsoluteError, MeanSquaredError
 from tensorflow.python.keras.models import Model
 from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
 from mlbpestimation.data.datasetloader import DatasetLoader
-from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
+from mlbpestimation.metrics.maskedmetric import MaskedMetric
 
 
 class Hypothesis:
@@ -18,8 +18,20 @@ class Hypothesis:
         self.optimization = optimization
         self.output_directory = str(output_directory)
         self.metrics = [
-            MeanAbsoluteError(),
-            StandardDeviation(AbsoluteError())
+            [
+                MaskedMetric(MeanAbsoluteError(), [True, False], name='SBP Mean Absolute Error'),
+                # StandardDeviation(AbsoluteError(), name='SBP Absolute Error standard Deviation'),
+                MaskedMetric(MeanSquaredError(), [True, False], name='SBP Mean Squared Error'),
+                # MeanPrediction(name='SBP Prediction Mean'),
+                # StandardDeviation(Prediction(), name='SBP Prediction Standard Deviation')
+            ],
+            [
+                MaskedMetric(MeanAbsoluteError(), [False, True], name='DBP Mean Absolute Error'),
+                # StandardDeviation(AbsoluteError(), name='DBP Absolute Error standard Deviation'),
+                MaskedMetric(MeanSquaredError(), [False, True], name='DBP Mean Squared Error'),
+                # MeanPrediction(name='DBP Prediction Mean'),
+                # StandardDeviation(Prediction(), name='DBP Prediction Standard Deviation')
+            ]
         ]
 
     def train(self):
