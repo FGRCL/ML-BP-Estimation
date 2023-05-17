@@ -6,27 +6,19 @@ from tensorflow.python.keras.losses import MeanSquaredError
 from tensorflow.python.keras.metrics import MeanAbsoluteError
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.optimizer_v2.adam import Adam
-from wandb import Settings, init
 from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
-from mlbpestimation.configuration.train.wandb.wandbconfiguration import WandbConfiguration
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.metrics.standardeviation import AbsoluteError, StandardDeviation
 
 
 class Hypothesis:
-    def __init__(self, dataset_loader: DatasetLoader, model: Model, wandb_configuration: WandbConfiguration, output_directory: str):
+    def __init__(self, dataset_loader: DatasetLoader, model: Model, output_directory: str):
         self.dataset_loader = dataset_loader
         self.model = model
-        self.wandb_configuration = wandb_configuration
         self.output_directory = str(output_directory)
 
     def train(self):
-        init(project=self.wandb_configuration.project_name,
-             entity=self.wandb_configuration.entity,
-             mode=self.wandb_configuration.mode,
-             settings=Settings(start_method='fork'))  # TODO: check that this is still needed
-
         datasets = self.dataset_loader.load_datasets()
         train = datasets.train \
             .batch(20, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
