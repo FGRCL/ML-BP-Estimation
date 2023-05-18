@@ -9,6 +9,8 @@ from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.metrics.maskedmetric import MaskedMetric
+from mlbpestimation.metrics.meanprediction import MeanPrediction
+from mlbpestimation.metrics.standardeviation import StandardDeviationAbsoluteError, StandardDeviationPrediction
 
 
 class Hypothesis:
@@ -17,26 +19,10 @@ class Hypothesis:
         self.model = model
         self.optimization = optimization
         self.output_directory = str(output_directory)
-        self.metrics = [
-            [
-                MaskedMetric(MeanAbsoluteError(), [True, False], name='SBP Mean Absolute Error'),
-                # StandardDeviation(AbsoluteError(), name='SBP Absolute Error standard Deviation'),
-                MaskedMetric(MeanSquaredError(), [True, False], name='SBP Mean Squared Error'),
-                # MeanPrediction(name='SBP Prediction Mean'),
-                # StandardDeviation(Prediction(), name='SBP Prediction Standard Deviation')
-            ],
-            [
-                MaskedMetric(MeanAbsoluteError(), [False, True], name='DBP Mean Absolute Error'),
-                # StandardDeviation(AbsoluteError(), name='DBP Absolute Error standard Deviation'),
-                MaskedMetric(MeanSquaredError(), [False, True], name='DBP Mean Squared Error'),
-                # MeanPrediction(name='DBP Prediction Mean'),
-                # StandardDeviation(Prediction(), name='DBP Prediction Standard Deviation')
-            ]
-        ]
 
     def train(self):
         train, validation = self.setup_train_val()
-        self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self.metrics)
+        self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=[*self._get_wandb_callbacks()], validation_data=validation)
 
     def setup_train_val(self):
@@ -57,3 +43,19 @@ class Hypothesis:
                 filepath=Path(self.output_directory) / wandb.run.name
             )
         ]
+
+    def _build_metrics(self):
+        metric_masks = [
+            ([True, False], 'SBP'),
+            ([False, True], 'DBP')
+        ]
+        metrics = []
+        for mask, name in metric_masks:
+            metrics += [
+                MaskedMetric(MeanAbsoluteError(), mask, name=f'{name} Mean Absolute Error'),
+                MaskedMetric(StandardDeviationAbsoluteError(), mask, name=f'{name} Absolute Error standard Deviation'),
+                MaskedMetric(MeanSquaredError(), mask, name=f'{name} Mean Squared Error'),
+                MaskedMetric(MeanPrediction(), mask, name=f'{name} Prediction Mean'),
+                MaskedMetric(StandardDeviationPrediction(), mask, name=f'{name} Prediction Standard Deviation'),
+            ]
+        return metrics
