@@ -10,13 +10,12 @@ load_dotenv()
 
 @main('configuration/train', 'train', None)
 def main(configuration: TrainConfiguration):
+    hypothesis = instantiate(configuration.hypothesis)
     init(project=configuration.wandb.project_name,
          entity=configuration.wandb.entity,
          mode=configuration.wandb.mode,
          config=configuration,
          settings=Settings(start_method='fork'))  # TODO: check that this is still needed
-
-    hypothesis = instantiate(configuration.hypothesis)
     hypothesis.train()
 
 
