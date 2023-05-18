@@ -1,4 +1,4 @@
-_target_: mlbpestimation.model.mlp.MLP
+_target_: mlbpestimation.models.mlp.MLP
 neurons:
   - 500
   - 100
