@@ -3,5 +3,5 @@ defaults:
   - _self_
 
 
-data: ${oc.env:SLURM_TMPDIR}
-output: /Users/francois/git/ML-BP-Estimation/out
+data: /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/data
+output: /home/fgrcl/projects/def-bentahar/fgrcl/ML-BP-Estimation/out
