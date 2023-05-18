@@ -2,6 +2,7 @@ from pathlib import Path
 
 import wandb
 from keras.callbacks import EarlyStopping
+from omegaconf import DictConfig
 from tensorflow.python.data import AUTOTUNE
 from tensorflow.python.keras.metrics import MeanAbsoluteError, MeanSquaredError
 from tensorflow.python.keras.models import Model
@@ -19,11 +20,15 @@ class Hypothesis:
         self.model = model
         self.optimization = optimization
         self.output_directory = str(output_directory)
+        self.callbacks = [
+            *self._get_wandb_callbacks(),
+            EarlyStopping(patience=5)
+        ]
 
     def train(self):
         train, validation = self.setup_train_val()
         self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
-        self.model.fit(train, epochs=self.optimization.epoch, callbacks=[*self._get_wandb_callbacks(), EarlyStopping(patience=5)], validation_data=validation)
+        self.model.fit(train, epochs=self.optimization.epoch, callbacks=self.callbacks, validation_data=validation)
 
     def setup_train_val(self):
         datasets = self.dataset_loader.load_datasets()
