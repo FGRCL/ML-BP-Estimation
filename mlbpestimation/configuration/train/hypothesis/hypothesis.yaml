@@ -1,0 +1,8 @@
+defaults:
+  - model: baseline
+  - dataset_loader: mimic_window_saved
+  - optimization: adam
+
+_target_: mlbpestimation.hypothesis.Hypothesis
+output_directory: ${directories.output}
+

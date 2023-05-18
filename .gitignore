@@ -81,3 +81,5 @@ slurm-*
 /logs
 /logdir
 /out
+/outputs
+/multirun

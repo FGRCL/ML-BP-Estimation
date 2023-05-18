@@ -1,3 +1,5 @@
+from typing import List
+
 import tensorflow
 from tensorflow.python.keras import Model, Sequential
 from tensorflow.python.keras.layers import Add, Conv1D, Dense, Dropout, Flatten, ReLU
@@ -5,11 +7,9 @@ from tensorflow.python.keras.regularizers import L2
 
 
 class ResNet(Model):
-    def __init__(self):
+    def __init__(self, n_residual_blocks: List[int], n_filters: List[int]):
         super().__init__()
-        n_residual_blocks = [10, 15, 10]
-        n_filters = [16, 32, 64]
-
+        
         self.octaves = Sequential()
         for n_residual_block, n_filter in zip(n_residual_blocks, n_filters):
             self.octaves.add(ResidualOctave(n_filter, n_residual_block))

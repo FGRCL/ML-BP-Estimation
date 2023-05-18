@@ -3,7 +3,6 @@ from numpy.random import choice, seed, shuffle
 from tensorflow import TensorSpec, float32
 from tensorflow.python.data import Dataset
 
-from mlbpestimation.configuration import configuration
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.data.splitdataset import SplitDataset
 from mlbpestimation.data.vitaldb.casegenerator import MAX_VITAL_DB_CASE, MIN_VITAL_DB_CASE, VitalDBGenerator, \
@@ -12,7 +11,8 @@ from mlbpestimation.data.vitaldb.fetchingstrategy.DatasetApi import DatasetApi
 
 
 class VitalDatasetLoader(DatasetLoader):
-    def __init__(self, subsample: float = 1.0):
+    def __init__(self, random_seed: int, subsample: float = 1.0):
+        self.random_seed = random_seed
         self.subsample = subsample
 
     def load_datasets(self) -> SplitDataset:
@@ -40,7 +40,7 @@ class VitalDatasetLoader(DatasetLoader):
 
     def _get_random_case_id_list(self):
         case_ids = arange(MIN_VITAL_DB_CASE, MAX_VITAL_DB_CASE + 1)
-        seed(configuration['random_seed'])
+        seed(self.random_seed)
         shuffle(case_ids)
         return case_ids
 

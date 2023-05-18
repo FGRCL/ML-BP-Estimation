@@ -14,7 +14,7 @@ class DatasetOperation(ABC):
 
 class TransformOperation(DatasetOperation):
     def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.map(self.transform, num_parallel_calls=AUTOTUNE, deterministic=False)
+        return dataset.map(self.transform, num_parallel_calls=AUTOTUNE, deterministic=False, name=self.__class__.__name__)
 
     @abstractmethod
     def transform(self, *args) -> Any:
@@ -23,7 +23,7 @@ class TransformOperation(DatasetOperation):
 
 class FilterOperation(DatasetOperation):
     def apply(self, dataset) -> Dataset:
-        return dataset.filter(self.filter)
+        return dataset.filter(self.filter, name=self.__class__.__name__)
 
     @abstractmethod
     def filter(self, *args) -> bool:
@@ -36,13 +36,13 @@ class NumpyTransformOperation(DatasetOperation):
         self.stateful = stateful
 
     def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.map(self.adapted_function, num_parallel_calls=AUTOTUNE, deterministic=False)
+        return dataset.map(self.adapted_function, num_parallel_calls=AUTOTUNE, deterministic=False, name=self.__class__.__name__)
 
     def adapted_function(self, x: Tensor, y: Tensor = None):
         if y is None:
-            return numpy_function(self.transform, [x], self.out_type, self.stateful)
+            return numpy_function(self.transform, [x], self.out_type, self.stateful, name=self.__class__.__name__)
         else:
-            return numpy_function(self.transform, [x, y], self.out_type, self.stateful)
+            return numpy_function(self.transform, [x, y], self.out_type, self.stateful, name=self.__class__.__name__)
 
     @abstractmethod
     def transform(self, *args) -> Any:
@@ -54,13 +54,13 @@ class PythonFunctionTransformOperation(DatasetOperation):
         self.out_type = out_type
 
     def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.map(self.adapted_function, num_parallel_calls=AUTOTUNE, deterministic=False)
+        return dataset.map(self.adapted_function, num_parallel_calls=AUTOTUNE, deterministic=False, name=self.__class__.__name__)
 
     def adapted_function(self, x: Tensor, y: Tensor = None):
         if y is None:
-            return py_function(self.transform, [x], self.out_type)
+            return py_function(self.transform, [x], self.out_type, name=self.__class__.__name__)
         else:
-            return py_function(self.transform, [x, y], self.out_type)
+            return py_function(self.transform, [x, y], self.out_type, name=self.__class__.__name__)
 
     @abstractmethod
     def transform(self, *args) -> Any:
@@ -69,13 +69,13 @@ class PythonFunctionTransformOperation(DatasetOperation):
 
 class NumpyFilterOperation(DatasetOperation):
     def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.filter(self.adapted_function)
+        return dataset.filter(self.adapted_function, name=self.__class__.__name__)
 
     def adapted_function(self, x: Tensor, y: Tensor = None):
         if y is None:
-            return numpy_function(self.filter, [x], bool)
+            return numpy_function(self.filter, [x], bool, name=self.__class__.__name__)
         else:
-            return numpy_function(self.filter, [x, y], bool)
+            return numpy_function(self.filter, [x, y], bool, name=self.__class__.__name__)
 
     @abstractmethod
     def filter(self, *args) -> Any:
@@ -84,7 +84,7 @@ class NumpyFilterOperation(DatasetOperation):
 
 class Batch(DatasetOperation):
     def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.batch(self.get_batch_size(), num_parallel_calls=AUTOTUNE, deterministic=False)
+        return dataset.batch(self.get_batch_size(), num_parallel_calls=AUTOTUNE, deterministic=False, name=self.__class__.__name__)
 
     @abstractmethod
     def get_batch_size(self):
@@ -93,7 +93,7 @@ class Batch(DatasetOperation):
 
 class FlatMap(DatasetOperation):
     def apply(self, dataset: Dataset) -> Dataset:
-        return dataset.flat_map(self.flatten)
+        return dataset.flat_map(self.flatten, name=self.__class__.__name__)
 
     @abstractmethod
     def flatten(self, *args) -> Tuple[Dataset, ...]:

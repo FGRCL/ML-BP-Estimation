@@ -5,15 +5,15 @@ from numpy.random import seed, shuffle
 from tensorflow.python.data import Dataset
 from tensorflow.python.ops.ragged.ragged_factory_ops import constant
 
-from mlbpestimation.configuration import configuration
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.data.splitdataset import SplitDataset
 
 
 class UciDatasetLoader(DatasetLoader):
-    def __init__(self, subsample: float = 1.0):
+    def __init__(self, uci_files_directory: str, random_seed: int, subsample: float = 1.0):
         self.subsample = subsample
-        self.files_directory = Path(configuration['data.directory']) / 'uci'
+        self.random_seed = random_seed
+        self.uci_files_directory = Path(uci_files_directory)
 
     def load_datasets(self) -> SplitDataset:
         signals = self._get_abp_list()
@@ -30,7 +30,7 @@ class UciDatasetLoader(DatasetLoader):
 
     def _get_abp_list(self):
         signals = []
-        for file in self.files_directory.glob('*.mat'):
+        for file in self.uci_files_directory.glob('*.mat'):
             mat = loadmat(file)
             for key in mat:
                 for record in mat[key]:
@@ -41,7 +41,7 @@ class UciDatasetLoader(DatasetLoader):
 
     # TODO: duplicate code
     def _shuffle_items(self, record_paths):
-        seed(configuration['random_seed'])
+        seed(self.random_seed)
         shuffle(record_paths)
         return record_paths
 

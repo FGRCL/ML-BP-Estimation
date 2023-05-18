@@ -1,18 +1,16 @@
 from typing import Any, Tuple, Union
 
-from numpy import asarray, float32 as float32, ndarray
-from scipy.stats import skew
-from tensorflow import DType, Tensor, bool
+from numpy import float32 as float32
+from tensorflow import Tensor, bool
 from tensorflow.python.data import Dataset
 from tensorflow.python.ops.array_ops import size
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, \
-    FlatMap, NumpyTransformOperation, \
-    TransformOperation
-from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, RemoveLowpassTrack, \
+    FlatMap, TransformOperation
+from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, FilterSqi, HasData
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, ComputeSqi, RemoveLowpassTrack, \
     RemoveNan, \
-    SetTensorShape, SignalFilter, StandardizeArray
+    RemoveSqi, SetTensorShape, SignalFilter, StandardizeArray
 
 
 class WindowPreprocessing(DatasetPreprocessingPipeline):
@@ -77,26 +75,3 @@ class BatchWindows(TransformOperation):
 class FlattenWindows(FlatMap):
     def flatten(self, lowpass_windows: Dataset, bandpass_windows: Dataset) -> Union[Dataset, Tuple[Dataset, ...]]:
         return Dataset.zip((lowpass_windows, bandpass_windows))
-
-
-class ComputeSqi(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType, ...]]):
-        super().__init__(out_type)
-
-    def transform(self, window_lowpass: ndarray, window_bandpass: ndarray) -> Any:
-        sqi = skew(window_bandpass)
-        return window_lowpass, window_bandpass, asarray(sqi, dtype=float32)
-
-
-class FilterSqi(FilterOperation):
-    def __init__(self, low_threshold, high_threshold):
-        self.low_threshold = low_threshold
-        self.high_threshold = high_threshold
-
-    def filter(self, lowpass_window: ndarray, bandpass_window: ndarray, sqi: ndarray) -> bool:
-        return self.low_threshold < sqi < self.high_threshold
-
-
-class RemoveSqi(TransformOperation):
-    def transform(self, lowpass_window: ndarray, bandpass_window: ndarray, sqi: ndarray) -> Any:
-        return lowpass_window, bandpass_window

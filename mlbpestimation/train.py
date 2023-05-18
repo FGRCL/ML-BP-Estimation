@@ -1,14 +1,23 @@
-import argparse
+from dotenv import load_dotenv
+from hydra import main
+from hydra.utils import instantiate
+from omegaconf import OmegaConf
+from wandb import Settings, init
 
-from mlbpestimation.hypothesis import hypotheses_repository
+from mlbpestimation.configuration.train.trainconfiguration import TrainConfiguration
+
+load_dotenv()
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('hypothesis', choices=hypotheses_repository.keys(), nargs=1)
-    args = parser.parse_args()
-    h = hypotheses_repository[args.hypothesis[0]]
-    h.train()
+@main('configuration/train', 'train', None)
+def main(configuration: TrainConfiguration):
+    hypothesis = instantiate(configuration.hypothesis)
+    init(project=configuration.wandb.project_name,
+         entity=configuration.wandb.entity,
+         mode=configuration.wandb.mode,
+         config=OmegaConf.to_container(configuration, resolve=True),
+         settings=Settings(start_method='fork'))  # TODO: check that this is still needed
+    hypothesis.train()
 
 
 if __name__ == '__main__':

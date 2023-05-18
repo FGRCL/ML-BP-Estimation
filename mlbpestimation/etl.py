@@ -1,13 +1,18 @@
-from pathlib import Path
+from dotenv import load_dotenv
+from hydra import main
+from hydra.utils import instantiate
 
-from mlbpestimation.data.preprocessedloader import PreprocessedLoader
-from mlbpestimation.data.uci.ucidatasetloader import UciDatasetLoader
-from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
+from mlbpestimation.configuration.etl.etlconfiguration import EtlConfiguration
+from mlbpestimation.data.datasetloader import DatasetLoader
+
+load_dotenv()
 
 
-def main():
-    datasets = PreprocessedLoader(UciDatasetLoader(), WindowPreprocessing(125)).load_datasets()
-    datasets.save(Path('uci-window'))
+@main('configuration/etl', 'etl', None)
+def main(configuration: EtlConfiguration):
+    dataset_loader: DatasetLoader = instantiate(configuration.save_dataset.dataset)
+    datasets = dataset_loader.load_datasets()
+    datasets.save(configuration.save_dataset.save_directory)
 
 
 if __name__ == '__main__':
