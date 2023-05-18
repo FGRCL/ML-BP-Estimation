@@ -12,6 +12,7 @@ source venv/bin/activate
 pip install --no-index --upgrade pip
 pip install -r requirements.txt
 
-HYDRA_FULL_ERROR=1
+export HYDRA_FULL_ERROR=1
+echo "$a"
 python -m mlbpestimation.train directories=cc wandb=dev "$a"
 EOT
