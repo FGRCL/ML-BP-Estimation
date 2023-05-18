@@ -13,6 +13,6 @@ pip install --no-index --upgrade pip
 pip install -r requirements.txt
 
 export HYDRA_FULL_ERROR=1
-echo "$a"
+echo "$1"
 python -m mlbpestimation.train directories=cc wandb=dev "$a"
 EOT
