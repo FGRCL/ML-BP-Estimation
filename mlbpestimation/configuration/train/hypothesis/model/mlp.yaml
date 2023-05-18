@@ -1,0 +1,7 @@
+_target_: mlbpestimation.model.mlp.MLP
+neurons:
+  - 500
+  - 100
+  - 100
+  - 20
+  - 2
