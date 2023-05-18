@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import wandb
+from keras.callbacks import EarlyStopping
 from omegaconf import DictConfig
 from tensorflow.python.data import AUTOTUNE
 from tensorflow.python.keras.metrics import MeanAbsoluteError, MeanSquaredError
@@ -23,7 +24,7 @@ class Hypothesis:
     def train(self):
         train, validation = self.setup_train_val()
         self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
-        self.model.fit(train, epochs=self.optimization.epoch, callbacks=[*self._get_wandb_callbacks()], validation_data=validation)
+        self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_data=validation)
 
     def setup_train_val(self):
         datasets = self.dataset_loader.load_datasets()
@@ -33,6 +34,12 @@ class Hypothesis:
         validation = datasets.validation \
             .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE)
         return train, validation
+
+    def _build_callbacks(self):
+        return [
+            *self._get_wandb_callbacks(),
+            EarlyStopping(patience=5)
+        ]
 
     def _get_wandb_callbacks(self):
         return [
@@ -59,3 +66,4 @@ class Hypothesis:
                 MaskedMetric(StandardDeviationPrediction(), mask, name=f'{name} Prediction Standard Deviation'),
             ]
         return metrics
+
