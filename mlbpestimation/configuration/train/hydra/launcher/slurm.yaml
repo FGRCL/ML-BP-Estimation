@@ -1,0 +1,14 @@
+defaults:
+  - submitit_slurm
+  - override hydra/job: slurm
+
+timeout_min: 14400
+cpus_per_task: 2
+mem_gb: 32
+gres: null
+account: def-bentahar
+setup:
+  - module load python/3.8 cuda cudnn
+  - source venv/bin/activate
+  - pip install --no-index --upgrade pip
+  - pip install -r requirements.txt

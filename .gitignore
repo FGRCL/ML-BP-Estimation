@@ -76,7 +76,7 @@ environments/local/variables.env
 /models
 /data
 /wandb
-slurm-*
+slurm-*.out
 /notebooks
 /logs
 /logdir

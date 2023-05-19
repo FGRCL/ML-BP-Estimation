@@ -1,0 +1,3 @@
+env_set:
+  HYDRA_FULL_ERROR: 1
+  WANDB__SERVICE_WAIT: 300
