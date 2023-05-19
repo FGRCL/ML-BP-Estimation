@@ -13,6 +13,7 @@ class TrainConfiguration:
     wandb: WandbConfiguration
     directories: DirectoriesConfiguration
     random_seed: int
+    job_id: int
 
 
 ConfigStore.instance().store(name='base_train_configuration', node=TrainConfiguration)
