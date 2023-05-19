@@ -33,6 +33,9 @@ class Hypothesis:
             .prefetch(AUTOTUNE)
         validation = datasets.validation \
             .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE)
+        if self.optimization.n_batches is not None:
+            train = train.take(self.optimization.n_batches)
+            validation = validation.take(int(self.optimization.n_batches * 0.15))
         return train, validation
 
     def _build_callbacks(self):
@@ -66,4 +69,3 @@ class Hypothesis:
                 MaskedMetric(StandardDeviationPrediction(), mask, name=f'{name} Prediction Standard Deviation'),
             ]
         return metrics
-
