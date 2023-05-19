@@ -1,0 +1,20 @@
+defaults:
+  - base_save_dataset_configuration
+  - _self_
+
+dataset:
+  _target_: mlbpestimation.data.shufflesplitdatasetloader import ShuffleSplitDatasetLoader
+  dataset_loader:
+    _target_: mlbpestimation.data.preprocessedloader.PreprocessedLoader
+    dataset_loader:
+      _target_: mlbpestimation.data.uci.ucidatasetloader.UciDatasetLoader
+      uci_files_directory: ${data_directory}/uci
+      random_seed: ${random_seed}
+    preprocessing:
+      _target_: mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing.HeartbeatPreprocessing
+      frequency: 125
+  train_size: 0.7
+  validation_size: 0.15
+  test_size: 0.15
+  random_seed: ${random_seed}
+save_directory: ${data_directory}/uci-heartbeat-shuffle
