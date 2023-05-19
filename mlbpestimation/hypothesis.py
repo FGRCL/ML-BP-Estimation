@@ -15,9 +15,7 @@ from mlbpestimation.metrics.standardeviation import StandardDeviationAbsoluteErr
 
 
 class Hypothesis:
-    def __init__(self, dataset_loader: DatasetLoader, model: Model, output_directory: str, optimization: DictConfig, validation_split: float, n_batches: int):
-        self.n_batches = n_batches
-        self.validation_split = validation_split
+    def __init__(self, dataset_loader: DatasetLoader, model: Model, output_directory: str, optimization: DictConfig):
         self.dataset_loader = dataset_loader
         self.model = model
         self.optimization = optimization
@@ -26,20 +24,18 @@ class Hypothesis:
     def train(self):
         train, validation = self.setup_train_val()
         self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
-        if self.validation_split is None:
-            self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_data=validation)
-        else:
-            self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_split=self.validation_split)
+        self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_data=validation)
 
     def setup_train_val(self):
         datasets = self.dataset_loader.load_datasets()
         train = datasets.train \
             .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
             .prefetch(AUTOTUNE)
-        if self.n_batches is not None:
-            train = train.take(self.n_batches)
         validation = datasets.validation \
             .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE)
+        if self.optimization.n_batches is not None:
+            train = train.take(self.optimization.n_batches)
+            validation = validation.take(int(self.optimization.n_batches * 0.15))
         return train, validation
 
     def _build_callbacks(self):

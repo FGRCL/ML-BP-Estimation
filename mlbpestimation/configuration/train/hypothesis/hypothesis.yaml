@@ -5,6 +5,3 @@ defaults:
 
 _target_: mlbpestimation.hypothesis.Hypothesis
 output_directory: ${directories.output}
-validation_split: 0.15
-n_batches: 1000
-
