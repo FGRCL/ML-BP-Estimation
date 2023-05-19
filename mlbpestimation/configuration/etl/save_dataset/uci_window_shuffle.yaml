@@ -3,7 +3,7 @@ defaults:
   - _self_
 
 dataset:
-  _target_: mlbpestimation.data.shufflesplitdatasetloader import ShuffleSplitDatasetLoader
+  _target_: mlbpestimation.data.shufflesplitdatasetloader.ShuffleSplitDatasetLoader
   dataset_loader:
     _target_: mlbpestimation.data.preprocessedloader.PreprocessedLoader
     dataset_loader:
