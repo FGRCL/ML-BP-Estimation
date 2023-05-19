@@ -5,3 +5,5 @@ loss:
   _target_: tensorflow.python.keras.losses.MeanSquaredError
 batch_size: 20
 epoch: 100
+validation_split: None
+n_batches: None
