@@ -6,4 +6,4 @@ defaults:
   - _self_
 
 random_seed: 106
-job_id: ${oc.env:SLURM_JOB_ID}
+job_id: ${oc.env:SLURM_JOB_ID,0}
