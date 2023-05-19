@@ -3,7 +3,5 @@ optimizer:
   learning_rate: 1e-6
 loss:
   _target_: tensorflow.python.keras.losses.MeanSquaredError
-batch_size: 20
-epoch: 100
-validation_split: None
-n_batches: None
+batch_size: 256
+epoch: 20
