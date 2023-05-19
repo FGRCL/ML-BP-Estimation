@@ -17,3 +17,4 @@ memory-profiler
 mat73
 hydra-core
 python-dotenv
+hydra-submitit-launcher
