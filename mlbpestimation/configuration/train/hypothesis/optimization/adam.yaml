@@ -4,4 +4,5 @@ optimizer:
 loss:
   _target_: tensorflow.python.keras.losses.MeanSquaredError
 batch_size: 20
-epoch: 100
+epoch: 20
+n_batches: null

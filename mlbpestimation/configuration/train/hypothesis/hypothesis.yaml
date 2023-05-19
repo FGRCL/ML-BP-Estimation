@@ -5,4 +5,3 @@ defaults:
 
 _target_: mlbpestimation.hypothesis.Hypothesis
 output_directory: ${directories.output}
-
