@@ -1,6 +1,6 @@
 defaults:
   - submitit_slurm
-  - override hydra/job: slurm
+  - override /hydra/job: slurm
 
 timeout_min: 10
 cpus_per_task: 2
