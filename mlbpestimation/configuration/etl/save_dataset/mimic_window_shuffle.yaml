@@ -1,0 +1,20 @@
+defaults:
+  - base_save_dataset_configuration
+  - _self_
+
+dataset:
+  _target_: mlbpestimation.data.shufflesplitdatasetloader.ShuffleSplitDatasetLoader
+  dataset_loader:
+    _target_: mlbpestimation.data.preprocessedloader.PreprocessedLoader
+    dataset_loader:
+      _target_: mlbpestimation.data.mimic4.mimicdatasetloader.MimicDatasetLoader
+      mimic_wave_files_directory: ${data_directory}/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves
+      random_seed: ${random_seed}
+    preprocessing:
+      _target_: mlbpestimation.preprocessing.pipelines.windowpreprocessing.WindowPreprocessing
+      frequency: 63
+  train_size: 0.7
+  validation_size: 0.15
+  test_size: 0.15
+  random_seed: ${random_seed}
+save_directory: ${data_directory}/mimic-window-shuffle
