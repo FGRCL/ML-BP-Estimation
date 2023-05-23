@@ -5,17 +5,17 @@ from keras.callbacks import EarlyStopping
 from omegaconf import DictConfig
 from tensorflow.python.data import AUTOTUNE
 from tensorflow.python.keras.metrics import MeanAbsoluteError, MeanSquaredError
-from tensorflow.python.keras.models import Model
 from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.metrics.maskedmetric import MaskedMetric
 from mlbpestimation.metrics.meanprediction import MeanPrediction
 from mlbpestimation.metrics.standardeviation import StandardDeviationAbsoluteError, StandardDeviationPrediction
+from mlbpestimation.models.basemodel import BloodPressureModel
 
 
 class Hypothesis:
-    def __init__(self, dataset_loader: DatasetLoader, model: Model, output_directory: str, optimization: DictConfig):
+    def __init__(self, dataset_loader: DatasetLoader, model: BloodPressureModel, output_directory: str, optimization: DictConfig):
         self.dataset_loader = dataset_loader
         self.model = model
         self.optimization = optimization
@@ -23,7 +23,7 @@ class Hypothesis:
 
     def train(self):
         train, validation = self.setup_train_val()
-        self.model.set_input_output_shape(train.output_shapes)
+        self.model.set_input_shape(train.element_spec)
         self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_data=validation)
 
