@@ -23,6 +23,7 @@ class Hypothesis:
 
     def train(self):
         train, validation = self.setup_train_val()
+        self.model.set_input_output_shape(train.output_shapes)
         self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_data=validation)
 
@@ -66,4 +67,3 @@ class Hypothesis:
                 MaskedMetric(StandardDeviationPrediction(), mask, name=f'{name} Prediction Standard Deviation'),
             ]
         return metrics
-
