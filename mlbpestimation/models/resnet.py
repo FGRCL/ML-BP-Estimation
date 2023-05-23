@@ -1,15 +1,18 @@
 from typing import List
 
 import tensorflow
-from tensorflow.python.keras import Model, Sequential
+from tensorflow.python.keras import Sequential
+from tensorflow.python.keras.engine.base_layer import Layer
 from tensorflow.python.keras.layers import Add, Conv1D, Dense, Dropout, Flatten, ReLU
 from tensorflow.python.keras.regularizers import L2
 
+from mlbpestimation.models.basemodel import BloodPressureModel
 
-class ResNet(Model):
+
+class ResNet(BloodPressureModel):
     def __init__(self, n_residual_blocks: List[int], n_filters: List[int]):
         super().__init__()
-        
+
         self.octaves = Sequential()
         for n_residual_block, n_filter in zip(n_residual_blocks, n_filters):
             self.octaves.add(ResidualOctave(n_filter, n_residual_block))
@@ -27,8 +30,11 @@ class ResNet(Model):
         x = self.regressor(x)
         return x
 
+    def set_input_shape(self, dataset_spec):
+        pass
 
-class ResidualOctave(Model):
+
+class ResidualOctave(Layer):
     def __init__(self, n_filter, n_block):
         super().__init__()
 
@@ -42,7 +48,7 @@ class ResidualOctave(Model):
         return self.octave(inputs)
 
 
-class ExpandResidualBlock(Model):
+class ExpandResidualBlock(Layer):
     def __init__(self, n_filter):
         super().__init__()
 
@@ -63,7 +69,7 @@ class ExpandResidualBlock(Model):
         return x
 
 
-class ResidualBlock(Model):
+class ResidualBlock(Layer):
     def __init__(self, n_filter):
         super().__init__()
 
@@ -82,7 +88,7 @@ class ResidualBlock(Model):
         return x
 
 
-class ConvBlock(Model):
+class ConvBlock(Layer):
     def __init__(self, n_filter, kernel_size, stride=1, activation=True):
         super().__init__()
 
