@@ -7,12 +7,12 @@ from mlbpestimation.models.basemodel import BloodPressureModel
 
 
 class MLP(BloodPressureModel):
-    def __init__(self, neurons, *args, **kwargs):  # TODO activations
-        super().__init__(*args, **kwargs)
+    def __init__(self, neurons, activation):
+        super().__init__()
         self.input_layer = None
         self.dense_layers = Sequential()
         for neuron_count in neurons:
-            self.dense_layers.add(Dense(neuron_count, use_bias=False))
+            self.dense_layers.add(Dense(neuron_count, activation=activation))
 
     def call(self, inputs, training=None, mask=None):
         x = reshape(inputs, [*inputs.shape[:-1]])

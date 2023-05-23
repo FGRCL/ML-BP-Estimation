@@ -5,3 +5,4 @@ neurons:
   - 100
   - 20
   - 2
+activation: relu
