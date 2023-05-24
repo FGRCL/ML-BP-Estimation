@@ -23,3 +23,6 @@ class Baseline(BloodPressureModel):
 
     def set_input_shape(self, dataset_spec):
         pass
+
+    def get_config(self):
+        return {}
