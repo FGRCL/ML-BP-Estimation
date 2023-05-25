@@ -5,10 +5,9 @@ from keras.engine.input_layer import InputLayer
 from keras.layers import Dropout
 from numpy import arange, concatenate, full, log2
 from tensorflow.python.keras.engine.base_layer import Layer
-from tensorflow.python.keras.layers import Add, Conv1D, Dense, GRU, ReLU
+from tensorflow.python.keras.layers import Add, AveragePooling1D, Conv1D, Dense, GRU, ReLU
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.regularizers import l2
-from tensorflow.python.layers.pooling import AveragePooling1D
 
 from mlbpestimation.models.basemodel import BloodPressureModel
 
@@ -79,6 +78,7 @@ class Regressor(Layer):
 class ResNetBlock(Layer):
     def __init__(self, filters: int, n_kernels: List[int], pool_size: int, pool_stride: int):
         super().__init__()
+        self._conv_blocks = Sequential()
         for kernel in n_kernels:
             self._conv_blocks.add(
                 ConvBlock(filters, kernel)
