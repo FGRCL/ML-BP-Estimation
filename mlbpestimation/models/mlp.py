@@ -1,7 +1,6 @@
-from tensorflow import reshape
-from tensorflow.python.keras import Sequential
-from tensorflow.python.keras.engine.input_layer import InputLayer
-from tensorflow.python.keras.layers import Dense
+from keras import Sequential
+from keras.engine.input_layer import InputLayer
+from keras.layers import Dense, Flatten
 
 from mlbpestimation.models.basemodel import BloodPressureModel
 
@@ -13,18 +12,18 @@ class MLP(BloodPressureModel):
         self.activation = activation
 
         self.input_layer = None
+        self.flatten = Flatten()
         self.dense_layers = Sequential()
         for neuron_count in self.neurons:
             self.dense_layers.add(Dense(neuron_count, activation=self.activation))
 
     def call(self, inputs, training=None, mask=None):
-        x = reshape(inputs, [*inputs.shape[:-1]])
-        x = self.input_layer(x)
+        x = self.input_layer(inputs)
+        x = self.flatten(x)
         return self.dense_layers(x, training, mask)
 
     def set_input_shape(self, dataset_spec):
-        input_spec = dataset_spec[0]
-        self.input_layer = InputLayer(input_spec.shape[1])
+        self.input_layer = InputLayer(dataset_spec[0].shape[1:])
 
     def get_config(self):
         return {
