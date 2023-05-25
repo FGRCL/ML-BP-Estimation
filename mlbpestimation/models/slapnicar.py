@@ -87,15 +87,14 @@ class ResNetBlock(Layer):
             Conv1D(filters, 1, padding='same'),
             tensorflow.keras.layers.BatchNormalization(),
         ])
-        self._add_outputs = Sequential([
-            Add(),
-            AveragePooling1D(pool_size, pool_stride),
-        ])
+        self._add = Add()
+        self._average_pooling = AveragePooling1D(pool_size, pool_stride)
 
     def call(self, inputs, training=None, mask=None):
         conv_output = self._conv_blocks(inputs, training, mask)
         shortcut_output = self._shortcut(inputs, training, mask)
-        return self._add_outputs([conv_output, shortcut_output], training, mask)
+        x = self._add([conv_output, shortcut_output])
+        return self._average_pooling(x)
 
 
 class ConvBlock(Layer):
