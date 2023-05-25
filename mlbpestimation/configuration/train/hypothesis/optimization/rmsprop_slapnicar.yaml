@@ -1,0 +1,8 @@
+optimizer:
+  _target_: tensorflow.python.keras.optimizer_v2.rmsprop.RMSProp
+  learning_rate: 1e-4
+loss:
+  _target_: tensorflow.python.keras.losses.MeanAbsoluteError
+batch_size: 256
+epoch: 20
+n_batches: null
