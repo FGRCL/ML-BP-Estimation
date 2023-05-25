@@ -1,3 +1,4 @@
+from shutil import rmtree
 from unittest import TestCase
 
 from keras.saving.saving_api import load_model
@@ -9,6 +10,10 @@ from tests.constants import data_directory
 
 
 class TestMLP(TestCase):
+    @classmethod
+    def tearDownClass(cls) -> None:
+        rmtree('mlp')
+
     def test_save_model(self):
         model = MLP([10, 10, 2], 'relu')
         train, _, _ = SavedDatasetLoader(data_directory / 'mimic-window').load_datasets()

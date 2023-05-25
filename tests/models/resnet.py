@@ -1,3 +1,4 @@
+from shutil import rmtree
 from unittest import TestCase
 
 from keras.saving.saving_api import load_model
@@ -9,6 +10,10 @@ from tests.constants import data_directory
 
 
 class TestResNet(TestCase):
+    @classmethod
+    def tearDownClass(cls) -> None:
+        rmtree('resnet')
+
     def test_save_model(self):
         model = ResNet([1, 1, 1], [5, 5, 5])
         train, _, _ = SavedDatasetLoader(data_directory / 'mimic-window').load_datasets()
