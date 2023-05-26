@@ -1,18 +1,17 @@
-from typing import List
-
 from keras import Sequential
 from keras.engine.base_layer import Layer
 from keras.layers import Add, BatchNormalization, Conv1D, Dense, Dropout, Flatten, ReLU
 from keras.regularizers import L2
+from omegaconf import ListConfig
 
 from mlbpestimation.models.basemodel import BloodPressureModel
 
 
 class ResNet(BloodPressureModel):
-    def __init__(self, n_residual_blocks: List[int], n_filters: List[int]):
+    def __init__(self, n_residual_blocks: ListConfig, n_filters: ListConfig):
         super().__init__()
-        self.n_residual_blocks = n_residual_blocks
-        self.n_filters = n_filters
+        self.n_residual_blocks = list(n_residual_blocks)
+        self.n_filters = list(n_filters)
 
         self.octaves = Sequential()
         for n_residual_block, n_filter in zip(self.n_residual_blocks, self.n_filters):
