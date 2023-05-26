@@ -4,5 +4,5 @@ optimizer:
 loss:
   _target_: keras.losses.MeanSquaredError
 batch_size: 20
-epoch: 1
+epoch: 100
 n_batches: null
