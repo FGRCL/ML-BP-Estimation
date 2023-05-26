@@ -1,8 +1,5 @@
 _target_: mlbpestimation.models.mlp.MLP
-neurons:
-  - 500
-  - 100
-  - 100
-  - 20
-  - 2
+n_layers: 2
+n_units: 2000
+output_units: 2
 activation: relu

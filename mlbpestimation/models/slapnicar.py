@@ -6,6 +6,7 @@ from keras.engine.input_layer import InputLayer
 from keras.layers import Add, AveragePooling1D, BatchNormalization, Conv1D, Dense, Dropout, GRU, ReLU
 from keras.regularizers import l2
 from numpy import arange, concatenate, full, log2
+from omegaconf import ListConfig
 
 from mlbpestimation.models.basemodel import BloodPressureModel
 
@@ -15,7 +16,7 @@ class Slapnicar(BloodPressureModel):
                  start_filters: int,
                  max_filters: int,
                  resnet_blocks: int,
-                 resnet_block_kernels: List[int],
+                 resnet_block_kernels: ListConfig,
                  pool_size: int,
                  pool_stride: int,
                  gru_units: int,
@@ -27,7 +28,7 @@ class Slapnicar(BloodPressureModel):
         self.start_filters = start_filters
         self.max_filters = max_filters
         self.resnet_blocks = resnet_blocks
-        self.resnet_block_kernels = resnet_block_kernels
+        self.resnet_block_kernels: List[int] = list(resnet_block_kernels)
         self.pool_size = pool_size
         self.pool_stride = pool_stride
         self.gru_units = gru_units
@@ -41,7 +42,7 @@ class Slapnicar(BloodPressureModel):
         self._resnet_blocks = Sequential()
         for resnet_filter in resnet_filters:
             self._resnet_blocks.add(
-                ResNetBlock(resnet_filter, resnet_block_kernels, pool_size, pool_stride)
+                ResNetBlock(resnet_filter, self.resnet_block_kernels, pool_size, pool_stride)
             )
         self._regressor = Regressor(gru_units, dense_units, output_units, l2_lambda, dropout_rate)
 
