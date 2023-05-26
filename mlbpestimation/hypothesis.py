@@ -2,9 +2,9 @@ from pathlib import Path
 
 import wandb
 from keras.callbacks import EarlyStopping
+from keras.metrics import MeanAbsoluteError, MeanSquaredError
 from omegaconf import DictConfig
 from tensorflow.python.data import AUTOTUNE
-from tensorflow.python.keras.metrics import MeanAbsoluteError, MeanSquaredError
 from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
 from mlbpestimation.data.datasetloader import DatasetLoader

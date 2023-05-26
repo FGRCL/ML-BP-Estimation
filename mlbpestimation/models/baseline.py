@@ -1,6 +1,5 @@
-import tensorflow
-from tensorflow.python.keras.layers import Conv1D, Dense, Dropout, LSTM, MaxPooling1D
-from tensorflow.python.keras.models import Sequential
+from keras import Sequential
+from keras.layers import BatchNormalization, Conv1D, Dense, Dropout, LSTM, MaxPooling1D
 
 from mlbpestimation.models.basemodel import BloodPressureModel
 
@@ -10,7 +9,7 @@ class Baseline(BloodPressureModel):
         super().__init__()
         self._layers = Sequential([
             Conv1D(64, 15, activation='relu'),
-            tensorflow.keras.layers.BatchNormalization(),
+            BatchNormalization(),
             MaxPooling1D(4),
             Dropout(0.1),
             LSTM(64, return_sequences=True),
@@ -23,3 +22,6 @@ class Baseline(BloodPressureModel):
 
     def set_input_shape(self, dataset_spec):
         pass
+
+    def get_config(self):
+        return {}
