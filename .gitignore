@@ -83,3 +83,4 @@ slurm-*
 /out
 /outputs
 /multirun
+/sweeps

@@ -1,0 +1,8 @@
+defaults:
+  - base_wandb_configuration
+  - _self_
+
+api_key: ${oc.env:WANDB_API_KEY}
+project_name: ml-bp-estimation-local
+entity: warpfive
+mode: online

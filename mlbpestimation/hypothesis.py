@@ -15,8 +15,8 @@ from mlbpestimation.models.basemodel import BloodPressureModel
 
 
 class Hypothesis:
-    def __init__(self, dataset_loader: DatasetLoader, model: BloodPressureModel, output_directory: str, optimization: DictConfig):
-        self.dataset_loader = dataset_loader
+    def __init__(self, dataset: DatasetLoader, model: BloodPressureModel, output_directory: str, optimization: DictConfig):
+        self.dataset = dataset
         self.model = model
         self.optimization = optimization
         self.output_directory = str(output_directory)
@@ -28,7 +28,7 @@ class Hypothesis:
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_data=validation)
 
     def setup_train_val(self):
-        datasets = self.dataset_loader.load_datasets()
+        datasets = self.dataset.load_datasets()
         train = datasets.train \
             .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
             .prefetch(AUTOTUNE)
