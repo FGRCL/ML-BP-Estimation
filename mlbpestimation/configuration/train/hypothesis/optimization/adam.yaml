@@ -1,8 +1,8 @@
 optimizer:
-  _target_: tensorflow.python.keras.optimizer_v2.adam.Adam
+  _target_: keras.optimizers.Adam
   learning_rate: 1e-6
 loss:
-  _target_: tensorflow.python.keras.losses.MeanSquaredError
+  _target_: keras.losses.MeanSquaredError
 batch_size: 20
 epoch: 100
 n_batches: null

@@ -1,0 +1,16 @@
+_target_: mlbpestimation.models.slapnicar.Slapnicar
+start_filters: 32
+max_filters: 64
+resnet_blocks: 4
+resnet_block_kernels:
+  - 8
+  - 5
+  - 5
+  - 3
+pool_size: 2
+pool_stride: 1
+gru_units: 65
+dense_units: 32
+output_units: 2
+l2_lambda: .001
+dropout_rate: .25
