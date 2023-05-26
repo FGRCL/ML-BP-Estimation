@@ -1,20 +1,20 @@
-from typing import List
-
-import tensorflow
-from tensorflow.python.keras import Sequential
-from tensorflow.python.keras.engine.base_layer import Layer
-from tensorflow.python.keras.layers import Add, Conv1D, Dense, Dropout, Flatten, ReLU
-from tensorflow.python.keras.regularizers import L2
+from keras import Sequential
+from keras.engine.base_layer import Layer
+from keras.layers import Add, BatchNormalization, Conv1D, Dense, Dropout, Flatten, ReLU
+from keras.regularizers import L2
+from omegaconf import ListConfig
 
 from mlbpestimation.models.basemodel import BloodPressureModel
 
 
 class ResNet(BloodPressureModel):
-    def __init__(self, n_residual_blocks: List[int], n_filters: List[int]):
+    def __init__(self, n_residual_blocks: ListConfig, n_filters: ListConfig):
         super().__init__()
+        self.n_residual_blocks = list(n_residual_blocks)
+        self.n_filters = list(n_filters)
 
         self.octaves = Sequential()
-        for n_residual_block, n_filter in zip(n_residual_blocks, n_filters):
+        for n_residual_block, n_filter in zip(self.n_residual_blocks, self.n_filters):
             self.octaves.add(ResidualOctave(n_filter, n_residual_block))
         self.regressor = Sequential([
             Flatten(),
@@ -32,6 +32,12 @@ class ResNet(BloodPressureModel):
 
     def set_input_shape(self, dataset_spec):
         pass
+
+    def get_config(self):
+        return {
+            'n_residual_blocks': self.n_residual_blocks,
+            'n_filters': self.n_filters
+        }
 
 
 class ResidualOctave(Layer):
@@ -94,7 +100,7 @@ class ConvBlock(Layer):
 
         self.block = Sequential([
             Conv1D(n_filter, kernel_size, strides=stride, padding="same"),
-            tensorflow.keras.layers.BatchNormalization(),
+            BatchNormalization(),
         ])
         if activation:
             self.block.add(ReLU())
