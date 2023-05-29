@@ -60,7 +60,9 @@ class Hypothesis:
             ([True, False], 'SBP'),
             ([False, True], 'DBP')
         ]
-        metrics = []
+        metrics = [
+            MeanAbsoluteError(name='Mean Absolute Error')
+        ]
         for mask, name in metric_masks:
             metrics += [
                 MaskedMetric(MeanAbsoluteError(), mask, name=f'{name} Mean Absolute Error'),
