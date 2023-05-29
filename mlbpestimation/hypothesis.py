@@ -51,7 +51,8 @@ class Hypothesis:
                 log_freq="batch"
             ),
             WandbModelCheckpoint(
-                filepath=Path(self.output_directory) / wandb.run.name
+                filepath=Path(self.output_directory) / wandb.run.name,
+                save_best_only=True
             )
         ]
 
