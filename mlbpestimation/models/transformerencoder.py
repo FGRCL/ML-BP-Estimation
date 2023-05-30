@@ -17,7 +17,7 @@ class TransformerEncoder(BloodPressureModel):
                  n_regressor_layers: int,
                  regressor_units: int,
                  output_units: int,
-                 regressor_dropout: int,
+                 regressor_dropout: float,
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -42,16 +42,14 @@ class TransformerEncoder(BloodPressureModel):
 
 
 class Regressor(Layer):
-    def __init__(self, n_layers: int, dense_units: int, output_size: int, dropout_rate: int, **kwargs):
+    def __init__(self, n_layers: int, dense_units: int, output_size: int, dropout_rate: float, **kwargs):
         super().__init__(**kwargs)
 
         self._dense_layers = Sequential()
         for _ in range(n_layers):
-            self._dense_layers.add([
-                Dropout(dropout_rate),
-                Dense(dense_units),
-                ReLU()
-            ])
+            self._dense_layers.add(Dropout(dropout_rate))
+            self._dense_layers.add(Dense(dense_units))
+            self._dense_layers.add(ReLU())
         self._output = Dense(output_size)
 
     def call(self, inputs, *args, **kwargs):
