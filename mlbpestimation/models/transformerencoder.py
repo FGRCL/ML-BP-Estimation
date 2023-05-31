@@ -30,9 +30,9 @@ class TransformerEncoder(BloodPressureModel):
 
     def call(self, inputs, training=None, mask=None):
         x = self._input_layer(inputs, training, mask)
-        x = self._flatten(x, inputs, mask)
         x = self._encoders(x, training, mask)
-        return self._regressor(x, training, mask)
+        x = self._flatten(x)
+        return self._regressor(x, training=training, mask=mask)
 
     def set_input_shape(self, dataset_spec):
         self._input_layer = InputLayer(dataset_spec[0].shape[1:])
