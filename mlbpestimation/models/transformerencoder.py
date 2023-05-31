@@ -20,6 +20,16 @@ class TransformerEncoder(BloodPressureModel):
                  regressor_dropout: float,
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.n_encoder_modules = n_encoder_modules
+        self.n_attention_heads = n_attention_heads
+        self.d_embedding = d_embedding
+        self.attention_dropout = attention_dropout
+        self.ff_encoder_units = ff_encoder_units
+        self.ff_encoder_dropout = ff_encoder_dropout
+        self.n_regressor_layers = n_regressor_layers
+        self.regressor_units = regressor_units
+        self.output_units = output_units
+        self.regressor_dropout = regressor_dropout
 
         self._input_layer = None
         self._flatten = Flatten()
@@ -38,7 +48,18 @@ class TransformerEncoder(BloodPressureModel):
         self._input_layer = InputLayer(dataset_spec[0].shape[1:])
 
     def get_config(self):
-        return {}
+        return {
+            'n_encoder_modules': self.n_encoder_modules,
+            'n_attention_heads': self.n_attention_heads,
+            'd_embedding': self.d_embedding,
+            'attention_dropout': self.attention_dropout,
+            'ff_encoder_units': self.ff_encoder_units,
+            'ff_encoder_dropout': self.ff_encoder_dropout,
+            'n_regressor_layers': self.n_regressor_layers,
+            'regressor_units': self.regressor_units,
+            'output_units': self.output_units,
+            'regressor_dropout': self.regressor_dropout
+        }
 
 
 class Regressor(Layer):
