@@ -16,5 +16,4 @@ pip install -r requirements.txt
 export HYDRA_FULL_ERROR=1
 export WANDB__SERVICE_WAIT=300
 wandb agent --count 1 $1
-python -m mlbpestimation.train directories=cc wandb=online $@
 EOT
