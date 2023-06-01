@@ -15,7 +15,7 @@ class TestWindowPreprocessing(TestCase):
         dataset = Dataset.from_tensor_slices([ppg_signal])
         pipeline = WindowPreprocessing()
 
-        processed_dataset = pipeline.preprocess(dataset)
+        processed_dataset = pipeline.apply(dataset)
 
         expected_specs = (TensorSpec(shape=(4000, 1), dtype=float32), TensorSpec(shape=2, dtype=float32))
         self.assertEqual(expected_specs, processed_dataset.element_spec)
@@ -25,7 +25,7 @@ class TestWindowPreprocessing(TestCase):
         dataset = Dataset.from_tensor_slices([ppg_signal])
         pipeline = WindowPreprocessing()
 
-        processed_dataset = pipeline.preprocess(dataset)
+        processed_dataset = pipeline.apply(dataset)
 
         try:
             element = next(iter(processed_dataset))
@@ -38,7 +38,7 @@ class TestWindowPreprocessing(TestCase):
         dataset = dataset.take(1)
         pipeline = WindowPreprocessing(frequency=64)
 
-        dataset = pipeline.preprocess(dataset)
+        dataset = pipeline.apply(dataset)
 
         self.assertIsNotNone(dataset)
 
@@ -47,6 +47,6 @@ class TestWindowPreprocessing(TestCase):
         dataset = dataset.take(1)
         pipeline = WindowPreprocessing(frequency=500)
 
-        dataset = pipeline.preprocess(dataset)
+        dataset = pipeline.apply(dataset)
 
         self.assertIsNotNone(dataset)
