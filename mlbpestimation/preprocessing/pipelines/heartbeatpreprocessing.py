@@ -30,7 +30,7 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             StandardizeArray(),
             SetTensorShape(beat_length),
         ]
-        super().__init__(dataset_operations, debug=False)
+        super().__init__(dataset_operations)
 
 
 class SplitHeartbeats(NumpyTransformOperation):

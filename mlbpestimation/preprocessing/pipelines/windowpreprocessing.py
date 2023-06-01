@@ -34,7 +34,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             StandardizeArray(),
             SetTensorShape(frequency * window_size),
         ]
-        super().__init__(dataset_operations, debug=False)
+        super().__init__(dataset_operations)
 
 
 class FilterSize(FilterOperation):
