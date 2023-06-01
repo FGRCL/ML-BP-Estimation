@@ -4,7 +4,7 @@ from unittest import TestCase
 from keras.saving.saving_api import load_model
 from numpy.testing import assert_allclose
 
-from mlbpestimation.data.preprocessed.saveddatasetloader import SavedDatasetLoader
+from mlbpestimation.data.saveddatasetloader import SavedDatasetLoader
 from mlbpestimation.models.baseline import Baseline
 from tests.constants import data_directory
 
