@@ -71,7 +71,7 @@ class Slapnicar(BloodPressureModel):
 
     @staticmethod
     def _compute_resnet_filters(start_filters, max_filters, resnet_blocks):
-        filters = arange(log2(start_filters), log2(max_filters), dtype=int)
+        filters = arange(log2(start_filters), log2(max_filters) + 1, dtype=int)
         remaining_blocks = resnet_blocks - filters.size
         if remaining_blocks > 0:
             remainder_filters = full(remaining_blocks, log2(max_filters), dtype=int)
