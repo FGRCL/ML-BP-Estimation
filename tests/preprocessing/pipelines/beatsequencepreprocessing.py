@@ -23,5 +23,4 @@ class TestBeatSequencePreprocessing(TestCase):
         result = train.take(1)
 
         self.assertIsNotNone(result)
-
-
+        self.assertEqual(result.output_shapes, [(16, 400, 1), (16, 2)])

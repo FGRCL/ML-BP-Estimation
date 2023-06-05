@@ -40,9 +40,12 @@ class SignalFilter(NumpyTransformOperation):
 
 
 class AddBloodPressureOutput(TransformOperation):
+    def __init__(self, axis: int = 0):
+        self.axis = axis
+
     def transform(self, lowpass_window: Tensor, bandpass_window: Tensor = None) -> Any:
-        sbp = reduce_max(lowpass_window)
-        dbp = reduce_min(lowpass_window)
+        sbp = reduce_max(lowpass_window, self.axis)
+        dbp = reduce_min(lowpass_window, self.axis)
         return lowpass_window, bandpass_window, [sbp, dbp]
 
 
@@ -74,11 +77,12 @@ class Cast(TransformOperation):
 
 
 class ComputeSqi(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType, ...]]):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], axis: int = 0):
         super().__init__(out_type)
+        self.axis = axis
 
     def transform(self, window_lowpass: ndarray, window_bandpass: ndarray) -> Any:
-        sqi = skew(window_bandpass)
+        sqi = skew(window_bandpass, self.axis)
         return window_lowpass, window_bandpass, asarray(sqi, dtype=float32)
 
 
