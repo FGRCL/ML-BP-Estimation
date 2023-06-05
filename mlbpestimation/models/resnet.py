@@ -32,6 +32,8 @@ class ResNet(BloodPressureModel):
         self.regressor_units = regressor_units
         self.regressor_dropout = regressor_dropout
         self.regressor_activation = regressor_activation
+        self.l2_lambda = l2_lambda
+        self.output_units = output_units
 
         self._octaves = Sequential()
         filters = self._compute_filters(start_filters, max_filters)
@@ -57,8 +59,18 @@ class ResNet(BloodPressureModel):
 
     def get_config(self):
         return {
-            'n_residual_blocks': self.n_residual_blocks,
-            'n_filters': self.n_filters
+            'start_filters': self.start_filters,
+            'max_filters': self.max_filters,
+            'first_octave_modules': self.first_octave_modules,
+            'second_octave_modules': self.second_octave_modules,
+            'third_octave_modules': self.third_octave_modules,
+            'fourth_octave_modules': self.fourth_octave_modules,
+            'regressor_layers': self.regressor_layers,
+            'regressor_units': self.regressor_units,
+            'regressor_dropout': self.regressor_dropout,
+            'regressor_activation': self.regressor_activation,
+            'l2_lambda': self.l2_lambda,
+            'output_units': self.output_units,
         }
 
     @staticmethod
