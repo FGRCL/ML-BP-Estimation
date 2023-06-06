@@ -24,5 +24,5 @@ class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
             AddBloodPressureOutput(1),
             RemoveLowpassTrack(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
-            StandardizeArray((float32, float32), 1),
+            StandardizeArray(1),
         ])

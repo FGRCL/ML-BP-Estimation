@@ -24,7 +24,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             AddBloodPressureOutput(),
             RemoveLowpassTrack(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
-            StandardizeArray((float32, float32)),
+            StandardizeArray(),
             SetTensorShape(window_size_frequency),
         ])
 

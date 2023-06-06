@@ -1,12 +1,13 @@
 from typing import Any, Tuple, Union
 
 import tensorflow as tf
-from numpy import asarray, float32, mean, ndarray, std
+from numpy import asarray, float32, ndarray
 from scipy.signal import butter, sosfilt
 from scipy.stats import skew
-from tensorflow import DType, Tensor, cast, reduce_max, reduce_min, reshape
+from tensorflow import DType, Tensor, cast, reduce_max, reduce_mean, reduce_min, reshape
 from tensorflow.python.data import Dataset
 from tensorflow.python.ops.array_ops import boolean_mask
+from tensorflow.python.ops.math_ops import reduce_std
 
 from mlbpestimation.preprocessing.base import FlatMap, NumpyTransformOperation, TransformOperation
 
@@ -17,13 +18,12 @@ class RemoveNan(TransformOperation):
 
 
 class StandardizeArray(TransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], axis=0):
-        super().__init__(out_type)
+    def __init__(self, axis=0):
         self.axis = axis
 
-    def transform(self, bandpass_window: ndarray, pressures: ndarray) -> (Tensor, Tensor):
-        mu = mean(bandpass_window, self.axis, keepdims=True)
-        sigma = std(bandpass_window, self.axis, keepdims=True)
+    def transform(self, bandpass_window: Tensor, pressures: Tensor) -> (Tensor, Tensor):
+        mu = reduce_mean(bandpass_window, self.axis, True)
+        sigma = reduce_std(bandpass_window, self.axis, True)
         scaled = (bandpass_window - mu) / sigma
         return scaled, pressures
 
