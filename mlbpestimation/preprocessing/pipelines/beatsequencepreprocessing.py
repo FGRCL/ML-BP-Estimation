@@ -1,12 +1,12 @@
 from typing import Tuple
 
-from tensorflow import Tensor, float32
-from tensorflow.python.data import Dataset
+from tensorflow import float32
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FlatMap
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline
 from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import SplitHeartbeats
-from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, FilterSqi, HasData
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, ComputeSqi, RemoveLowpassTrack, RemoveNan, RemoveSqi, SignalFilter
+from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
+from mlbpestimation.preprocessing.shared.pipelines import SqiFiltering
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, MakeWindows, RemoveLowpassTrack, RemoveNan, SignalFilter, StandardizeArray
 
 
 class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
@@ -20,21 +20,9 @@ class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
             SplitHeartbeats((float32, float32), frequency, beat_length),
             HasData(),
             MakeWindows(sequence_steps, sequence_stride),
-            ComputeSqi((float32, float32, float32), 1),
-            FilterSqi(0.5, 2),
-            RemoveSqi(),
+            SqiFiltering(0.5, 2, 1),
             AddBloodPressureOutput(1),
             RemoveLowpassTrack(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
+            StandardizeArray((float32, float32), 1),
         ])
-
-
-class MakeWindows(FlatMap):
-    def __init__(self, window_size, step):
-        self.window_size = window_size
-        self.step = step
-
-    def flatten(self, lowpass_beat: Tensor, bandpass_beat: Tensor) -> Tuple[Dataset, Dataset]:
-        return Dataset.from_tensor_slices((lowpass_beat, bandpass_beat)) \
-            .window(self.window_size, self.step, drop_remainder=True) \
-            .flat_map(lambda low, high: Dataset.zip((low.batch(self.window_size), high.batch(self.window_size))))

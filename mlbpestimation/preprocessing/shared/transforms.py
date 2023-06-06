@@ -1,25 +1,30 @@
 from typing import Any, Tuple, Union
 
 import tensorflow as tf
-from numpy import asarray, float32, ndarray
+from numpy import asarray, float32, mean, ndarray, std
 from scipy.signal import butter, sosfilt
 from scipy.stats import skew
 from tensorflow import DType, Tensor, cast, reduce_max, reduce_min, reshape
 from tensorflow.python.data import Dataset
+from tensorflow.python.ops.array_ops import boolean_mask
 
 from mlbpestimation.preprocessing.base import FlatMap, NumpyTransformOperation, TransformOperation
 
 
 class RemoveNan(TransformOperation):
     def transform(self, x: Tensor, y: Tensor = None) -> Tensor:
-        return tf.boolean_mask(x, tf.logical_not(tf.math.is_nan(x)))
+        return boolean_mask(x, tf.logical_not(tf.math.is_nan(x)))
 
 
 class StandardizeArray(TransformOperation):
-    def transform(self, bandpass_window: Tensor, pressures: Tensor) -> (Tensor, Tensor):
-        mean = tf.math.reduce_mean(bandpass_window)
-        std = tf.math.reduce_std(bandpass_window)
-        scaled = (bandpass_window - mean) / std
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], axis=0):
+        super().__init__(out_type)
+        self.axis = axis
+
+    def transform(self, bandpass_window: ndarray, pressures: ndarray) -> (Tensor, Tensor):
+        mu = mean(bandpass_window, self.axis, keepdims=True)
+        sigma = std(bandpass_window, self.axis, keepdims=True)
+        scaled = (bandpass_window - mu) / sigma
         return scaled, pressures
 
 
@@ -89,3 +94,14 @@ class ComputeSqi(NumpyTransformOperation):
 class RemoveSqi(TransformOperation):
     def transform(self, lowpass_window: ndarray, bandpass_window: ndarray, sqi: ndarray) -> Any:
         return lowpass_window, bandpass_window
+
+
+class MakeWindows(FlatMap):
+    def __init__(self, window_size, step):
+        self.window_size = window_size
+        self.step = step
+
+    def flatten(self, lowpass_beat: Tensor, bandpass_beat: Tensor) -> Tuple[Dataset, Dataset]:
+        return Dataset.from_tensor_slices((lowpass_beat, bandpass_beat)) \
+            .window(self.window_size, self.step, drop_remainder=True) \
+            .flat_map(lambda low, high: Dataset.zip((low.batch(self.window_size), high.batch(self.window_size))))
