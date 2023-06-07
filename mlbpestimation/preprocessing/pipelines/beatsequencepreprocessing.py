@@ -27,7 +27,7 @@ class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
             FilterPressureWithinBounds(min_pressure, max_pressure),
             RemovePressures(),
             StandardizeArray(1),
-            SetTensorShape([sequence_steps, beat_length])
+            SetTensorShape([sequence_steps, beat_length, 1])
         ])
 
 
