@@ -11,4 +11,4 @@ regressor_dropout: 0.25
 regressor_activation: relu
 l2_lambda: .001
 output_units: 2
-use_2d: false
+use_2d: true
