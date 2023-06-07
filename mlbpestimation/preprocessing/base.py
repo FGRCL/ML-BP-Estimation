@@ -100,6 +100,7 @@ class FlatMap(DatasetOperation):
         ...
 
 
+# This class is mainly used for debugging
 class Print(TransformOperation):
     def __init__(self, operation_name):
         self.operation_name = operation_name
@@ -111,14 +112,11 @@ class Print(TransformOperation):
         return args
 
 
-class DatasetPreprocessingPipeline(ABC):
-    def __init__(self, dataset_operations: List[DatasetOperation], debug=False):
+class DatasetPreprocessingPipeline(DatasetOperation):
+    def __init__(self, dataset_operations: List[DatasetOperation]):
         self.dataset_operations = dataset_operations
-        self.debug = debug
 
-    def preprocess(self, dataset: Dataset) -> Dataset:
+    def apply(self, dataset: Dataset) -> Dataset:
         for op in self.dataset_operations:
             dataset = op.apply(dataset)
-            if self.debug:
-                dataset = Print(op.__class__.__name__).apply(dataset)
         return dataset

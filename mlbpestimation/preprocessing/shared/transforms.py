@@ -4,22 +4,27 @@ import tensorflow as tf
 from numpy import asarray, float32, ndarray
 from scipy.signal import butter, sosfilt
 from scipy.stats import skew
-from tensorflow import DType, Tensor, cast, reduce_max, reduce_min, reshape
+from tensorflow import DType, Tensor, cast, reduce_max, reduce_mean, reduce_min, reshape
 from tensorflow.python.data import Dataset
+from tensorflow.python.ops.array_ops import boolean_mask
+from tensorflow.python.ops.math_ops import reduce_std
 
 from mlbpestimation.preprocessing.base import FlatMap, NumpyTransformOperation, TransformOperation
 
 
 class RemoveNan(TransformOperation):
     def transform(self, x: Tensor, y: Tensor = None) -> Tensor:
-        return tf.boolean_mask(x, tf.logical_not(tf.math.is_nan(x)))
+        return boolean_mask(x, tf.logical_not(tf.math.is_nan(x)))
 
 
 class StandardizeArray(TransformOperation):
+    def __init__(self, axis=0):
+        self.axis = axis
+
     def transform(self, bandpass_window: Tensor, pressures: Tensor) -> (Tensor, Tensor):
-        mean = tf.math.reduce_mean(bandpass_window)
-        std = tf.math.reduce_std(bandpass_window)
-        scaled = (bandpass_window - mean) / std
+        mu = reduce_mean(bandpass_window, self.axis, True)
+        sigma = reduce_std(bandpass_window, self.axis, True)
+        scaled = (bandpass_window - mu) / sigma
         return scaled, pressures
 
 
@@ -40,9 +45,12 @@ class SignalFilter(NumpyTransformOperation):
 
 
 class AddBloodPressureOutput(TransformOperation):
+    def __init__(self, axis: int = 0):
+        self.axis = axis
+
     def transform(self, lowpass_window: Tensor, bandpass_window: Tensor = None) -> Any:
-        sbp = reduce_max(lowpass_window)
-        dbp = reduce_min(lowpass_window)
+        sbp = reduce_max(lowpass_window, self.axis)
+        dbp = reduce_min(lowpass_window, self.axis)
         return lowpass_window, bandpass_window, [sbp, dbp]
 
 
@@ -58,11 +66,11 @@ class FlattenDataset(FlatMap):
 
 
 class SetTensorShape(TransformOperation):
-    def __init__(self, input_length):
-        self.input_length = input_length
+    def __init__(self, shape):
+        self.shape = shape
 
     def transform(self, bandpass_window: Tensor, pressures: Tensor = None) -> Any:
-        return reshape(bandpass_window, [self.input_length, 1]), reshape(pressures, [2])
+        return reshape(bandpass_window, self.shape), reshape(pressures, [2])
 
 
 class Cast(TransformOperation):
@@ -74,14 +82,26 @@ class Cast(TransformOperation):
 
 
 class ComputeSqi(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType, ...]]):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], axis: int = 0):
         super().__init__(out_type)
+        self.axis = axis
 
     def transform(self, window_lowpass: ndarray, window_bandpass: ndarray) -> Any:
-        sqi = skew(window_bandpass)
+        sqi = skew(window_bandpass, self.axis)
         return window_lowpass, window_bandpass, asarray(sqi, dtype=float32)
 
 
 class RemoveSqi(TransformOperation):
     def transform(self, lowpass_window: ndarray, bandpass_window: ndarray, sqi: ndarray) -> Any:
         return lowpass_window, bandpass_window
+
+
+class MakeWindows(FlatMap):
+    def __init__(self, window_size, step):
+        self.window_size = window_size
+        self.step = step
+
+    def flatten(self, lowpass_beat: Tensor, bandpass_beat: Tensor) -> Tuple[Dataset, Dataset]:
+        return Dataset.from_tensor_slices((lowpass_beat, bandpass_beat)) \
+            .window(self.window_size, self.step, drop_remainder=True) \
+            .flat_map(lambda low, high: Dataset.zip((low.batch(self.window_size), high.batch(self.window_size))))
