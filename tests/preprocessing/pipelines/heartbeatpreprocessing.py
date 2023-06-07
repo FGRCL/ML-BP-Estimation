@@ -14,7 +14,7 @@ class TestHeartbeatPreprocessing(TestCase):
         dataset = Dataset.from_tensor_slices([ppg_signal])
         pipeline = HeartbeatPreprocessing()
 
-        processed_dataset = pipeline.preprocess(dataset)
+        processed_dataset = pipeline.apply(dataset)
 
         expected_specs = (TensorSpec(shape=400, dtype=float32), TensorSpec(shape=2, dtype=float32))
         self.assertEqual(expected_specs, processed_dataset.element_spec)
@@ -24,7 +24,7 @@ class TestHeartbeatPreprocessing(TestCase):
         dataset = Dataset.from_tensor_slices([ppg_signal])
         pipeline = HeartbeatPreprocessing()
 
-        processed_dataset = pipeline.preprocess(dataset)
+        processed_dataset = pipeline.apply(dataset)
 
         try:
             element = next(iter(processed_dataset))
