@@ -27,7 +27,7 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             RemoveLowpassTrack(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
             StandardizeArray(),
-            SetTensorShape(beat_length),
+            SetTensorShape([beat_length, 1]),
         ]
         super().__init__(dataset_operations)
 

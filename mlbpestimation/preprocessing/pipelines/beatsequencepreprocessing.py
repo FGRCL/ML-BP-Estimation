@@ -6,7 +6,8 @@ from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline
 from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import SplitHeartbeats
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
 from mlbpestimation.preprocessing.shared.pipelines import SqiFiltering
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, MakeWindows, RemoveLowpassTrack, RemoveNan, SignalFilter, StandardizeArray
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, MakeWindows, RemoveLowpassTrack, RemoveNan, SetTensorShape, SignalFilter, \
+    StandardizeArray
 
 
 class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
@@ -25,4 +26,5 @@ class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
             RemoveLowpassTrack(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
             StandardizeArray(1),
+            SetTensorShape([sequence_steps, beat_length])
         ])

@@ -25,7 +25,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             RemoveLowpassTrack(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
             StandardizeArray(),
-            SetTensorShape(window_size_frequency),
+            SetTensorShape([window_size_frequency, 1]),
         ])
 
 

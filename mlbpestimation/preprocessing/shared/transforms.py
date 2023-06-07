@@ -66,11 +66,11 @@ class FlattenDataset(FlatMap):
 
 
 class SetTensorShape(TransformOperation):
-    def __init__(self, input_length):
-        self.input_length = input_length
+    def __init__(self, shape):
+        self.shape = shape
 
     def transform(self, bandpass_window: Tensor, pressures: Tensor = None) -> Any:
-        return reshape(bandpass_window, [self.input_length, 1]), reshape(pressures, [2])
+        return reshape(bandpass_window, self.shape), reshape(pressures, [2])
 
 
 class Cast(TransformOperation):
