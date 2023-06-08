@@ -8,6 +8,7 @@ from omegaconf import DictConfig
 from tensorflow.python.data import AUTOTUNE
 from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
+from mlbpestimation.callbacks.evaluatecallback import EvaluateCallback
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.metrics.maskedmetric import MaskedMetric
 from mlbpestimation.metrics.meanprediction import MeanPrediction
@@ -38,7 +39,7 @@ class Hypothesis:
             .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
             .prefetch(AUTOTUNE)
 
-        self.model.evaluate(test)
+        self.model.evaluate(test, callbacks=self._get_eval_callbacks())
         log.info('Finished evaluation')
 
     def setup_train_val(self):
@@ -69,6 +70,11 @@ class Hypothesis:
                 filepath=Path(self.output_directory) / wandb.run.name,
                 save_best_only=True
             )
+        ]
+
+    def _get_eval_callbacks(self):
+        return [
+            EvaluateCallback()
         ]
 
     def _build_metrics(self):
