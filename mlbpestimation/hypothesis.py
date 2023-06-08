@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import wandb
@@ -7,11 +8,14 @@ from omegaconf import DictConfig
 from tensorflow.python.data import AUTOTUNE
 from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
+from mlbpestimation.callbacks.evaluatecallback import EvaluateCallback
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.metrics.maskedmetric import MaskedMetric
 from mlbpestimation.metrics.meanprediction import MeanPrediction
 from mlbpestimation.metrics.standardeviation import StandardDeviationAbsoluteError, StandardDeviationPrediction
 from mlbpestimation.models.basemodel import BloodPressureModel
+
+log = logging.getLogger(__name__)
 
 
 class Hypothesis:
@@ -22,10 +26,21 @@ class Hypothesis:
         self.output_directory = str(output_directory)
 
     def train(self):
+        log.info('Start training')
         train, validation = self.setup_train_val()
         self.model.set_input_shape(train.element_spec)
         self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_data=validation)
+        log.info('Finished training')
+
+    def evaluate(self):
+        log.info('Start evaluation')
+        test = self.dataset.load_datasets().test \
+            .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
+            .prefetch(AUTOTUNE)
+
+        self.model.evaluate(test, callbacks=self._get_eval_callbacks())
+        log.info('Finished evaluation')
 
     def setup_train_val(self):
         datasets = self.dataset.load_datasets()
@@ -34,6 +49,7 @@ class Hypothesis:
             .prefetch(AUTOTUNE)
         validation = datasets.validation \
             .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE)
+
         if self.optimization.n_batches is not None:
             train = train.take(self.optimization.n_batches)
             validation = validation.take(int(self.optimization.n_batches * 0.15))
@@ -54,6 +70,11 @@ class Hypothesis:
                 filepath=Path(self.output_directory) / wandb.run.name,
                 save_best_only=True
             )
+        ]
+
+    def _get_eval_callbacks(self):
+        return [
+            EvaluateCallback()
         ]
 
     def _build_metrics(self):
