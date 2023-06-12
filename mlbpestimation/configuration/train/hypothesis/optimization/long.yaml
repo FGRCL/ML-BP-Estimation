@@ -1,0 +1,8 @@
+defaults:
+  - optimizer: adam
+  - loss: meansquarederror
+  - _self_
+
+batch_size: 20
+epoch: 100
+n_batches: null
