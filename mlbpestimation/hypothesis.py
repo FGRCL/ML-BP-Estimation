@@ -13,6 +13,7 @@ from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.metrics.maskedmetric import MaskedMetric
 from mlbpestimation.metrics.meanprediction import MeanPrediction
 from mlbpestimation.metrics.standardeviation import StandardDeviationAbsoluteError, StandardDeviationPrediction
+from mlbpestimation.metrics.totalmeanabsoluteerror import TotalMeanAbsoluteErrorMetric
 from mlbpestimation.models.basemodel import BloodPressureModel
 
 log = logging.getLogger(__name__)
@@ -83,7 +84,8 @@ class Hypothesis:
             ([False, True], 'DBP')
         ]
         metrics = [
-            MeanAbsoluteError(name='Mean Absolute Error')
+            MeanAbsoluteError(name='Mean Absolute Error'),
+            TotalMeanAbsoluteErrorMetric(name='Total Mean Absolute Error')
         ]
         for mask, name in metric_masks:
             metrics += [
