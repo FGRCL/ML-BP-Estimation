@@ -12,8 +12,8 @@ preprocessing:
     - 8
   min_pressure: 30
   max_pressure: 230
-  beat_length: 100
-  sequence_steps: 12
+  beat_length: 50
+  sequence_steps: 10
   sequence_stride: 1
 
 
