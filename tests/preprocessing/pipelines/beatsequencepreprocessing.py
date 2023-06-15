@@ -2,14 +2,13 @@ from unittest import TestCase
 
 from tensorflow import TensorShape
 
-from mlbpestimation.data.mimic4.mimicdatasetloader import MimicDatasetLoader
 from mlbpestimation.preprocessing.pipelines.beatsequencepreprocessing import BeatSequencePreprocessing
+from tests.fixtures.dataset import DatasetLoaderFixture
 
 
 class TestBeatSequencePreprocessing(TestCase):
     def test_can_preprocess(self):
-        train, _, _ = MimicDatasetLoader('/Users/francois/git/ML-BP-Estimation/data/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves', 1337,
-                                         False).load_datasets()
+        train, _, _ = DatasetLoaderFixture().load_datasets()
         pipeline = BeatSequencePreprocessing(
             125,
             5,
