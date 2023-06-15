@@ -118,5 +118,14 @@ class DatasetPreprocessingPipeline(DatasetOperation):
 
     def apply(self, dataset: Dataset) -> Dataset:
         for op in self.dataset_operations:
-            dataset = op.apply(dataset)
+            try:
+                dataset = op.apply(dataset)
+            except Exception as e:
+                raise PreprocessingException(op.__class__).with_traceback(e.__traceback__) from e
+
         return dataset
+
+
+class PreprocessingException(BaseException):
+    def __init__(self, operation_name):
+        super().__init__(f'Encountered an exception with operation: {operation_name}')
