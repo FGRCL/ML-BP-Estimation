@@ -11,6 +11,6 @@ class DatasetApi(VitalDBFetchingStrategy):
         tracks = vitaldb.load_case(case_id, track_names, interval)
 
         if tracks.size < len(track_names):
-            tracks = empty((1, len(track_names)))
+            tracks = empty((0, len(track_names)))
 
         return tracks
