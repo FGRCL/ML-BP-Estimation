@@ -8,7 +8,7 @@ from tensorflow import DType, Tensor, float32 as tfloat32
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyFilterOperation, NumpyTransformOperation
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
 from mlbpestimation.preprocessing.shared.pipelines import SqiFiltering
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveLowpassTrack, RemoveNan, SetTensorShape, SignalFilter, \
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveNan, RemoveOutputSignal, SetTensorShape, SignalFilter, \
     StandardizeArray
 
 
@@ -24,7 +24,7 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             FlattenDataset(),
             SqiFiltering(0.5, 2),
             AddBloodPressureOutput(),
-            RemoveLowpassTrack(),
+            RemoveOutputSignal(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
             StandardizeArray(),
             SetTensorShape([beat_length, 1]),
