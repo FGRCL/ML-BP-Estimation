@@ -15,7 +15,7 @@ class TestMLP(TestCase):
         rmtree('mlp')
 
     def test_save_model(self):
-        model = MLP([10, 10, 2], 'relu')
+        model = MLP(2, 100, 2, 'relu')
         train, _, _ = SavedDatasetLoader(data_directory / 'mimic-window').load_datasets()
         sample = next(iter(train.batch(5).take(1)))
         inputs = sample[0]

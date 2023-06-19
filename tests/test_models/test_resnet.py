@@ -15,7 +15,7 @@ class TestResNet(TestCase):
         rmtree('resnet')
 
     def test_save_model(self):
-        model = ResNet([1, 1, 1], [5, 5, 5])
+        model = ResNet(64, 256, 1, 1, 1, 1, 1, 100, 0, 'relu', 0.01, 2, False)
         train, _, _ = SavedDatasetLoader(data_directory / 'mimic-window').load_datasets()
         inputs = next(iter(train.batch(5).take(1)))[0]
         outputs = model(inputs)
