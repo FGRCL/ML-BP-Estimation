@@ -4,19 +4,18 @@ from unittest import TestCase
 from keras.saving.saving_api import load_model
 from numpy.testing import assert_allclose
 
-from mlbpestimation.data.preprocessed.saveddatasetloader import SavedDatasetLoader
 from mlbpestimation.models.resnet import ResNet
-from tests.constants import data_directory
+from tests.fixtures.windowdatasetloaderfixture import WindowDatasetLoaderFixture
 
 
 class TestResNet(TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
-        rmtree('resnet')
+        rmtree('resnet', ignore_errors=True)
 
     def test_save_model(self):
         model = ResNet(64, 256, 1, 1, 1, 1, 1, 100, 0, 'relu', 0.01, 2, False)
-        train, _, _ = SavedDatasetLoader(data_directory / 'mimic-window').load_datasets()
+        train, _, _ = WindowDatasetLoaderFixture().load_datasets()
         inputs = next(iter(train.batch(5).take(1)))[0]
         outputs = model(inputs)
 

@@ -3,12 +3,12 @@ from unittest import TestCase
 from tensorflow import TensorShape
 
 from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
-from tests.fixtures.dataset import DatasetLoaderFixture
+from tests.fixtures.signaldatasetloaderfixture import SignalDatasetLoaderFixture
 
 
 class TestWindowPreprocessing(TestCase):
     def test_can_preprocess(self):
-        train, _, _ = DatasetLoaderFixture().load_datasets()
+        train, _, _ = SignalDatasetLoaderFixture().load_datasets()
         pipeline = WindowPreprocessing(
             125,
             8,
