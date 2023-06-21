@@ -1,2 +1,2 @@
 _target_: keras.optimizers.SGD
-learning_rate: 1e-6
+learning_rate: 1e-3
