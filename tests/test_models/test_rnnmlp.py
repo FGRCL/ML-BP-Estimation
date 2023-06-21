@@ -4,7 +4,7 @@ from unittest import TestCase
 from keras.saving.saving_api import load_model
 from numpy.testing import assert_allclose
 
-from mlbpestimation.models.RnnMlp import RnnMlp
+from mlbpestimation.models.rnnmlp import RnnMlp
 from tests.fixtures.windowdatasetloaderfixture import WindowDatasetLoaderFixture
 
 

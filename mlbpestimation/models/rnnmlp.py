@@ -9,6 +9,13 @@ from mlbpestimation.models.basemodel import BloodPressureModel
 class RnnMlp(BloodPressureModel):
     def __init__(self, rnn_first: bool, rnn_layers: int, rnn_units: int, rnn_type: str, mlp_layers, mlp_units: int, activation: str, output_units: int):
         super().__init__()
+        self.rnn_first = rnn_first
+        self.rnn_layers = rnn_layers
+        self.rnn_units = rnn_units
+        self.rnn_type = rnn_type
+        self.mlp_layers = mlp_layers
+        self.activation = activation
+        self.output_units = output_units
 
         self._input_layer = None
         if rnn_first:
@@ -29,6 +36,17 @@ class RnnMlp(BloodPressureModel):
 
     def set_input_shape(self, dataset_spec):
         self._input_layer = InputLayer(dataset_spec[0].shape[1:])
+
+    def get_config(self):
+        return {
+            'rnn_first': self.rnn_first,
+            'rnn_layers': self.rnn_layers,
+            'rnn_units': self.rnn_units,
+            'rnn_type': self.rnn_type,
+            'mlp_layer': self.mlp_layers,
+            'activation': self.activation,
+            'output_units': self.output_units,
+        }
 
 
 class RnnModule(Layer):
@@ -54,6 +72,11 @@ class RnnModule(Layer):
 
     def call(self, inputs, *args, **kwargs):
         return self._layers(inputs, *args, **kwargs)
+
+    def get_config(self):
+        return {
+
+        }
 
 
 class MlpModule(Layer):
