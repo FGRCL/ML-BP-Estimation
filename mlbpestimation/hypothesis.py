@@ -37,6 +37,7 @@ class Hypothesis:
     def evaluate(self):
         log.info('Start evaluation')
         test = self.dataset.load_datasets().test \
+            .cache() \
             .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
             .prefetch(AUTOTUNE)
 
@@ -46,9 +47,12 @@ class Hypothesis:
     def setup_train_val(self):
         datasets = self.dataset.load_datasets()
         train = datasets.train \
+            .cache() \
             .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
             .prefetch(AUTOTUNE)
+
         validation = datasets.validation \
+            .cache() \
             .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE)
 
         if self.optimization.n_batches is not None:
@@ -68,7 +72,7 @@ class Hypothesis:
                 log_freq="batch"
             ),
             WandbModelCheckpoint(
-                filepath=Path(self.output_directory) / wandb.run.name,
+                filepath=Path(self.output_directory) / wandb.run.name / '{epoch:02d}',
                 save_best_only=True
             )
         ]
