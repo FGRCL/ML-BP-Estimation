@@ -1,7 +1,10 @@
+from typing import Tuple
+
 from keras import Sequential
 from keras.engine.base_layer import Layer
 from keras.engine.input_layer import InputLayer
-from keras.layers import Dense, GRU, LSTM
+from keras.layers import Dense, GRU, LSTM, Reshape
+from tensorflow import TensorSpec, reduce_prod
 
 from mlbpestimation.models.basemodel import BloodPressureModel
 
@@ -18,6 +21,7 @@ class RnnMlp(BloodPressureModel):
         self.output_units = output_units
 
         self._input_layer = None
+        self._reshape = None
         if rnn_first:
             self._layers = Sequential([
                 RnnModule(rnn_layers, rnn_units, rnn_type),
@@ -32,10 +36,16 @@ class RnnMlp(BloodPressureModel):
 
     def call(self, inputs, training=None, mask=None):
         x = self._input_layer(inputs, training, mask)
+        x = self._reshape(x)
         return self._layers(x, training, mask)
 
-    def set_input_shape(self, dataset_spec):
-        self._input_layer = InputLayer(dataset_spec[0].shape[1:])
+    def set_input_shape(self, dataset_spec: Tuple[TensorSpec]):
+        input_shape = dataset_spec[0].shape
+        input_type = dataset_spec[0].dtype
+        self._input_layer = InputLayer(input_shape[1:], input_shape[0], input_type)
+
+        feature_size = reduce_prod(input_shape[2:]).numpy()
+        self._reshape = Reshape((input_shape[1], feature_size))
 
     def get_config(self):
         return {

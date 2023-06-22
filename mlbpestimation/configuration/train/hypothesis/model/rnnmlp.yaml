@@ -1,0 +1,9 @@
+_target_: mlbpestimation.models.rnnmlp.RnnMlp
+rnn_first: true
+rnn_layers: 1
+rnn_units: 64
+rnn_type: lstm
+mlp_layers: 1
+mlp_units: 32
+activation: relu
+output_units: 2
