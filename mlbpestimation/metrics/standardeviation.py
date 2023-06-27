@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
+from keras.metrics import Metric
 from tensorflow import Variable, concat
-from tensorflow.python.keras.metrics import Metric
 from tensorflow.python.ops.math_ops import reduce_std
 
 

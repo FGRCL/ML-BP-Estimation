@@ -31,7 +31,7 @@ class TestTotalMeanAbsoluteMetric(TestCase):
         ])
 
         for y_true, y_pred in zip(y_true_batches, y_pred_batches):
-            metric(y_true.T, y_pred.T)
+            metric.update_state(y_true.T, y_pred.T)
         result = metric.result()
 
         means = []

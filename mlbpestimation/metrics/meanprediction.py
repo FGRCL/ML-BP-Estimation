@@ -1,5 +1,5 @@
+from keras.metrics import Metric
 from tensorflow import Variable, concat, reduce_mean
-from tensorflow.python.keras.metrics import Metric
 
 
 class MeanPrediction(Metric):
