@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from mlbpestimation.data.saveddatasetloader import SavedDatasetLoader
-from mlbpestimation.data.shufflesplitdatasetloader import ShuffleSplitDatasetLoader
+from mlbpestimation.data.decorator.saveddatasetloader import SavedDatasetLoader
+from mlbpestimation.data.decorator.shufflesplitdatasetloader import ShuffleSplitDatasetLoader
 
 
 class TestShuffleSplitDatasetLoader(TestCase):
