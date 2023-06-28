@@ -6,7 +6,7 @@ from mlbpestimation.metrics.meanprediction import MeanPrediction
 
 
 class TestMeanPrediction(TestCase):
-    def test_mean_prediction_single_batch(self):
+    def test_single_batch(self):
         metric = MeanPrediction()
         y_true = array([[78, 39, 40, 94, 21, 35, 90, 88, 14, 55]])
         y_pred = array([[98, 24, 29, 16, 61, 62, 77, 52, 36, 83]])
@@ -17,7 +17,7 @@ class TestMeanPrediction(TestCase):
         expected = mean(y_pred)
         self.assertEqual(expected, result)
 
-    def test_mean_prediction_multiple_batches(self):
+    def test_multiple_batches(self):
         metric = MeanPrediction()
         y_true_batches = array([
             [[15, 73, 87, 37, 46]],
