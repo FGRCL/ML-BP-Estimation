@@ -14,4 +14,4 @@ class MeanPrediction(Metric):
         return reduce_mean(self.predictions)
 
     def reset_state(self):
-        self.predictions = Variable([], shape=(None,), validate_shape=False)
+        self.predictions.assign(Variable([], shape=(None,), validate_shape=False))

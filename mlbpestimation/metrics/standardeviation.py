@@ -18,7 +18,7 @@ class StandardDeviationMetric(ABC, Metric):
         return reduce_std(self.measures)
 
     def reset_state(self):
-        self.measures = Variable([], shape=(None,), validate_shape=False)
+        self.measures.assign(Variable([], shape=(None,), validate_shape=False))
 
     @abstractmethod
     def compute_metric(self, y_true, y_pred):
