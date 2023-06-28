@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
+from keras.metrics import Metric
 from tensorflow import Variable, concat
-from tensorflow.python.keras.metrics import Metric
 from tensorflow.python.ops.math_ops import reduce_std
 
 
@@ -18,7 +18,7 @@ class StandardDeviationMetric(ABC, Metric):
         return reduce_std(self.measures)
 
     def reset_state(self):
-        self.measures = Variable([], shape=(None,), validate_shape=False)
+        self.measures.assign(Variable([], shape=(None,), validate_shape=False))
 
     @abstractmethod
     def compute_metric(self, y_true, y_pred):

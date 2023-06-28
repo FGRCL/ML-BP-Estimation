@@ -14,6 +14,9 @@ class TrainConfiguration:
     directories: DirectoriesConfiguration
     random_seed: int
     job_id: int
+    array_job_id: int
+    array_task_id: int
+    evaluate: bool
 
 
 ConfigStore.instance().store(name='base_train_configuration', node=TrainConfiguration)

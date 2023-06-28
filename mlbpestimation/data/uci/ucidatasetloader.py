@@ -10,20 +10,21 @@ from mlbpestimation.data.splitdataset import SplitDataset
 
 
 class UciDatasetLoader(DatasetLoader):
-    def __init__(self, uci_files_directory: str, random_seed: int, subsample: float = 1.0):
+    def __init__(self, uci_files_directory: str, random_seed: int, subsample: float = 1.0, use_ppg: bool = False):
         self.subsample = subsample
         self.random_seed = random_seed
         self.uci_files_directory = Path(uci_files_directory)
+        self.input_index = 0 if use_ppg else 1
 
     def load_datasets(self) -> SplitDataset:
         signals = self._get_abp_list()
         signals = self._shuffle_items(signals)
         signals = self._subsample_items(signals)
-        sets = self._make_splits(signals)
+        splits = self._make_splits(signals)
 
         datasets = []
-        for set in sets:
-            dataset = Dataset.from_tensor_slices(constant(set))
+        for split in splits:
+            dataset = Dataset.from_tensor_slices((constant(split[:][0]), constant(split[:][1])))
             datasets.append(dataset)
 
         return SplitDataset(*datasets)
@@ -34,8 +35,9 @@ class UciDatasetLoader(DatasetLoader):
             mat = loadmat(file)
             for key in mat:
                 for record in mat[key]:
+                    input_signal = record[self.input_index]
                     abp = record[1]
-                    signals.append(abp)
+                    signals.append([input_signal, abp])
 
         return signals
 

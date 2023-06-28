@@ -18,6 +18,8 @@ def main(configuration: TrainConfiguration):
          config=OmegaConf.to_container(configuration, resolve=True),
          settings=Settings(start_method='fork'))  # TODO: check that this is still needed
     hypothesis.train()
+    if configuration.evaluate:
+        hypothesis.evaluate()
 
 
 if __name__ == '__main__':

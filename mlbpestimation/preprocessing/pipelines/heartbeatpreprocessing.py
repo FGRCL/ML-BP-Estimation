@@ -6,9 +6,10 @@ from scipy.signal import find_peaks, resample
 from tensorflow import DType, Tensor, float32 as tfloat32
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyFilterOperation, NumpyTransformOperation
-from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, FilterSqi, HasData
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, ComputeSqi, FlattenDataset, RemoveLowpassTrack, RemoveNan, RemoveSqi, \
-    SetTensorShape, SignalFilter, StandardizeArray
+from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
+from mlbpestimation.preprocessing.shared.pipelines import SqiFiltering
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveNan, RemoveOutputSignal, SetTensorShape, SignalFilter, \
+    StandardizeArray
 
 
 class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
@@ -21,16 +22,14 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             SplitHeartbeats((tfloat32, tfloat32), frequency, beat_length),
             HasData(),
             FlattenDataset(),
-            ComputeSqi((tfloat32, tfloat32, tfloat32)),
-            FilterSqi(0.5, 2),
-            RemoveSqi(),
+            SqiFiltering(0.5, 2),
             AddBloodPressureOutput(),
-            RemoveLowpassTrack(),
+            RemoveOutputSignal(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
             StandardizeArray(),
-            SetTensorShape(beat_length),
+            SetTensorShape([beat_length, 1]),
         ]
-        super().__init__(dataset_operations, debug=False)
+        super().__init__(dataset_operations)
 
 
 class SplitHeartbeats(NumpyTransformOperation):

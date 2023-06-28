@@ -9,4 +9,4 @@ class PreprocessedLoader(DatasetLoader):
         self.preprocessing = preprocessing
 
     def load_datasets(self) -> SplitDataset:
-        return SplitDataset(*map(self.preprocessing.preprocess, self.dataset_loader.load_datasets()))
+        return SplitDataset(*map(self.preprocessing.apply, self.dataset_loader.load_datasets()))

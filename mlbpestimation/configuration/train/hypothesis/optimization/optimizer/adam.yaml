@@ -1,0 +1,2 @@
+_target_: keras.optimizers.Adam
+learning_rate: 1e-3

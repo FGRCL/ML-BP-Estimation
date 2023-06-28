@@ -1,8 +1,10 @@
+defaults:
+  - optimizer: adam
+  - loss: meansquarederror
+  - _self_
+
 optimizer:
-  _target_: tensorflow.python.keras.optimizer_v2.adam.Adam
   learning_rate: 1e-3
-loss:
-  _target_: tensorflow.python.keras.losses.MeanSquaredError
 batch_size: 64
 epoch: 20
 n_batches: 100

@@ -7,10 +7,10 @@ from mlbpestimation.data.vitaldb.fetchingstrategy.VitalDBFetchingStrategy import
 
 
 class DatasetApi(VitalDBFetchingStrategy):
-    def fetch_tracks(self, case_id: int, tracks: List[str], interval: float) -> ndarray:
-        tracks = vitaldb.load_case(case_id, tracks, interval)
+    def fetch_tracks(self, case_id: int, track_names: List[str], interval: float) -> ndarray:
+        tracks = vitaldb.load_case(case_id, track_names, interval)
 
-        if tracks.size == 0:
-            tracks = empty([0, 1])
+        if tracks.size < len(track_names):
+            tracks = empty((0, len(track_names)))
 
         return tracks
