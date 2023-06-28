@@ -36,10 +36,14 @@ class Hypothesis:
 
     def evaluate(self):
         log.info('Start evaluation')
+
         test = self.dataset.load_datasets().test \
             .cache() \
             .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
             .prefetch(AUTOTUNE)
+
+        if self.optimization.n_batches is not None:
+            test = test.take(int(self.optimization.n_batches * 0.15))
 
         self.model.evaluate(test, callbacks=self._get_eval_callbacks())
         log.info('Finished evaluation')
