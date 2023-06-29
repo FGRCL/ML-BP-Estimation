@@ -3,7 +3,7 @@ defaults:
   - _self_
 
 dataset:
-  _target_: mlbpestimation.data.preprocessedloader.PreprocessedLoader
+  _target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
   dataset_loader:
     _target_: mlbpestimation.data.uci.ucidatasetloader.UciDatasetLoader
     uci_files_directory: ${data_directory}/uci

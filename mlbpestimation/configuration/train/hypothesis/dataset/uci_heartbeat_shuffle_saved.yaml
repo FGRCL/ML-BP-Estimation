@@ -1,2 +1,2 @@
-_target_: mlbpestimation.data.preprocessed.saveddatasetloader.SavedDatasetLoader
+_target_: mlbpestimation.data.decorator.saveddatasetloader.SavedDatasetLoader
 dataset_directory: ${directories.data}/uci-heartbeat-shuffle
