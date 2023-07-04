@@ -1,5 +1,5 @@
 defaults:
-  - model: baseline
+  - model: tazarv
   - dataset: mimic_window_saved
   - optimization: long
   - _self_
