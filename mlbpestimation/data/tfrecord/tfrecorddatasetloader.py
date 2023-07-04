@@ -6,7 +6,7 @@ from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.data.splitdataset import SplitDataset
 
 
-class SavedDatasetLoader(DatasetLoader):
+class TFRecordDatasetLoader(DatasetLoader):
     def __init__(self, dataset_directory: str):
         self.dataset_directory = Path(dataset_directory)
 
