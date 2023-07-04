@@ -1,0 +1,2 @@
+_target_: mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing.HeartbeatPreprocessing
+frequency: ${hypothesis.dataset.dataset_loader.frequency}

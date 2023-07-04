@@ -1,9 +1,5 @@
+defaults:
+  - dataset_loader: mimic
+  - preprocessing: heartbeat
+
 _target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
-dataset_loader:
-  _target_: mlbpestimation.data.mimic4.mimicdatasetloader.MimicDatasetLoader
-  mimic_wave_files_directory: ${directories.data}/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves
-  random_seed: ${random_seed}
-  use_ppg: false
-preprocessing:
-  _target_: mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing.HeartbeatPreprocessing
-  frequency: 125

@@ -1,7 +1,5 @@
+defaults:
+  - dataset_loader: vital
+  - preprocessing: heartbeat
+
 _target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
-dataset_loader:
-  _target_: mlbpestimation.data.vitaldb.vitaldatasetloader.VitalDatasetLoader
-  random_seed: ${random_seed}
-preprocessing:
-  _target_: mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing.HeartbeatPreprocessing
-  frequency: 500
