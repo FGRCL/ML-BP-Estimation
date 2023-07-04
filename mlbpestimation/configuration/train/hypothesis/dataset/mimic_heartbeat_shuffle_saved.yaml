@@ -1,2 +1,2 @@
-_target_: mlbpestimation.data.decorator.tfrecorddatasetloader.TFRecordDatasetLoader
+_target_: mlbpestimation.data.tfrecord.tfrecorddatasetloader.TFRecordDatasetLoader
 dataset_directory: ${directories.data}/mimic-heartbeat-shuffle
