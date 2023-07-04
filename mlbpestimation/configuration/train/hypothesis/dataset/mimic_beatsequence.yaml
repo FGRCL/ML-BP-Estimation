@@ -1,20 +1,6 @@
-_target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
-dataset_loader:
-  _target_: mlbpestimation.data.mimic4.mimicdatasetloader.MimicDatasetLoader
-  mimic_wave_files_directory: ${directories.data}/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves
-  random_seed: ${random_seed}
-  use_ppg: false
-preprocessing:
-  _target_: mlbpestimation.preprocessing.pipelines.beatsequencepreprocessing.BeatSequencePreprocessing
-  frequency: 125
-  lowpass_cutoff: 5
-  bandpass_cutoff:
-    - 0.1
-    - 8
-  min_pressure: 30
-  max_pressure: 230
-  beat_length: 50
-  sequence_steps: 10
-  sequence_stride: 1
+defaults:
+  - dataset_loader: mimic
+  - preprocessing: beatsequence
 
+_target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
 

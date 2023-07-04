@@ -13,8 +13,9 @@ from mlbpestimation.data.vitaldb.fetchingstrategy.DatasetApi import DatasetApi
 class VitalDatasetLoader(DatasetLoader):
     output_signal = 'SNUADC/ART'
 
-    def __init__(self, random_seed: int, subsample: float = 1.0, use_ppg: bool = False):
+    def __init__(self, random_seed: int, frequency: int, subsample: float = 1.0, use_ppg: bool = False):
         self.random_seed = random_seed
+        self.frequency = frequency
         self.subsample = subsample
         self.input_track = '' if use_ppg else self.output_signal
 

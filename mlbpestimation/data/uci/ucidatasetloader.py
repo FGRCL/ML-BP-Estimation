@@ -10,8 +10,9 @@ from mlbpestimation.data.splitdataset import SplitDataset
 
 
 class UciDatasetLoader(DatasetLoader):
-    def __init__(self, uci_files_directory: str, random_seed: int, subsample: float = 1.0, use_ppg: bool = False):
+    def __init__(self, uci_files_directory: str, frequency: int, random_seed: int, subsample: float = 1.0, use_ppg: bool = False):
         self.subsample = subsample
+        self.frequency = frequency
         self.random_seed = random_seed
         self.uci_files_directory = Path(uci_files_directory)
         self.input_index = 0 if use_ppg else 1

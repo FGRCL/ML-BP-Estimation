@@ -15,8 +15,9 @@ from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, Pyth
 
 
 class MimicDatasetLoader(DatasetLoader):
-    def __init__(self, mimic_wave_files_directory: str, random_seed: int, use_ppg: bool, subsample: float = 1.0):
+    def __init__(self, mimic_wave_files_directory: str, frequency: int, random_seed: int, use_ppg: bool, subsample: float = 1.0):
         self.mimic_wave_files_directory = Path(mimic_wave_files_directory)
+        self.frequency = frequency
         self.random_seed = random_seed
         self.subsample = subsample
         self.input_signal = 'Pleth' if use_ppg else 'ABP'
