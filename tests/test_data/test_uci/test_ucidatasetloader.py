@@ -15,7 +15,7 @@ class TestUciDatasetLoader(TestCase):
             'b': ones((100, 2, 500)),
             'c': ones((50, 2, 5000))
         }
-        dataset, _, _ = UciDatasetLoader(uci, 1337, use_ppg=False).load_datasets()
+        dataset, _, _ = UciDatasetLoader(uci, 125, 1337, use_ppg=False).load_datasets()
 
         element = next(iter(dataset))
 
@@ -29,7 +29,7 @@ class TestUciDatasetLoader(TestCase):
             'b': ones((100, 2, 500)),
             'c': ones((50, 2, 5000))
         }
-        dataset, _, _ = UciDatasetLoader(uci, 1337, use_ppg=True).load_datasets()
+        dataset, _, _ = UciDatasetLoader(uci, 125, 1337, use_ppg=True).load_datasets()
 
         element = next(iter(dataset))
 

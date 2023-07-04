@@ -7,7 +7,7 @@ from tests.data.directories import mimic
 class TestMimicDataset(TestCase):
 
     def test_can_load_signal(self):
-        dataset, _, _ = MimicDatasetLoader(mimic, 106, use_ppg=False).load_datasets()
+        dataset, _, _ = MimicDatasetLoader(mimic, 125, 106, use_ppg=False).load_datasets()
 
         element = next(iter(dataset))
 
@@ -15,7 +15,7 @@ class TestMimicDataset(TestCase):
         self.assertEqual(len(element), 2)
 
     def test_load_with_ppg(self):
-        dataset, _, _ = MimicDatasetLoader(mimic, 106,
+        dataset, _, _ = MimicDatasetLoader(mimic, 125, 106,
                                            use_ppg=True).load_datasets()
 
         element = next(iter(dataset))
