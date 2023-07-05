@@ -1,6 +1,6 @@
 defaults:
   - model: tazarv
-  - dataset: mimic_window_saved
+  - dataset: dataset
   - optimization: long
   - _self_
 

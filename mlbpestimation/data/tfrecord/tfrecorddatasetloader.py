@@ -7,8 +7,8 @@ from mlbpestimation.data.splitdataset import SplitDataset
 
 
 class TFRecordDatasetLoader(DatasetLoader):
-    def __init__(self, dataset_directory: str):
-        self.dataset_directory = Path(dataset_directory)
+    def __init__(self, data_directory: str, dataset_name: str):
+        self.dataset_directory = Path(data_directory) / Path(dataset_name)
 
     def load_datasets(self):
         train = Dataset.load(str(self.dataset_directory / 'train'))

@@ -1,2 +1,3 @@
 _target_: mlbpestimation.data.tfrecord.tfrecorddatasetloader.TFRecordDatasetLoader
-dataset_directory: ${directories.data}/uci-heartbeat
+data_directory: ${directories.data}
+dataset_name: mimic-window

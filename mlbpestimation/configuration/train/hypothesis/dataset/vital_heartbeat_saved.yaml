@@ -1,2 +1,0 @@
-_target_: mlbpestimation.data.tfrecord.tfrecorddatasetloader.TFRecordDatasetLoader
-dataset_directory: ${directories.data}/vital-heartbeat

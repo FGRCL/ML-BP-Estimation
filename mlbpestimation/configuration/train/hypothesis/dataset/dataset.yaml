@@ -1,0 +1,4 @@
+defaults:
+  - source: mimic
+  - decorators:
+  - _self_
