@@ -1,6 +1,6 @@
 from keras.metrics import Metric
-from numpy import inf, logical_and
-from tensorflow import greater, less
+from numpy import inf
+from tensorflow import greater, less, logical_and
 from tensorflow.python.ops.array_ops import boolean_mask
 
 
