@@ -31,7 +31,7 @@ class Hypothesis:
         log.info('Start training')
         train, validation = self.setup_train_val()
         self.model.set_input_shape(train.element_spec)
-        self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics(), run_eagerly=True)
+        self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_data=validation)
         log.info('Finished training')
 
