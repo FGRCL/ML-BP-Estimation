@@ -1,5 +1,6 @@
 defaults:
   - dataset_loader: mimic
-  - preprocessing: window
+  - preprocessing: beatsequence
 
 _target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
+

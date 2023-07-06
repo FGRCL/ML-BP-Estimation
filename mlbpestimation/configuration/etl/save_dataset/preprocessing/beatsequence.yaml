@@ -1,5 +1,5 @@
 _target_: mlbpestimation.preprocessing.pipelines.beatsequencepreprocessing.BeatSequencePreprocessing
-frequency: ${hypothesis.dataset.dataset_loader.frequency}
+frequency: ${save_dataset.dataset_loader.frequency}
 lowpass_cutoff: 5
 bandpass_cutoff:
   - 0.1
