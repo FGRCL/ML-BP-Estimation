@@ -3,3 +3,5 @@ defaults:
   - preprocessing: heartbeat
 
 _target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
+save_directory: ${data_directory}/vital-heartbeat
+

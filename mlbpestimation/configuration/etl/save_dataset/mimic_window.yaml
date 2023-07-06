@@ -3,3 +3,4 @@ defaults:
   - preprocessing: window
 
 _target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
+save_directory: ${data_directory}/mimic-window

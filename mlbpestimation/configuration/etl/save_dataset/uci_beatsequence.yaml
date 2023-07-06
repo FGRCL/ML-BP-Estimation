@@ -3,3 +3,5 @@ defaults:
   - preprocessing: beatsequence
 
 _target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
+save_directory: ${data_directory}/uci-beatsequence
+
