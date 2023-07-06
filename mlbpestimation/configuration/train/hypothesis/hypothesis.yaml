@@ -1,8 +1,8 @@
 defaults:
+  - basehypothesis
   - model: tazarv
   - dataset: dataset
   - optimization: long
   - _self_
 
-_target_: mlbpestimation.hypothesis.Hypothesis
 output_directory: ${directories.output}

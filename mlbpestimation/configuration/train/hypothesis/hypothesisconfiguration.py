@@ -1,18 +1,14 @@
-from dataclasses import dataclass
+from typing import Any
 
-from hydra.core.config_store import ConfigStore
-from omegaconf import DictConfig, MISSING
+from omegaconf import MISSING
 
+from mlbpestimation.configuration.decorators import configuration
 from mlbpestimation.configuration.train.hypothesis.dataset.datasetconfiguration import DatasetConfiguration
 
 
-@dataclass
+@configuration('basehypothesis', 'hypothesis')
 class HypothesisConfiguration:
-    _target_: str = 'mlbpestimation.hypothesis.Hypothesis'
     dataset: DatasetConfiguration = MISSING
-    model: DictConfig = MISSING
-    optimization: DictConfig = MISSING
+    model: Any = MISSING
+    optimization: Any = MISSING
     output_directory: str = '${directories.output}'
-
-
-ConfigStore.instance().store(group='hypothesis', name='base_hypothesis_configuration', node=HypothesisConfiguration)

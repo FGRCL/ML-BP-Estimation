@@ -1,13 +1,13 @@
 from dataclasses import dataclass
+from typing import Any
 
 from hydra.core.config_store import ConfigStore
-from omegaconf import DictConfig
 
 
 @dataclass
 class DatasetConfiguration:
-    source: DictConfig
-    decorators: DictConfig
+    source: Any
+    decorators: Any
 
 
 ConfigStore.instance().store(group='hypothesis/dataset', name='base_dataset_configuration', node=DatasetConfiguration)
