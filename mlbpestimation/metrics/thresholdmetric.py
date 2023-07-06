@@ -22,5 +22,5 @@ class ThresholdMetric(Metric):
     def result(self):
         return self.metric.result()
 
-    def reset_states(self):
+    def reset_state(self):
         return self.metric.reset_state()
