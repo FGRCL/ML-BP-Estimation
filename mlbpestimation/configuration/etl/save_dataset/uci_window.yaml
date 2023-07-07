@@ -1,14 +1,4 @@
 defaults:
-  - base_save_dataset_configuration
-  - _self_
+  - dataset: uci_window
 
-dataset:
-  _target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
-  dataset_loader:
-    _target_: mlbpestimation.data.uci.ucidatasetloader.UciDatasetLoader
-    uci_files_directory: ${data_directory}/uci
-    random_seed: ${random_seed}
-  preprocessing:
-    _target_: mlbpestimation.preprocessing.pipelines.windowpreprocessing.WindowPreprocessing
-    frequency: 125
-save_directory: ${data_directory}/uci-heartbeat
+save_directory: ${data_directory}/uci-window

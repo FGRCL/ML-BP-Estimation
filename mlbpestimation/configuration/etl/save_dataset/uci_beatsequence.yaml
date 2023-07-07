@@ -1,0 +1,5 @@
+defaults:
+  - dataset: uci_beatsequence
+
+save_directory: ${data_directory}/uci-beatsequence
+
