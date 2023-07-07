@@ -1,6 +1,4 @@
 defaults:
-  - dataset_loader: mimic
-  - preprocessing: beatsequence
+  - dataset: mimic_beatsequence
 
-_target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
 save_directory: ${data_directory}/mimic-beatsequence
