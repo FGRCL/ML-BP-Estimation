@@ -6,7 +6,7 @@ from mlbpestimation.configuration.decorators import configuration
 from mlbpestimation.configuration.train.hypothesis.dataset.datasetconfiguration import DatasetConfiguration
 
 
-@configuration('basehypothesis', 'hypothesis')
+@configuration('base_hypothesis_configuration', 'hypothesis')
 class HypothesisConfiguration:
     dataset: DatasetConfiguration = MISSING
     model: Any = MISSING

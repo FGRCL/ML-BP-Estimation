@@ -1,5 +1,5 @@
 defaults:
-  - basehypothesis
+  - base_hypothesis_configuration
   - model: tazarv
   - dataset: dataset
   - optimization: long
