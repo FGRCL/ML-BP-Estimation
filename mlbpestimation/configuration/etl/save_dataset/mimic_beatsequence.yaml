@@ -1,0 +1,4 @@
+defaults:
+  - dataset: mimic_beatsequence
+
+save_directory: ${data_directory}/mimic-beatsequence

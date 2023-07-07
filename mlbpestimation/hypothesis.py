@@ -13,6 +13,7 @@ from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.metrics.maskedmetric import MaskedMetric
 from mlbpestimation.metrics.meanprediction import MeanPrediction
 from mlbpestimation.metrics.standardeviation import StandardDeviationAbsoluteError, StandardDeviationPrediction
+from mlbpestimation.metrics.thresholdmetric import ThresholdMetric
 from mlbpestimation.metrics.totalmeanabsoluteerror import TotalMeanAbsoluteErrorMetric
 from mlbpestimation.models.basemodel import BloodPressureModel
 
@@ -99,6 +100,9 @@ class Hypothesis:
             metrics += [
                 MaskedMetric(MeanAbsoluteError(), mask, name=f'{name} Mean Absolute Error'),
                 MaskedMetric(StandardDeviationAbsoluteError(), mask, name=f'{name} Absolute Error standard Deviation'),
+                MaskedMetric(ThresholdMetric(MeanAbsoluteError(), upper=50), mask, name=f'{name} Mean Absolute Error under 50mmHg'),
+                MaskedMetric(ThresholdMetric(MeanAbsoluteError(), lower=150), mask, name=f'{name} Mean Absolute Error above 150mmHg'),
+                MaskedMetric(ThresholdMetric(MeanAbsoluteError(), lower=50, upper=150), mask, name=f'{name} Mean Absolute Error between 50mmHg and 150mmHg'),
                 MaskedMetric(MeanSquaredError(), mask, name=f'{name} Mean Squared Error'),
                 MaskedMetric(MeanPrediction(), mask, name=f'{name} Prediction Mean'),
                 MaskedMetric(StandardDeviationPrediction(), mask, name=f'{name} Prediction Standard Deviation'),
