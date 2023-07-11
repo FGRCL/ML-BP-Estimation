@@ -5,8 +5,8 @@ from tensorflow import Tensor, float32
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, TransformOperation
 from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import SplitHeartbeats
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from mlbpestimation.preprocessing.shared.pipelines import SqiFiltering
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, MakeWindows, RemoveNan, RemoveOutputSignal, SetTensorShape, SignalFilter, \
+from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal, SqiFiltering
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, MakeWindows, RemoveOutputSignal, SetTensorShape, SignalFilter, \
     StandardizeArray
 
 
@@ -15,8 +15,7 @@ class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
                  sequence_steps: int,
                  sequence_stride: int):
         super(BeatSequencePreprocessing, self).__init__([
-            HasData(),
-            RemoveNan(),
+            FilterHasSignal(),
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
             SplitHeartbeats((float32, float32), frequency, beat_length),
             HasData(),

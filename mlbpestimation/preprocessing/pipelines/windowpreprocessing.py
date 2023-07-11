@@ -2,9 +2,9 @@ from tensorflow import bool, float32, reduce_all
 from tensorflow.python.ops.array_ops import size
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation
-from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from mlbpestimation.preprocessing.shared.pipelines import SqiFiltering
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, MakeWindows, RemoveNan, RemoveOutputSignal, SetTensorShape, SignalFilter, \
+from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds
+from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal, SqiFiltering
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, MakeWindows, RemoveOutputSignal, SetTensorShape, SignalFilter, \
     StandardizeArray
 
 
@@ -14,8 +14,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
         window_size_frequency = window_size * frequency
         window_step_frequency = window_step * frequency
         super().__init__([
-            HasData(),
-            RemoveNan(),
+            FilterHasSignal(),
             FilterSize(window_size, frequency),
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
             MakeWindows(window_size_frequency, window_step_frequency),
