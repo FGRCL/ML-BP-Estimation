@@ -12,9 +12,7 @@ class TestSeriesPreprocessing(TestCase):
         pipeline = SeriesPreprocessing(
             125,
             5,
-            (0.1, 8),
-            0,
-            230
+            (0.1, 8)
         )
 
         dataset = pipeline.apply(train)
