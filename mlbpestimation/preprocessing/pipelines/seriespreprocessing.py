@@ -1,20 +1,17 @@
 from tensorflow import Tensor, float32, reshape
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, Print, TransformOperation
-from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from mlbpestimation.preprocessing.shared.pipelines import SqiFiltering
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, TransformOperation
+from mlbpestimation.preprocessing.shared.filters import HasData
 from mlbpestimation.preprocessing.shared.transforms import RemoveNan, SignalFilter, StandardizeArray
 
 
 class SeriesPreprocessing(DatasetPreprocessingPipeline):
-    def __init__(self, frequency: int, lowpass_cutoff: int, bandpass_cutoff, min_pressure, max_pressure):
+    def __init__(self, frequency: int, lowpass_cutoff: int, bandpass_cutoff):
         super().__init__([
             HasData(),
             RemoveNan(),
+            HasData(),
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
-            SqiFiltering(0.35, 0.8),
-            FilterPressureWithinBounds(min_pressure, max_pressure),
-            Print("After pressure withing bounds"),
             StandardizeArray(),
             ExpandFeatureDimension(),
         ])
