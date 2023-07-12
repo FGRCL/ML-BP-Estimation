@@ -1,0 +1,2 @@
+shuffle:
+  _target_: mlbpestimation.data.decorator.shufflesplitdatasetloader.ShuffleSplitDatasetLoader

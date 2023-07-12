@@ -1,15 +1,12 @@
-from dataclasses import dataclass
-from typing import Any
-
-from hydra.core.config_store import ConfigStore
-
+from mlbpestimation.configuration.decorators import configuration
 from mlbpestimation.configuration.train.directories.directoriesconfiguration import DirectoriesConfiguration
+from mlbpestimation.configuration.train.hypothesis.hypothesisconfiguration import HypothesisConfiguration
 from mlbpestimation.configuration.train.wandb.wandbconfiguration import WandbConfiguration
 
 
-@dataclass
-class TrainConfiguration:
-    hypothesis: Any
+@configuration('base_train_configuration')
+class Train:
+    hypothesis: HypothesisConfiguration
     wandb: WandbConfiguration
     directories: DirectoriesConfiguration
     random_seed: int
@@ -17,6 +14,3 @@ class TrainConfiguration:
     array_job_id: int
     array_task_id: int
     evaluate: bool
-
-
-ConfigStore.instance().store(name='base_train_configuration', node=TrainConfiguration)

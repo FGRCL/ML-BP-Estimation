@@ -4,7 +4,7 @@ from keras.layers import BatchNormalization, Conv1D, Dense, Dropout, LSTM, MaxPo
 from mlbpestimation.models.basemodel import BloodPressureModel
 
 
-class Baseline(BloodPressureModel):
+class Tazarv(BloodPressureModel):
     def __init__(self):
         super().__init__()
         self._layers = Sequential([

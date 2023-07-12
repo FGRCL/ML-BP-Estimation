@@ -1,14 +1,9 @@
-from dataclasses import dataclass
-
-from hydra.core.config_store import ConfigStore
+from mlbpestimation.configuration.decorators import configuration
 
 
-@dataclass
+@configuration('base_wandb_configuration', 'wandb')
 class WandbConfiguration:
     api_key: str
     project_name: str
     entity: str
     mode: str
-
-
-ConfigStore.instance().store(group='wandb', name='base_wandb_configuration', node=WandbConfiguration)

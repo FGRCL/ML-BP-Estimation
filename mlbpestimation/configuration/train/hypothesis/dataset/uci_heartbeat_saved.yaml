@@ -1,2 +1,0 @@
-_target_: mlbpestimation.data.decorator.saveddatasetloader.SavedDatasetLoader
-dataset_directory: ${directories.data}/uci-heartbeat
