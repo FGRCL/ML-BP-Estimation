@@ -1,5 +1,0 @@
-defaults:
-  - dataset_loader: uci
-  - preprocessing: heartbeat
-
-_target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader

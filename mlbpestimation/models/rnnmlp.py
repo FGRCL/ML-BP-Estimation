@@ -3,7 +3,7 @@ from typing import Tuple
 from keras import Sequential
 from keras.engine.base_layer import Layer
 from keras.engine.input_layer import InputLayer
-from keras.layers import Dense, GRU, LSTM, Reshape
+from keras.layers import Dense, GRU, LSTM, Reshape, SimpleRNN
 from tensorflow import TensorSpec, reduce_prod
 
 from mlbpestimation.models.basemodel import BloodPressureModel
@@ -63,6 +63,7 @@ class RnnModule(Layer):
     _rnn_implementations = {
         'GRU': GRU,
         'LSTM': LSTM,
+        'RNN': SimpleRNN,
     }
 
     def __init__(self, n_layers: int, n_units: int, rnn_implementation: str, **kwargs):

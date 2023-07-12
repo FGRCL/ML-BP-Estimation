@@ -1,0 +1,5 @@
+defaults:
+  - base_dataset_configuration
+  - source: mimic
+  - decorators:
+  - _self_
