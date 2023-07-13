@@ -7,9 +7,9 @@ from mlbpestimation.data.splitdataset import SplitDataset
 
 
 class SignalDatasetLoaderFixture(DatasetLoader):
-    def __init__(self):
-        self.frequency = 125
-        self.sample_length = 120
+    def __init__(self, sample_length=120, frequency=125):
+        self.frequency = frequency
+        self.sample_length = sample_length
 
     def load_datasets(self) -> SplitDataset:
         train_samples = self._generate_samples(100)
@@ -26,8 +26,10 @@ class SignalDatasetLoaderFixture(DatasetLoader):
         sample_length_frequency = self.frequency * self.sample_length
         samples = empty((n_samples, 2, sample_length_frequency))
         for i in range(n_samples):
-            samples[i, 0] = ppg_simulate(sampling_rate=125, frequency_modulation=0.3, ibi_randomness=0.2, drift=1, random_state=1337)
-            samples[i, 1] = (ppg_simulate(sampling_rate=125, frequency_modulation=0.1, ibi_randomness=0, drift=0, random_state=1337) + 0.5) * 70 + 35
+            samples[i, 0] = ppg_simulate(duration=self.sample_length, sampling_rate=125, frequency_modulation=0.3, ibi_randomness=0.2, drift=1,
+                                         random_state=1337)
+            samples[i, 1] = (ppg_simulate(duration=self.sample_length, sampling_rate=125, frequency_modulation=0.1, ibi_randomness=0, drift=0,
+                                          random_state=1337) + 0.5) * 70 + 35
         return samples
 
     @staticmethod

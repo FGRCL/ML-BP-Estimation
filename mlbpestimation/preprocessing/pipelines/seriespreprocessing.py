@@ -2,7 +2,9 @@ from tensorflow import Tensor, float32, reshape
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, TransformOperation
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import SignalFilter, StandardizeArray
+from mlbpestimation.preprocessing.shared.transforms import SignalFilter, StandardizeInput
+
+SECONDS_IN_HOURS = 3600
 
 
 class SeriesPreprocessing(DatasetPreprocessingPipeline):
@@ -10,7 +12,7 @@ class SeriesPreprocessing(DatasetPreprocessingPipeline):
         super().__init__([
             FilterHasSignal(),
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
-            StandardizeArray(),
+            StandardizeInput(),
             ExpandFeatureDimension(),
         ])
 

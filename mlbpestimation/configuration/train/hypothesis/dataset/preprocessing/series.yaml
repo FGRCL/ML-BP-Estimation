@@ -1,6 +1,0 @@
-_target_: mlbpestimation.preprocessing.pipelines.seriespreprocessing.SeriesPreprocessing
-frequency: ${hypothesis.dataset.dataset_loader.frequency}
-lowpass_cutoff: 5
-bandpass_cutoff:
-  - 0.1
-  - 8
