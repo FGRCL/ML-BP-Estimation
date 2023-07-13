@@ -30,7 +30,7 @@ class Hypothesis:
     def train(self):
         log.info('Start training')
         train, validation = self.setup_train_val()
-        pressure_output = train.element_spec[1].shape[0] == 2
+        pressure_output = train.element_spec[1].shape[1] == 2
         self.model.set_input_shape(train.element_spec)
         self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics(pressure_output))
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_data=validation)
@@ -41,7 +41,7 @@ class Hypothesis:
 
         test = self.dataset.load_datasets().test \
             .cache() \
-            .padded_batch(self.optimization.batch_size) \
+            .batch(self.optimization.batch_size) \
             .prefetch(AUTOTUNE)
 
         if self.optimization.n_batches is not None:
@@ -54,12 +54,12 @@ class Hypothesis:
         datasets = self.dataset.load_datasets()
         train = datasets.train \
             .cache() \
-            .padded_batch(self.optimization.batch_size) \
+            .batch(self.optimization.batch_size) \
             .prefetch(AUTOTUNE)
 
         validation = datasets.validation \
             .cache() \
-            .padded_batch(self.optimization.batch_size) \
+            .batch(self.optimization.batch_size) \
             .prefetch(AUTOTUNE)
 
         if self.optimization.n_batches is not None:

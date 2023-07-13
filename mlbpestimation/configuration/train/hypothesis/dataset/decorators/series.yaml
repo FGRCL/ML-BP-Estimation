@@ -3,6 +3,8 @@ heartbeat:
   preprocessing:
     _target_: mlbpestimation.preprocessing.pipelines.seriespreprocessing.SeriesPreprocessing
     frequency: ${hypothesis.dataset.source.frequency}
+    resample_frequency: 20
+    window_size: 30
     lowpass_cutoff: 5
     bandpass_cutoff:
       - 0.1
