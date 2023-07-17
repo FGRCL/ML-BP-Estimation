@@ -11,7 +11,8 @@ class TestSeriesPreprocessing(TestCase):
         train, _, _ = SignalDatasetLoaderFixture(720).load_datasets()
         pipeline = SeriesPreprocessing(
             125,
-            0.2,
+            20,
+            10,
             5,
             (0.1, 8),
         )
