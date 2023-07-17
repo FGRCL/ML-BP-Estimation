@@ -3,7 +3,7 @@ from typing import Any
 from omegaconf import MISSING
 
 from mlbpestimation.configuration.decorators import configuration
-from mlbpestimation.configuration.train.hypothesis.dataset.datasetconfiguration import DatasetConfiguration
+from mlbpestimation.configuration.hypothesis.dataset.datasetconfiguration import DatasetConfiguration
 
 
 @configuration('base_hypothesis_configuration', 'hypothesis')

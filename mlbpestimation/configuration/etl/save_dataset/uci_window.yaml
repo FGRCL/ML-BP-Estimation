@@ -1,4 +1,0 @@
-defaults:
-  - dataset: uci_window
-
-save_directory: ${data_directory}/uci-window

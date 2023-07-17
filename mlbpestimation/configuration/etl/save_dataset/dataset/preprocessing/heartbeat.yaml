@@ -1,2 +1,0 @@
-_target_: mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing.HeartbeatPreprocessing
-frequency: ${save_dataset.dataset.dataset_loader.frequency}

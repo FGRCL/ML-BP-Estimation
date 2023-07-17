@@ -1,6 +1,6 @@
 defaults:
   - optimizer: adam
-  - loss: meansquarederror
+  - loss: meanabsoluteerror
   - _self_
 
 optimizer:

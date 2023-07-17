@@ -4,7 +4,7 @@ from hydra.utils import instantiate
 from omegaconf import OmegaConf
 from wandb import Settings, init
 
-from mlbpestimation.configuration.train.train import Train
+from mlbpestimation.configuration.train import Train
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.hypothesis import Hypothesis
 from mlbpestimation.models.basemodel import BloodPressureModel
@@ -12,7 +12,7 @@ from mlbpestimation.models.basemodel import BloodPressureModel
 load_dotenv()
 
 
-@main('configuration/train', 'train', None)
+@main('configuration', 'train', None)
 def main(configuration: Train):
     dataset: DatasetLoader = instantiate(configuration.hypothesis.dataset.source)
     if 'decorators' in configuration.hypothesis.dataset:

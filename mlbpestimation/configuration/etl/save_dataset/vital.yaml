@@ -1,8 +1,0 @@
-defaults:
-  - base_save_dataset_configuration
-  - _self_
-
-dataset:
-  _target_: mlbpestimation.data.vitaldb.vitaldatasetloader.VitalDatasetLoader
-  random_seed: ${random_seed}
-save_directory: ${data_directory}/vital-cached

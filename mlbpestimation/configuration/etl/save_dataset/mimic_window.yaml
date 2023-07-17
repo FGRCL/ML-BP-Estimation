@@ -1,4 +1,0 @@
-defaults:
-  - dataset: mimic_window
-
-save_directory: ${data_directory}/mimic-window

@@ -1,4 +1,0 @@
-defaults:
-  - dataset: uci_heartbeat
-
-save_directory: ${data_directory}/uci-heartbeat

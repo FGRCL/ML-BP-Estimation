@@ -1,7 +1,7 @@
 from mlbpestimation.configuration.decorators import configuration
-from mlbpestimation.configuration.train.directories.directoriesconfiguration import DirectoriesConfiguration
-from mlbpestimation.configuration.train.hypothesis.hypothesisconfiguration import HypothesisConfiguration
-from mlbpestimation.configuration.train.wandb.wandbconfiguration import WandbConfiguration
+from mlbpestimation.configuration.directories.directoriesconfiguration import DirectoriesConfiguration
+from mlbpestimation.configuration.hypothesis.hypothesisconfiguration import HypothesisConfiguration
+from mlbpestimation.configuration.wandb.wandbconfiguration import WandbConfiguration
 
 
 @configuration('base_train_configuration')
