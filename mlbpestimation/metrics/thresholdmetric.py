@@ -1,7 +1,7 @@
 from keras.metrics import Metric
 from numpy import inf
 from tensorflow import greater, less, logical_and
-from tensorflow.python.ops.array_ops import boolean_mask
+from tensorflow.python.ops.array_ops import boolean_mask, size
 
 
 class ThresholdMetric(Metric):
@@ -17,7 +17,8 @@ class ThresholdMetric(Metric):
         y_true = boolean_mask(y_true, mask)
         y_pred = boolean_mask(y_pred, mask)
         sample_weight = boolean_mask(sample_weight, mask) if sample_weight is not None else sample_weight
-        self.metric.update_state(y_true, y_pred, sample_weight)
+        if size(y_true) > 0:
+            self.metric.update_state(y_true, y_pred, sample_weight)
 
     def result(self):
         return self.metric.result()

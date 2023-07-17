@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from keras.metrics import MeanAbsoluteError
-from numpy import arange, average, float32, mean
+from numpy import arange, asarray, average, float32, mean
 
 from mlbpestimation.metrics.thresholdmetric import ThresholdMetric
 
@@ -63,3 +63,37 @@ class TestThresholdMetric(TestCase):
 
         expected = mean(abs(y_true_batches[:, 6:15] - y_pred_batches[:, 6:15]))
         self.assertEqual(expected, result)
+
+    def test_empty_array(self):
+        metric = ThresholdMetric(MeanAbsoluteError(), lower=5, upper=15)
+        y_true = asarray([])
+        y_pred = asarray([])
+
+        metric.update_state(y_true, y_pred)
+        result = metric.result()
+
+        expected = 0.0
+        self.assertEqual(expected, result)
+
+    def test_multiple_batches_with_empty_array(self):
+        metric = ThresholdMetric(MeanAbsoluteError(), lower=0, upper=100)
+        y_true_batches = ([
+            asarray([39, 22, 73]),
+            asarray([]),
+            asarray([22, 50, 23])
+        ])
+        y_pred_batches = ([
+            asarray([80, 59, 52]),
+            asarray([]),
+            asarray([87, 8, 38]),
+        ])
+
+        for y_true, y_pred in zip(y_true_batches, y_pred_batches):
+            metric.update_state(y_true, y_pred)
+        result = metric.result()
+
+        absolute_errors = []
+        for y_true, y_pred in zip(y_true_batches, y_pred_batches):
+            absolute_errors += list(abs(y_true - y_pred))
+        expected = mean(absolute_errors)
+        self.assertAlmostEqual(expected, result.numpy(), 5)
