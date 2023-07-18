@@ -23,5 +23,5 @@ class TestSeriesPreprocessing(TestCase):
         self.assertIsNotNone(dataset)
         self.assertIsNotNone(element)
         self.assertEqual((TensorShape([None, 1]), TensorShape([None, 1])), dataset.output_shapes)
-        self.assertEqual((90000, 1), element[0].shape)
-        self.assertEqual((90000, 1), element[1].shape)
+        self.assertEqual((12000, 1), element[0].shape)
+        self.assertEqual((12000, 1), element[1].shape)
