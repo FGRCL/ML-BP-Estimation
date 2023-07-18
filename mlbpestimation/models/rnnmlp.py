@@ -84,11 +84,6 @@ class RnnModule(Layer):
     def call(self, inputs, *args, **kwargs):
         return self._layers(inputs, *args, **kwargs)
 
-    def get_config(self):
-        return {
-
-        }
-
 
 class MlpModule(Layer):
     def __init__(self, n_layers, n_units, activation, **kwargs):

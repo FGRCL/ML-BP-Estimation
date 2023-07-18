@@ -1,4 +1,0 @@
-defaults:
-  - dataset: mimic_heartbeat
-
-save_directory: ${data_directory}/mimic-heartbeat

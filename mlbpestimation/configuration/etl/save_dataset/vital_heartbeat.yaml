@@ -1,5 +1,0 @@
-defaults:
-  - dataset: vital_heartbeat
-
-save_directory: ${data_directory}/vital-heartbeat
-

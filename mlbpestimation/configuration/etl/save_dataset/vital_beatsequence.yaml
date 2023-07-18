@@ -1,4 +1,0 @@
-defaults:
-  - dataset: vital_beatsequence
-
-save_directory: ${data_directory}/vital-beatsequence

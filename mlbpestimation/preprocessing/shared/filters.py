@@ -6,8 +6,11 @@ from mlbpestimation.preprocessing.base import FilterOperation
 
 class HasData(FilterOperation):
 
-    def filter(self, *args) -> bool:
-        return reduce_all(size(args) != 0)
+    def filter(self, input_signal: Tensor, output_signal: Tensor) -> bool:
+        return logical_and(
+            size(input_signal) > 1,
+            size(output_signal) > 1,
+        )
 
 
 class FilterPressureWithinBounds(FilterOperation):

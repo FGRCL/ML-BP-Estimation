@@ -1,0 +1,5 @@
+_target_: mlbpestimation.models.rnn.Rnn
+n_units: 100
+n_layers: 1
+rnn_implementation: rnn
+output_size: 1

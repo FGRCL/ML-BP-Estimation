@@ -106,9 +106,7 @@ class Print(TransformOperation):
         self.operation_name = operation_name
 
     def transform(self, *args) -> Any:
-        tf.print(self.operation_name)
-        for i, tensor in enumerate(args):
-            tf.print(f'{i}:', tensor)
+        tf.print(self.operation_name, *args)
         return args
 
 

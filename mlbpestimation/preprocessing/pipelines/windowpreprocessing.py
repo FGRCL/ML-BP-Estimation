@@ -2,10 +2,10 @@ from tensorflow import bool, float32, reduce_all
 from tensorflow.python.ops.array_ops import size
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation
-from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from mlbpestimation.preprocessing.shared.pipelines import SqiFiltering
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, MakeWindows, RemoveNan, RemoveOutputSignal, SetTensorShape, SignalFilter, \
-    StandardizeArray
+from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds
+from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal, SqiFiltering
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, MakeWindows, RemoveOutputSignal, SetTensorShape, SignalFilter, \
+    StandardizeInput
 
 
 class WindowPreprocessing(DatasetPreprocessingPipeline):
@@ -14,24 +14,22 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
         window_size_frequency = window_size * frequency
         window_step_frequency = window_step * frequency
         super().__init__([
-            HasData(),
-            RemoveNan(),
-            FilterSize(window_size, frequency),
+            FilterHasSignal(),
+            FilterSize(window_size_frequency),
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
             MakeWindows(window_size_frequency, window_step_frequency),
             SqiFiltering(0.35, 0.8),
             AddBloodPressureOutput(),
             RemoveOutputSignal(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
-            StandardizeArray(),
+            StandardizeInput(),
             SetTensorShape([window_size_frequency, 1]),
         ])
 
 
 class FilterSize(FilterOperation):
-    def __init__(self, window_size: int, frequency: int):
-        self.window_size = window_size
-        self.frequency = frequency
+    def __init__(self, signal_size: int):
+        self.signal_size = signal_size
 
     def filter(self, *signals) -> bool:
-        return reduce_all(size(signals) > self.window_size * self.frequency)
+        return reduce_all(size(signals) > self.signal_size)

@@ -30,8 +30,9 @@ class Hypothesis:
     def train(self):
         log.info('Start training')
         train, validation = self.setup_train_val()
+        pressure_output = train.element_spec[1].shape[1] == 2
         self.model.set_input_shape(train.element_spec)
-        self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
+        self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics(pressure_output))
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_data=validation)
         log.info('Finished training')
 
@@ -40,7 +41,7 @@ class Hypothesis:
 
         test = self.dataset.load_datasets().test \
             .cache() \
-            .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
+            .batch(self.optimization.batch_size) \
             .prefetch(AUTOTUNE)
 
         if self.optimization.n_batches is not None:
@@ -53,12 +54,13 @@ class Hypothesis:
         datasets = self.dataset.load_datasets()
         train = datasets.train \
             .cache() \
-            .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE) \
+            .batch(self.optimization.batch_size) \
             .prefetch(AUTOTUNE)
 
         validation = datasets.validation \
             .cache() \
-            .batch(self.optimization.batch_size, drop_remainder=True, num_parallel_calls=AUTOTUNE)
+            .batch(self.optimization.batch_size) \
+            .prefetch(AUTOTUNE)
 
         if self.optimization.n_batches is not None:
             train = train.take(self.optimization.n_batches)
@@ -87,7 +89,7 @@ class Hypothesis:
             EvaluateCallback()
         ]
 
-    def _build_metrics(self):
+    def _build_metrics(self, include_pressure_metrics: bool):
         metric_masks = [
             ([True, False], 'SBP'),
             ([False, True], 'DBP')
@@ -96,15 +98,17 @@ class Hypothesis:
             MeanAbsoluteError(name='Mean Absolute Error'),
             TotalMeanAbsoluteErrorMetric(name='Total Mean Absolute Error')
         ]
-        for mask, name in metric_masks:
-            metrics += [
-                MaskedMetric(MeanAbsoluteError(), mask, name=f'{name} Mean Absolute Error'),
-                MaskedMetric(StandardDeviationAbsoluteError(), mask, name=f'{name} Absolute Error standard Deviation'),
-                MaskedMetric(ThresholdMetric(MeanAbsoluteError(), upper=50), mask, name=f'{name} Mean Absolute Error under 50mmHg'),
-                MaskedMetric(ThresholdMetric(MeanAbsoluteError(), lower=150), mask, name=f'{name} Mean Absolute Error above 150mmHg'),
-                MaskedMetric(ThresholdMetric(MeanAbsoluteError(), lower=50, upper=150), mask, name=f'{name} Mean Absolute Error between 50mmHg and 150mmHg'),
-                MaskedMetric(MeanSquaredError(), mask, name=f'{name} Mean Squared Error'),
-                MaskedMetric(MeanPrediction(), mask, name=f'{name} Prediction Mean'),
-                MaskedMetric(StandardDeviationPrediction(), mask, name=f'{name} Prediction Standard Deviation'),
-            ]
+        if include_pressure_metrics:
+            for mask, name in metric_masks:
+                metrics += [
+                    MaskedMetric(MeanAbsoluteError(), mask, name=f'{name} Mean Absolute Error'),
+                    MaskedMetric(StandardDeviationAbsoluteError(), mask, name=f'{name} Absolute Error standard Deviation'),
+                    MaskedMetric(ThresholdMetric(MeanAbsoluteError(), upper=50), mask, name=f'{name} Mean Absolute Error under 50mmHg'),
+                    MaskedMetric(ThresholdMetric(MeanAbsoluteError(), lower=150), mask, name=f'{name} Mean Absolute Error above 150mmHg'),
+                    MaskedMetric(ThresholdMetric(MeanAbsoluteError(), lower=50, upper=150), mask,
+                                 name=f'{name} Mean Absolute Error between 50mmHg and 150mmHg'),
+                    MaskedMetric(MeanSquaredError(), mask, name=f'{name} Mean Squared Error'),
+                    MaskedMetric(MeanPrediction(), mask, name=f'{name} Prediction Mean'),
+                    MaskedMetric(StandardDeviationPrediction(), mask, name=f'{name} Prediction Standard Deviation'),
+                ]
         return metrics
