@@ -1,9 +1,10 @@
 from typing import List
 
+from kapre.time_frequency import Magnitude, STFT
 from keras import Sequential
 from keras.engine.base_layer import Layer
 from keras.engine.input_layer import InputLayer
-from keras.layers import Add, AveragePooling1D, BatchNormalization, Conv1D, Dense, Dropout, GRU, ReLU
+from keras.layers import Add, AveragePooling1D, BatchNormalization, Concatenate, Conv1D, Dense, Dropout, GRU, ReLU, Reshape
 from keras.regularizers import l2
 from numpy import arange, concatenate, full, log2
 from omegaconf import ListConfig
@@ -44,11 +45,20 @@ class Slapnicar(BloodPressureModel):
             self._resnet_blocks.add(
                 ResNetBlock(resnet_filter, self.resnet_block_kernels, pool_size, pool_stride)
             )
-        self._regressor = Regressor(gru_units, dense_units, output_units, l2_lambda, dropout_rate)
+        self._spectro_temporal_block = SpectroTemporalBlock()
+        self._gru_block = Sequential([
+            GRU(gru_units),
+            BatchNormalization(),
+        ])
+        self._concatenate = Concatenate()
+        self._regressor = Regressor(dense_units, output_units, l2_lambda, dropout_rate)
 
     def call(self, inputs, training=None, mask=None):
         x = self._input_layer(inputs, training, mask)
-        x = self._resnet_blocks(x, training, mask)
+        resnet_output = self._resnet_blocks(x, training, mask)
+        gru_output = self._gru_block(resnet_output)
+        spectrotemporal_output = self._spectro_temporal_block(x, training, mask)
+        x = self._concatenate([gru_output, spectrotemporal_output])
         return self._regressor(x, training, mask)
 
     def get_config(self):
@@ -83,12 +93,9 @@ class Slapnicar(BloodPressureModel):
 
 
 class Regressor(Layer):
-    def __init__(self, gru_units: int, dense_units: int, output_units: int, l2_lambda: float, dropout_rate: float):
+    def __init__(self, dense_units: int, output_units: int, l2_lambda: float, dropout_rate: float):
         super().__init__()
         self._layers = Sequential([
-            BatchNormalization(),
-            GRU(gru_units),
-            BatchNormalization(),
             Dense(dense_units, kernel_regularizer=l2(l2_lambda)),
             ReLU(),
             Dropout(dropout_rate),
@@ -136,3 +143,25 @@ class ConvBlock(Layer):
 
     def call(self, inputs, training=None, mask=None):
         return self._layers(inputs, training, mask)
+
+
+class SpectroTemporalBlock(Layer):
+    def __init__(self):
+        super().__init__()
+        self._spectrogram = Sequential([
+            STFT(
+                n_fft=128,
+                input_data_format="channels_last",
+                output_data_format="channels_last",
+            ),
+            Magnitude()
+        ])
+        self._temporal = Sequential([
+            GRU(64),
+            BatchNormalization(),
+        ])
+
+    def call(self, inputs, training=None, mask=None):
+        x = self._spectrogram(inputs, training, mask)
+        x = Reshape((*x.shape[1:2], -1))(x)
+        return self._temporal(x, training, mask)
