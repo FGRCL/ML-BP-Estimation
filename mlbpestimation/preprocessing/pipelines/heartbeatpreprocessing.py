@@ -9,7 +9,7 @@ from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, Nump
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal, SqiFiltering
 from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveOutputSignal, SetTensorShape, SignalFilter, \
-    StandardizeInput
+    StandardScaling
 
 
 class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
@@ -25,7 +25,7 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             AddBloodPressureOutput(),
             RemoveOutputSignal(),
             FilterPressureWithinBounds(min_pressure, max_pressure),
-            StandardizeInput(),
+            StandardScaling(),
             SetTensorShape([beat_length, 1]),
         ]
         super().__init__(dataset_operations)

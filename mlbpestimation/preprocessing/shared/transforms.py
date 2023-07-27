@@ -22,7 +22,7 @@ class RemoveNan(TransformOperation):
         return boolean_mask(tensor, logical_not(is_nan(tensor)))
 
 
-class StandardizeInput(TransformOperation):
+class StandardScaling(TransformOperation):
     def __init__(self, axis=0):
         self.axis = axis
 

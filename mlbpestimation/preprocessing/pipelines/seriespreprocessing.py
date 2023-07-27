@@ -6,7 +6,7 @@ from tensorflow import DType, Tensor, float32, reshape
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation, TransformOperation
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import MakeWindows, SignalFilter, StandardizeInput
+from mlbpestimation.preprocessing.shared.transforms import MakeWindows, SignalFilter, StandardScaling
 
 SECONDS_IN_MINUTES = 60
 
@@ -19,7 +19,7 @@ class SeriesPreprocessing(DatasetPreprocessingPipeline):
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
             ResampleSignals((float32, float32), frequency, resample_frequency),
             MakeWindows(window_samples, window_samples),
-            StandardizeInput(),
+            StandardScaling(),
             ExpandFeatureDimension(),
         ])
 

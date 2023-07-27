@@ -11,7 +11,7 @@ from tensorflow.python.ops.signal.shape_ops import frame
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, NumpyTransformOperation, TransformOperation, WithOptions
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import FlattenDataset, SignalFilter, StandardizeInput
+from mlbpestimation.preprocessing.shared.transforms import FlattenDataset, SignalFilter, StandardScaling
 
 
 class WindowPreprocessing(DatasetPreprocessingPipeline):
@@ -41,7 +41,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             AddBloodPressureOutput(),
             EnsureShape([None, window_size_frequency], [None, 2]),
             FilterPressureWithinBounds(min_pressure, max_pressure),
-            StandardizeInput(axis=1),
+            StandardScaling(axis=1),
             FlattenDataset(),
             Reshape([window_size_frequency, 1], [2]),
             WithOptions(self.options)
