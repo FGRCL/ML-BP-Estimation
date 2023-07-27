@@ -3,7 +3,7 @@ from typing import Any, List, Tuple, Union
 
 import tensorflow as tf
 from tensorflow import DType, Tensor, numpy_function, py_function
-from tensorflow.python.data import AUTOTUNE, Dataset
+from tensorflow.python.data import AUTOTUNE, Dataset, Options
 
 
 class DatasetOperation(ABC):
@@ -98,6 +98,14 @@ class FlatMap(DatasetOperation):
     @abstractmethod
     def flatten(self, *args) -> Tuple[Dataset, ...]:
         ...
+
+
+class WithOptions(DatasetOperation):
+    def __init__(self, options: Options):
+        self.options = options
+
+    def apply(self, dataset: Dataset) -> Dataset:
+        return dataset.with_options(self.options)
 
 
 # This class is mainly used for debugging
