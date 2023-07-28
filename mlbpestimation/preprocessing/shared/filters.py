@@ -13,16 +13,6 @@ class HasData(FilterOperation):
         )
 
 
-class FilterPressureWithinBounds(FilterOperation):
-    def __init__(self, min_pressure, max_pressure):
-        self.min_pressure = min_pressure
-        self.max_pressure = max_pressure
-
-    def filter(self, input_window: Tensor, blood_pressures: Tensor = None) -> bool:
-        sbp, dbp = blood_pressures[0], blood_pressures[1]
-        return reduce_all(logical_and(less(sbp, self.max_pressure), greater(dbp, self.min_pressure)))
-
-
 class FilterSqi(FilterOperation):
     def __init__(self, low_threshold, high_threshold):
         self.low_threshold = low_threshold

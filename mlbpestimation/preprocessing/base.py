@@ -4,6 +4,7 @@ from typing import Any, List, Tuple, Union
 import tensorflow as tf
 from tensorflow import DType, Tensor, numpy_function, py_function
 from tensorflow.python.data import AUTOTUNE, Dataset, Options
+from tensorflow.python.ops.array_ops import shape
 
 
 class DatasetOperation(ABC):
@@ -115,6 +116,18 @@ class Print(TransformOperation):
 
     def transform(self, *args) -> Any:
         tf.print(self.operation_name, *args)
+        return args
+
+
+# This class is mainly used for debugging
+# TODO needs to print on a single line
+class PrintShape(TransformOperation):
+    def __init__(self, name: str):
+        self.name = name
+
+    def transform(self, *args) -> Any:
+        for i, a in enumerate(args):
+            tf.print(self.name, i, shape(a))
         return args
 
 

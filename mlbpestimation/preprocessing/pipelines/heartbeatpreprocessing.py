@@ -4,15 +4,29 @@ from neurokit2 import ppg_clean, ppg_findpeaks
 from numpy import argmin, empty, float32 as nfloat32, ndarray, zeros
 from scipy.signal import find_peaks, resample
 from tensorflow import DType, Tensor, float32 as tfloat32
+from tensorflow.python.data.ops.options import AutotuneAlgorithm, AutotuneOptions, Options, ThreadingOptions
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyFilterOperation, NumpyTransformOperation
-from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, HasData
-from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal, SqiFiltering
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, FlattenDataset, RemoveOutputSignal, SetTensorShape, SignalFilter, \
-    StandardScaling
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyFilterOperation, NumpyTransformOperation, WithOptions
+from mlbpestimation.preprocessing.shared.filters import HasData
+from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, EnsureShape, FilterPressureWithinBounds, FlattenDataset, Reshape, SignalFilter, \
+    SqiFiltering, StandardScaling
 
 
 class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
+    autotune_options = AutotuneOptions()
+    autotune_options.autotune_algorithm = AutotuneAlgorithm.MAX_PARALLELISM
+    autotune_options.enabled = True
+    autotune_options.ram_budget = int(3.2e10)
+
+    threading_options = ThreadingOptions()
+    threading_options.private_threadpool_size = 0
+
+    options = Options()
+    options.autotune = autotune_options
+    options.deterministic = True
+    options.threading = threading_options
+
     def __init__(self, frequency=500, lowpass_cutoff=5, bandpass_cutoff=(0.1, 8), min_pressure=30, max_pressure=230,
                  beat_length=400):
         dataset_operations = [
@@ -20,13 +34,14 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             SignalFilter((tfloat32, tfloat32), frequency, lowpass_cutoff, bandpass_cutoff),
             SplitHeartbeats((tfloat32, tfloat32), frequency, beat_length),
             HasData(),
-            FlattenDataset(),
-            SqiFiltering(0.5, 2),
-            AddBloodPressureOutput(),
-            RemoveOutputSignal(),
+            SqiFiltering((tfloat32, tfloat32), 0.5, 2, axis=1),
+            AddBloodPressureOutput(axis=1),
+            EnsureShape([None, beat_length], [None, 2]),
             FilterPressureWithinBounds(min_pressure, max_pressure),
-            StandardScaling(),
-            SetTensorShape([beat_length, 1]),
+            StandardScaling(axis=1),
+            Reshape([-1, beat_length, 1], [-1, 2]),
+            FlattenDataset(),
+            WithOptions(self.options)
         ]
         super().__init__(dataset_operations)
 
@@ -51,7 +66,7 @@ class SplitHeartbeats(NumpyTransformOperation):
         lowpass_beats = self._get_beats(trough_indices, lowpass_signal)
         bandpass_beats = self._get_beats(trough_indices, bandpass_signal)
 
-        return [lowpass_beats, bandpass_beats]
+        return lowpass_beats, bandpass_beats
 
     def _get_troughs(self, peak_indices, lowpass_signal):
         trough_count = len(peak_indices) - 1

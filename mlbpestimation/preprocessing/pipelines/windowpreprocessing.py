@@ -1,17 +1,14 @@
-from typing import Any, List, Optional, Tuple, Union
+from typing import Tuple
 
-from numpy import ndarray
-from scipy.stats import skew
-from tensorflow import DType, Tensor, bool, ensure_shape, float32, reduce_all, reduce_max, reduce_min, reshape
+from tensorflow import Tensor, bool, float32, reduce_all
 from tensorflow.python.data import Options
 from tensorflow.python.data.ops.options import AutotuneAlgorithm, AutotuneOptions, ThreadingOptions
-from tensorflow.python.ops.array_ops import size, stack
-from tensorflow.python.ops.numpy_ops import shape
+from tensorflow.python.ops.array_ops import size
 from tensorflow.python.ops.signal.shape_ops import frame
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, NumpyTransformOperation, TransformOperation, WithOptions
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, TransformOperation, WithOptions
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import FlattenDataset, SignalFilter, StandardScaling
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, EnsureShape, FilterPressureWithinBounds, FlattenDataset, Reshape, SignalFilter, SqiFiltering, StandardScaling
 
 
 class WindowPreprocessing(DatasetPreprocessingPipeline):
@@ -37,13 +34,13 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             FilterSize(window_size_frequency),
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
             SlidingWindow(window_size_frequency, window_step_frequency),
-            SqiFiltering((float32, float32), 0.35, 0.8),
-            AddBloodPressureOutput(),
+            SqiFiltering((float32, float32), 0.35, 0.8, 1),
+            AddBloodPressureOutput(1),
             EnsureShape([None, window_size_frequency], [None, 2]),
             FilterPressureWithinBounds(min_pressure, max_pressure),
             StandardScaling(axis=1),
+            Reshape([-1, window_size_frequency, 1], [-1, 2]),
             FlattenDataset(),
-            Reshape([window_size_frequency, 1], [2]),
             WithOptions(self.options)
         ])
 
@@ -63,62 +60,3 @@ class SlidingWindow(TransformOperation):
 
     def transform(self, input_signal: Tensor, output_signal: Tensor) -> Tuple[Tensor, Tensor]:
         return frame(input_signal, self.size, self.shift), frame(output_signal, self.size, self.shift)
-
-
-class SqiFiltering(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], min: float, max: float):
-        super().__init__(out_type)
-        self.min = min
-        self.max = max
-
-    def transform(self, input_windows: ndarray, output_windows: ndarray) -> Tuple[ndarray, ndarray]:
-        skewness = skew(input_windows, axis=1)
-        valid_idx = (self.min < skewness) & (skewness < self.max)
-        return input_windows[valid_idx], output_windows[valid_idx]
-
-
-class AddBloodPressureOutput(TransformOperation):
-    def transform(self, input_windows: ndarray, output_windows: ndarray) -> Any:
-        sbp = reduce_max(output_windows, axis=1)
-        dbp = reduce_min(output_windows, axis=1)
-        pressures = stack((sbp, dbp), axis=1)
-
-        return input_windows, pressures
-
-
-class FilterPressureWithinBounds(TransformOperation):
-    def __init__(self, min: int, max: int):
-        self.min = min
-        self.max = max
-
-    def transform(self, input_windows: Tensor, pressures: Tensor) -> Tuple[ndarray, ndarray]:
-        sbp = pressures[:, 0]
-        dbp = pressures[:, 1]
-        valid_idx = (self.min < sbp) & (sbp < self.max) & (self.min < dbp) & (dbp < self.max)
-        return input_windows[valid_idx], pressures[valid_idx]
-
-
-class PrintShape(TransformOperation):
-    def __init__(self, name: str):
-        self.name = name
-
-    def transform(self, *args) -> Any:
-        for i, a in enumerate(args):
-            print(self.name, i, shape(a))
-        return args
-
-
-class EnsureShape(TransformOperation):
-    def __init__(self, *shapes: List[Optional[int]]):
-        self.shapes = shapes
-
-    def transform(self, *args: Tensor) -> Tuple[Tensor, ...]:
-        return tuple((ensure_shape(tensor, shape) for tensor, shape in zip(args, self.shapes)))
-
-
-class Reshape(TransformOperation):
-    def __init__(self, *shapes: List[Optional[int]]):
-        self.shapes = shapes
-
-    def transform(self, *args) -> Any:
-        return tuple((reshape(tensor, shape) for tensor, shape in zip(args, self.shapes)))

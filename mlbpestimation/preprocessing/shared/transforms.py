@@ -1,11 +1,11 @@
-from typing import Any, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 from numpy import asarray, float32, ndarray
 from scipy.signal import butter, sosfilt
 from scipy.stats import skew
-from tensorflow import DType, Tensor, cast, reduce_max, reduce_mean, reduce_min, reshape
+from tensorflow import DType, Tensor, cast, ensure_shape, reduce_max, reduce_mean, reduce_min, reshape
 from tensorflow.python.data import Dataset
-from tensorflow.python.ops.array_ops import boolean_mask
+from tensorflow.python.ops.array_ops import boolean_mask, stack
 from tensorflow.python.ops.gen_math_ops import is_nan
 from tensorflow.python.ops.math_ops import reduce_std
 from tensorflow.python.ops.numpy_ops import logical_not
@@ -23,7 +23,7 @@ class RemoveNan(TransformOperation):
 
 
 class StandardScaling(TransformOperation):
-    def __init__(self, axis=0):
+    def __init__(self, axis):
         self.axis = axis
 
     def transform(self, input_window: Tensor, pressures: Tensor) -> (Tensor, Tensor):
@@ -50,13 +50,15 @@ class SignalFilter(NumpyTransformOperation):
 
 
 class AddBloodPressureOutput(TransformOperation):
-    def __init__(self, axis: int = 0):
+    def __init__(self, axis):
         self.axis = axis
 
-    def transform(self, input_window: Tensor, output_window: Tensor = None) -> Any:
-        sbp = reduce_max(output_window, self.axis)
-        dbp = reduce_min(output_window, self.axis)
-        return input_window, output_window, [sbp, dbp]
+    def transform(self, input_windows: Tensor, output_windows: Tensor = None) -> Any:
+        sbp = reduce_max(output_windows, self.axis)
+        dbp = reduce_min(output_windows, self.axis)
+        pressures = stack((sbp, dbp), self.axis)
+
+        return input_windows, pressures
 
 
 class RemoveOutputSignal(TransformOperation):
@@ -68,14 +70,6 @@ class FlattenDataset(FlatMap):
     @staticmethod
     def flatten(*args) -> Dataset:
         return Dataset.from_tensor_slices(args)
-
-
-class SetTensorShape(TransformOperation):
-    def __init__(self, shape):
-        self.shape = shape
-
-    def transform(self, input_window: Tensor, pressures: Tensor = None) -> Any:
-        return reshape(input_window, self.shape), reshape(pressures, [2])
 
 
 class Cast(TransformOperation):
@@ -110,3 +104,44 @@ class MakeWindows(TransformOperation):
         return Dataset.from_tensor_slices((input_signal, output_signal)) \
             .window(self.window_size, self.step, drop_remainder=True) \
             .flat_map(lambda low, high: Dataset.zip((low.batch(self.window_size), high.batch(self.window_size))))
+
+
+class SqiFiltering(NumpyTransformOperation):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], min: float, max: float, axis: int):
+        super().__init__(out_type)
+        self.min = min
+        self.max = max
+        self.axis = axis
+
+    def transform(self, input_windows: ndarray, output_windows: ndarray) -> Tuple[ndarray, ndarray]:
+        skewness = skew(input_windows, axis=self.axis)
+        valid_idx = (self.min < skewness) & (skewness < self.max)
+        return input_windows[valid_idx], output_windows[valid_idx]
+
+
+class EnsureShape(TransformOperation):
+    def __init__(self, *shapes: List[Optional[int]]):
+        self.shapes = shapes
+
+    def transform(self, *args: Tensor) -> Tuple[Tensor, ...]:
+        return tuple((ensure_shape(tensor, shape) for tensor, shape in zip(args, self.shapes)))
+
+
+class Reshape(TransformOperation):
+    def __init__(self, *shapes: List[Optional[int]]):
+        self.shapes = shapes
+
+    def transform(self, *args) -> Any:
+        return tuple((reshape(tensor, shape) for tensor, shape in zip(args, self.shapes)))
+
+
+class FilterPressureWithinBounds(TransformOperation):
+    def __init__(self, min: int, max: int):
+        self.min = min
+        self.max = max
+
+    def transform(self, input_windows: Tensor, pressures: Tensor) -> Tuple[ndarray, ndarray]:
+        sbp = pressures[:, 0]
+        dbp = pressures[:, 1]
+        valid_idx = (self.min < sbp) & (sbp < self.max) & (self.min < dbp) & (dbp < self.max)
+        return input_windows[valid_idx], pressures[valid_idx]
