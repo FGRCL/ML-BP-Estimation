@@ -1,13 +1,15 @@
 from typing import Any, List, Optional, Tuple, Union
 
-from numpy import asarray, float32, ndarray
-from scipy.signal import butter, sosfilt
+import tensorflow
+from neurokit2 import ppg_clean, ppg_findpeaks
+from numpy import argmin, asarray, empty, float32, ndarray, zeros
+from scipy.signal import butter, resample, sosfilt
 from scipy.stats import skew
 from tensorflow import DType, Tensor, cast, ensure_shape, reduce_max, reduce_mean, reduce_min, reshape
 from tensorflow.python.data import Dataset
-from tensorflow.python.ops.array_ops import boolean_mask, stack
+from tensorflow.python.ops.array_ops import boolean_mask, gather, shape, stack
 from tensorflow.python.ops.gen_math_ops import is_nan
-from tensorflow.python.ops.math_ops import reduce_all, reduce_std
+from tensorflow.python.ops.math_ops import reduce_std
 from tensorflow.python.ops.numpy_ops import logical_not
 
 from mlbpestimation.preprocessing.base import FlatMap, NumpyTransformOperation, TransformOperation
@@ -103,19 +105,6 @@ class MakeWindows(TransformOperation):
             .flat_map(lambda low, high: Dataset.zip((low.batch(self.window_size), high.batch(self.window_size))))
 
 
-class SqiFiltering(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], min: float, max: float):
-        super().__init__(out_type)
-        self.min = min
-        self.max = max
-
-    def transform(self, input_windows: ndarray, output_windows: ndarray) -> Tuple[ndarray, ndarray]:
-        skewness = skew(input_windows, axis=-1)
-        valid_idx = (self.min < skewness) & (skewness < self.max)
-        valid_idx = reduce_all(valid_idx, tuple(range(1, valid_idx.ndim)))
-        return input_windows[valid_idx], output_windows[valid_idx]
-
-
 class EnsureShape(TransformOperation):
     def __init__(self, *shapes: List[Optional[int]]):
         self.shapes = shapes
@@ -132,13 +121,60 @@ class Reshape(TransformOperation):
         return tuple((reshape(tensor, shape) for tensor, shape in zip(args, self.shapes)))
 
 
-class FilterPressureWithinBounds(TransformOperation):
-    def __init__(self, min: int, max: int):
-        self.min = min
-        self.max = max
+class SlidingWindow(TransformOperation):
+    def __init__(self, width: int, shift: int):
+        self.width = width
+        self.shift = shift
 
-    def transform(self, input_windows: Tensor, pressures: Tensor) -> Tuple[ndarray, ndarray]:
-        sbp = pressures[:, 0]
-        dbp = pressures[:, 1]
-        valid_idx = (self.min < sbp) & (sbp < self.max) & (self.min < dbp) & (dbp < self.max)
-        return input_windows[valid_idx], pressures[valid_idx]
+    def transform(self, input_signal: Tensor, output_signal: Tensor) -> Tuple[Tensor, Tensor]:
+        return self._sliding_window(input_signal), self._sliding_window(output_signal)
+
+    def _sliding_window(self, signal):
+        hops = (shape(signal)[0] - self.width + self.shift) // self.shift
+        window_idx = tensorflow.range(0, self.width) + self.shift * reshape(tensorflow.range(0, hops), (-1, 1))
+        return gather(signal, window_idx)
+
+
+class SplitHeartbeats(NumpyTransformOperation):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], frequency, beat_length):
+        super().__init__(out_type)
+        self.beat_length = beat_length
+        self.frequency = frequency
+
+    def transform(self, lowpass_signal: Tensor, bandpass_signal: Tensor = None) -> Any:
+        try:
+            peak_indices = ppg_findpeaks(ppg_clean(bandpass_signal, self.frequency), self.frequency)['PPG_Peaks']
+        except:
+            return [zeros(0, float32), zeros(0, float32)]
+
+        if len(peak_indices) < 3:
+            return [zeros(0, float32), zeros(0, float32)]
+
+        trough_indices = self._get_troughs(peak_indices, bandpass_signal)
+
+        lowpass_beats = self._get_beats(trough_indices, lowpass_signal)
+        bandpass_beats = self._get_beats(trough_indices, bandpass_signal)
+
+        return lowpass_beats, bandpass_beats
+
+    def _get_troughs(self, peak_indices, lowpass_signal):
+        trough_count = len(peak_indices) - 1
+        trough_indices = empty(trough_count, dtype=int)
+
+        for i, (start_peak_index, end_peak_index) in enumerate(zip(peak_indices[:-1], peak_indices[1:])):
+            trough = argmin(lowpass_signal[start_peak_index: end_peak_index])
+            trough_index = start_peak_index + trough
+            trough_indices[i] = trough_index
+
+        return trough_indices
+
+    def _get_beats(self, trough_indices, signal):
+        beat_count = len(trough_indices) - 1
+        beats = empty((beat_count, self.beat_length), dtype=float32)
+
+        for i, (pulse_onset_index, diastolic_foot_index) in enumerate(zip(trough_indices[:-1], trough_indices[1:])):
+            beat = signal[pulse_onset_index: diastolic_foot_index]
+            beat_resampled = resample(beat, self.beat_length)
+            beats[i] = beat_resampled
+
+        return beats

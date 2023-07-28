@@ -5,9 +5,8 @@ from scipy.signal import resample
 from tensorflow import DType, Tensor, float32, reshape
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation, TransformOperation
-from mlbpestimation.preprocessing.pipelines.windowpreprocessing import SlidingWindow
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import SignalFilter, StandardScaling
+from mlbpestimation.preprocessing.shared.transforms import SignalFilter, SlidingWindow, StandardScaling
 
 SECONDS_IN_MINUTES = 60
 

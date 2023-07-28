@@ -1,14 +1,12 @@
-from typing import Tuple
-
-import tensorflow as tf
-from tensorflow import Tensor, bool, float32, reduce_all, reshape
+from tensorflow import bool, float32, reduce_all
 from tensorflow.python.data import Options
 from tensorflow.python.data.ops.options import AutotuneAlgorithm, AutotuneOptions, ThreadingOptions
-from tensorflow.python.ops.array_ops import gather, shape, size
+from tensorflow.python.ops.array_ops import size
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, TransformOperation, WithOptions
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, WithOptions
+from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, FilterSqi
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, EnsureShape, FilterPressureWithinBounds, FlattenDataset, Reshape, SignalFilter, SqiFiltering, StandardScaling
+from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, EnsureShape, FlattenDataset, Reshape, SignalFilter, SlidingWindow, StandardScaling
 
 
 class WindowPreprocessing(DatasetPreprocessingPipeline):
@@ -22,7 +20,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
 
     options = Options()
     options.autotune = autotune_options
-    options.deterministic = True
+    options.deterministic = False
     options.threading = threading_options
 
     def __init__(self, frequency: int = 500, window_size: int = 8, window_step: int = 2, min_pressure: int = 30,
@@ -34,7 +32,7 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             FilterSize(window_size_frequency),
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
             SlidingWindow(window_size_frequency, window_step_frequency),
-            SqiFiltering((float32, float32), 0.35, 0.8),
+            FilterSqi((float32, float32), 0.35, 0.8),
             AddBloodPressureOutput(),
             EnsureShape([None, window_size_frequency], [None, 2]),
             FilterPressureWithinBounds(min_pressure, max_pressure),
@@ -51,17 +49,3 @@ class FilterSize(FilterOperation):
 
     def filter(self, *signals) -> bool:
         return reduce_all(size(signals) > self.signal_size)
-
-
-class SlidingWindow(TransformOperation):
-    def __init__(self, width: int, shift: int):
-        self.width = width
-        self.shift = shift
-
-    def transform(self, input_signal: Tensor, output_signal: Tensor) -> Tuple[Tensor, Tensor]:
-        return self._sliding_window(input_signal), self._sliding_window(output_signal)
-
-    def _sliding_window(self, signal):
-        hops = (shape(signal)[0] - self.width + self.shift) // self.shift
-        window_idx = tf.range(0, self.width) + self.shift * reshape(tf.range(0, hops), (-1, 1))
-        return gather(signal, window_idx)

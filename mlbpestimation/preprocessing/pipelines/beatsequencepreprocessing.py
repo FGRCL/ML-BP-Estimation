@@ -4,12 +4,9 @@ from tensorflow import Tensor, float32, reduce_max, reduce_min, stack
 from tensorflow.python.ops.array_ops import shape
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, TransformOperation
-from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import SplitHeartbeats
-from mlbpestimation.preprocessing.pipelines.windowpreprocessing import SlidingWindow
-from mlbpestimation.preprocessing.shared.filters import HasData
+from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, FilterSqi, HasData
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import EnsureShape, FilterPressureWithinBounds, FlattenDataset, Reshape, SignalFilter, \
-    SqiFiltering, StandardScaling
+from mlbpestimation.preprocessing.shared.transforms import EnsureShape, FlattenDataset, Reshape, SignalFilter, SlidingWindow, SplitHeartbeats, StandardScaling
 
 
 class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
@@ -22,7 +19,7 @@ class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
             SplitHeartbeats((float32, float32), frequency, beat_length),
             FilterBeats(sequence_steps),
             SlidingWindow(sequence_steps, sequence_stride),
-            SqiFiltering((float32, float32), 0.5, 2),
+            FilterSqi((float32, float32), 0.5, 2),
             HasData(),
             AddBeatSequenceBloodPressure(),
             EnsureShape([None, sequence_steps, beat_length], [None, 2]),
@@ -31,11 +28,6 @@ class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
             Reshape([-1, sequence_steps, beat_length], [-1, 2]),
             FlattenDataset()
         ])
-
-
-class RemovePressures(TransformOperation):
-    def transform(self, beat_sequence: Tensor, pressures: Tensor) -> (Tensor, Tensor):
-        return beat_sequence, pressures[:, -1]
 
 
 class AddBeatSequenceBloodPressure(TransformOperation):
