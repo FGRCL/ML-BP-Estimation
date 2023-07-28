@@ -1,10 +1,10 @@
 from typing import Tuple
 
-from tensorflow import Tensor, bool, float32, reduce_all
+import tensorflow as tf
+from tensorflow import Tensor, bool, float32, reduce_all, reshape
 from tensorflow.python.data import Options
 from tensorflow.python.data.ops.options import AutotuneAlgorithm, AutotuneOptions, ThreadingOptions
-from tensorflow.python.ops.array_ops import size
-from tensorflow.python.ops.signal.shape_ops import frame
+from tensorflow.python.ops.array_ops import gather, shape, size
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, TransformOperation, WithOptions
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
@@ -34,8 +34,8 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             FilterSize(window_size_frequency),
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
             SlidingWindow(window_size_frequency, window_step_frequency),
-            SqiFiltering((float32, float32), 0.35, 0.8, 1),
-            AddBloodPressureOutput(1),
+            SqiFiltering((float32, float32), 0.35, 0.8),
+            AddBloodPressureOutput(),
             EnsureShape([None, window_size_frequency], [None, 2]),
             FilterPressureWithinBounds(min_pressure, max_pressure),
             StandardScaling(axis=1),
@@ -54,9 +54,14 @@ class FilterSize(FilterOperation):
 
 
 class SlidingWindow(TransformOperation):
-    def __init__(self, size: int, shift: int):
-        self.size = size
+    def __init__(self, width: int, shift: int):
+        self.width = width
         self.shift = shift
 
     def transform(self, input_signal: Tensor, output_signal: Tensor) -> Tuple[Tensor, Tensor]:
-        return frame(input_signal, self.size, self.shift), frame(output_signal, self.size, self.shift)
+        return self._sliding_window(input_signal), self._sliding_window(output_signal)
+
+    def _sliding_window(self, signal):
+        hops = (shape(signal)[0] - self.width + self.shift) // self.shift
+        window_idx = tf.range(0, self.width) + self.shift * reshape(tf.range(0, hops), (-1, 1))
+        return gather(signal, window_idx)

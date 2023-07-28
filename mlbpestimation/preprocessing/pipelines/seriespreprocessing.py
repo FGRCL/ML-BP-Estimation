@@ -5,21 +5,22 @@ from scipy.signal import resample
 from tensorflow import DType, Tensor, float32, reshape
 
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation, TransformOperation
+from mlbpestimation.preprocessing.pipelines.windowpreprocessing import SlidingWindow
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import MakeWindows, SignalFilter, StandardScaling
+from mlbpestimation.preprocessing.shared.transforms import SignalFilter, StandardScaling
 
 SECONDS_IN_MINUTES = 60
 
 
 class SeriesPreprocessing(DatasetPreprocessingPipeline):
     def __init__(self, frequency: int, resample_frequency: int, window_size: float, lowpass_cutoff: int, bandpass_cutoff):
-        window_samples = window_size * resample_frequency * SECONDS_IN_MINUTES
+        window_samples = int(window_size * resample_frequency * SECONDS_IN_MINUTES)
         super().__init__([
             FilterHasSignal(),
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
             ResampleSignals((float32, float32), frequency, resample_frequency),
-            MakeWindows(window_samples, window_samples),
-            StandardScaling(),
+            SlidingWindow(window_samples, window_samples),
+            StandardScaling(axis=1),
             ExpandFeatureDimension(),
         ])
 

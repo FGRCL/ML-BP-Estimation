@@ -7,7 +7,7 @@ from tensorflow import DType, Tensor, cast, ensure_shape, reduce_max, reduce_mea
 from tensorflow.python.data import Dataset
 from tensorflow.python.ops.array_ops import boolean_mask, stack
 from tensorflow.python.ops.gen_math_ops import is_nan
-from tensorflow.python.ops.math_ops import reduce_std
+from tensorflow.python.ops.math_ops import reduce_all, reduce_std
 from tensorflow.python.ops.numpy_ops import logical_not
 
 from mlbpestimation.preprocessing.base import FlatMap, NumpyTransformOperation, TransformOperation
@@ -50,13 +50,10 @@ class SignalFilter(NumpyTransformOperation):
 
 
 class AddBloodPressureOutput(TransformOperation):
-    def __init__(self, axis):
-        self.axis = axis
-
     def transform(self, input_windows: Tensor, output_windows: Tensor = None) -> Any:
-        sbp = reduce_max(output_windows, self.axis)
-        dbp = reduce_min(output_windows, self.axis)
-        pressures = stack((sbp, dbp), self.axis)
+        sbp = reduce_max(output_windows, axis=-1)
+        dbp = reduce_min(output_windows, axis=-1)
+        pressures = stack((sbp, dbp), 1)
 
         return input_windows, pressures
 
@@ -107,15 +104,15 @@ class MakeWindows(TransformOperation):
 
 
 class SqiFiltering(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], min: float, max: float, axis: int):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], min: float, max: float):
         super().__init__(out_type)
         self.min = min
         self.max = max
-        self.axis = axis
 
     def transform(self, input_windows: ndarray, output_windows: ndarray) -> Tuple[ndarray, ndarray]:
-        skewness = skew(input_windows, axis=self.axis)
+        skewness = skew(input_windows, axis=-1)
         valid_idx = (self.min < skewness) & (skewness < self.max)
+        valid_idx = reduce_all(valid_idx, tuple(range(1, valid_idx.ndim)))
         return input_windows[valid_idx], output_windows[valid_idx]
 
 

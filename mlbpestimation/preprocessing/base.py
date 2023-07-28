@@ -120,14 +120,18 @@ class Print(TransformOperation):
 
 
 # This class is mainly used for debugging
-# TODO needs to print on a single line
 class PrintShape(TransformOperation):
-    def __init__(self, name: str):
-        self.name = name
+    number = 1
+
+    def __init__(self, name: str = None):
+        if name is None:
+            self.name = PrintShape.number
+            PrintShape.number += 1
+        else:
+            self.name = name
 
     def transform(self, *args) -> Any:
-        for i, a in enumerate(args):
-            tf.print(self.name, i, shape(a))
+        tf.print(self.name, *(shape(a) for a in args))
         return args
 
 
