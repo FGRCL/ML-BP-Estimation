@@ -3,3 +3,11 @@ heartbeat:
   preprocessing:
     _target_: mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing.HeartbeatPreprocessing
     frequency: ${hypothesis.dataset.source.frequency}
+    lowpass_cutoff: 5
+    bandpass_cutoff:
+      - 0.1
+      - 8
+    min_pressure: 30
+    max_pressure: 230
+    beat_length: 400
+    scale_per_signal: false
