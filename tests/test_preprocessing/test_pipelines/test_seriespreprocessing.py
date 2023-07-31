@@ -15,6 +15,7 @@ class TestSeriesPreprocessing(TestCase):
             10,
             5,
             (0.1, 8),
+            False
         )
 
         dataset = pipeline.apply(train)
