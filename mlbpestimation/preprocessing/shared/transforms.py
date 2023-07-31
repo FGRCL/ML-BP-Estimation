@@ -101,12 +101,12 @@ class RemoveSqi(TransformOperation):
         return input_window, output_window
 
 
-class MakeWindows(FlatMap):
+class MakeWindows(TransformOperation):
     def __init__(self, window_size, step):
         self.window_size = window_size
         self.step = step
 
-    def flatten(self, input_signal: Tensor, output_signal: Tensor) -> Tuple[Dataset, Dataset]:
+    def transform(self, input_signal: Tensor, output_signal: Tensor) -> Dataset:
         return Dataset.from_tensor_slices((input_signal, output_signal)) \
             .window(self.window_size, self.step, drop_remainder=True) \
             .flat_map(lambda low, high: Dataset.zip((low.batch(self.window_size), high.batch(self.window_size))))
