@@ -17,6 +17,7 @@ class TestWindowPreprocessing(TestCase):
             230,
             5,
             (0.1, 8),
+            False,
         )
 
         dataset = pipeline.apply(train)

@@ -9,3 +9,4 @@ heartbeat:
     bandpass_cutoff:
       - 0.1
       - 8
+    scale_per_signal: false

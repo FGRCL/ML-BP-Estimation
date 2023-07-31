@@ -12,14 +12,21 @@ SECONDS_IN_MINUTES = 60
 
 
 class SeriesPreprocessing(DatasetPreprocessingPipeline):
-    def __init__(self, frequency: int, resample_frequency: int, window_size: float, lowpass_cutoff: int, bandpass_cutoff):
+    def __init__(self,
+                 frequency: int,
+                 resample_frequency: int,
+                 window_size: float,
+                 lowpass_cutoff: int,
+                 bandpass_cutoff,
+                 scale_per_signal: bool):
         window_samples = int(window_size * resample_frequency * SECONDS_IN_MINUTES)
+        scaling_axis = -1 if scale_per_signal else 1
         super().__init__([
             FilterHasSignal(),
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
             ResampleSignals((float32, float32), frequency, resample_frequency),
             SlidingWindow(window_samples, window_samples),
-            StandardScaling(axis=1),
+            StandardScaling(axis=scaling_axis),
             ExpandFeatureDimension(),
         ])
 

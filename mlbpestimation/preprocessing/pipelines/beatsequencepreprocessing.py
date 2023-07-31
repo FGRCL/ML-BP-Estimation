@@ -10,9 +10,17 @@ from mlbpestimation.preprocessing.shared.transforms import EnsureShape, FlattenD
 
 
 class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
-    def __init__(self, frequency: int, lowpass_cutoff: int, bandpass_cutoff: Tuple[float, float], min_pressure: int, max_pressure: int, beat_length: int,
+    def __init__(self,
+                 frequency: int,
+                 lowpass_cutoff: int,
+                 bandpass_cutoff: Tuple[float, float],
+                 min_pressure: int,
+                 max_pressure: int,
+                 beat_length: int,
                  sequence_steps: int,
-                 sequence_stride: int):
+                 sequence_stride: int,
+                 scale_per_signal: bool):
+        scaling_axis = -1 if scale_per_signal else 2
         super(BeatSequencePreprocessing, self).__init__([
             FilterHasSignal(),
             SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
@@ -24,7 +32,7 @@ class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
             AddBeatSequenceBloodPressure(),
             EnsureShape([None, sequence_steps, beat_length], [None, 2]),
             FilterPressureWithinBounds(min_pressure, max_pressure),
-            StandardScaling(axis=1),
+            StandardScaling(axis=scaling_axis),
             Reshape([-1, sequence_steps, beat_length], [-1, 2]),
             FlattenDataset()
         ])

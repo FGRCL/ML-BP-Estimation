@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from tensorflow import float32 as tfloat32
 from tensorflow.python.data.ops.options import AutotuneAlgorithm, AutotuneOptions, Options, ThreadingOptions
 
@@ -21,8 +23,15 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
     options.deterministic = False
     options.threading = threading_options
 
-    def __init__(self, frequency=500, lowpass_cutoff=5, bandpass_cutoff=(0.1, 8), min_pressure=30, max_pressure=230,
-                 beat_length=400):
+    def __init__(self,
+                 frequency: int,
+                 lowpass_cutoff: float,
+                 bandpass_cutoff: Tuple[float, float],
+                 min_pressure: int,
+                 max_pressure: int,
+                 beat_length: int,
+                 scale_per_signal: bool):
+        scaling_axis = -1 if scale_per_signal else 1
         dataset_operations = [
             FilterHasSignal(),
             SignalFilter((tfloat32, tfloat32), frequency, lowpass_cutoff, bandpass_cutoff),
@@ -32,7 +41,7 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             AddBloodPressureOutput(),
             EnsureShape([None, beat_length], [None, 2]),
             FilterPressureWithinBounds(min_pressure, max_pressure),
-            StandardScaling(axis=1),
+            StandardScaling(axis=scaling_axis),
             Reshape([-1, beat_length, 1], [-1, 2]),
             FlattenDataset(),
             WithOptions(self.options)

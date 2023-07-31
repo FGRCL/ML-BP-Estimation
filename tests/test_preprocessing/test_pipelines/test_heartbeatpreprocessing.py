@@ -16,6 +16,7 @@ class TestHeartbeatPreprocessing(TestCase):
             30,
             230,
             400,
+            False
         )
         train = pipeline.apply(train)
 

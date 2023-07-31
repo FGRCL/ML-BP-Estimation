@@ -17,7 +17,8 @@ class TestBeatSequencePreprocessing(TestCase):
             230,
             400,
             16,
-            1
+            1,
+            False
         )
         train = pipeline.apply(train)
 
