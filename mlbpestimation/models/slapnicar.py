@@ -1,6 +1,6 @@
 from typing import List
 
-from kapre.time_frequency import Magnitude, STFT
+from kapre import Magnitude, STFT
 from keras import Sequential
 from keras.engine.base_layer import Layer
 from keras.engine.input_layer import InputLayer
@@ -47,6 +47,7 @@ class Slapnicar(BloodPressureModel):
             )
         self._spectro_temporal_block = SpectroTemporalBlock()
         self._gru_block = Sequential([
+            BatchNormalization(),
             GRU(gru_units),
             BatchNormalization(),
         ])
@@ -163,5 +164,5 @@ class SpectroTemporalBlock(Layer):
 
     def call(self, inputs, training=None, mask=None):
         x = self._spectrogram(inputs, training, mask)
-        x = Reshape((*x.shape[1:2], -1))(x)
+        x = Reshape((x.shape[1], -1))(x)
         return self._temporal(x, training, mask)
