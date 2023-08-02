@@ -1,5 +1,5 @@
 _target_: mlbpestimation.models.mlp.MLP
-n_layers: 2
-n_units: 128
+n_layers: 6
+n_units: 64
 output_units: 2
-activation: relu
+activation: softmax

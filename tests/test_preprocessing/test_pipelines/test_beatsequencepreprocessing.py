@@ -17,7 +17,8 @@ class TestBeatSequencePreprocessing(TestCase):
             230,
             400,
             16,
-            1
+            1,
+            False
         )
         train = pipeline.apply(train)
 
@@ -26,6 +27,6 @@ class TestBeatSequencePreprocessing(TestCase):
 
         self.assertIsNotNone(dataset)
         self.assertIsNotNone(element)
-        self.assertEqual((TensorShape([16, 400, 1]), TensorShape([2])), dataset.output_shapes)
-        self.assertEqual(element[0].shape, [16, 400, 1])
+        self.assertEqual((TensorShape([16, 400]), TensorShape([2])), dataset.output_shapes)
+        self.assertEqual(element[0].shape, [16, 400])
         self.assertEqual(element[1].shape, [2])
