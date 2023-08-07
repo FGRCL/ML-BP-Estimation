@@ -1,0 +1,5 @@
+undersample:
+  _target_: mlbpestimation.data.decorator.regressionundersampling.RegressionUndersampling
+  dbp_threshold: 50
+  sbp_threshold: 150
+  sampling_ratio: 1
