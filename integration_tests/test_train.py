@@ -46,7 +46,7 @@ class TrainIntegrationTest(TestCase):
         self._train(["hypothesis/dataset/source=mimic", "hypothesis/dataset/decorators=beatsequence", "hypothesis/model=mlp"])
 
     def test_train_mimic_beatsequence_resnet(self):
-        self._train(["hypothesis/dataset/source=mimic", "hypothesis/dataset/decorators=beatsequence", "hypothesis/model=resnet_seq"])
+        self._train(["hypothesis/dataset/source=mimic", "hypothesis/dataset/decorators=beatsequence", "hypothesis/model=resnet"])
 
     def test_train_mimic_beatsequence_rnnmlp(self):
         self._train(["hypothesis/dataset/source=mimic", "hypothesis/dataset/decorators=beatsequence", "hypothesis/model=rnnmlp"])
