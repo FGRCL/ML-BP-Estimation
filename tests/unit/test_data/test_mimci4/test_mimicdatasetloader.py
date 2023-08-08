@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from mlbpestimation.data.mimic4.mimicdatasetloader import MimicDatasetLoader
-from tests.data.directories import mimic
+from tests.unit.data.directories import mimic
 
 
 class TestMimicDataset(TestCase):

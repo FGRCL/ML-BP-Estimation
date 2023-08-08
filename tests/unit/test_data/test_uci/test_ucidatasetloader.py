@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from numpy import ones
 
 from mlbpestimation.data.uci.ucidatasetloader import UciDatasetLoader
-from tests.data.directories import uci
+from tests.unit.data.directories import uci
 
 
 class TestUciDatasetLoader(TestCase):

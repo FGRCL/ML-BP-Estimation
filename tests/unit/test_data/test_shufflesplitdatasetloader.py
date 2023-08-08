@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from tests.fixtures.signaldatasetloaderfixture import SignalDatasetLoaderFixture
+from tests.unit.fixtures.signaldatasetloaderfixture import SignalDatasetLoaderFixture
 
 
 class TestShuffleSplitDatasetLoader(TestCase):

@@ -4,7 +4,7 @@ from numpy import empty, linspace, stack
 from tensorflow.python.data import Dataset
 
 from mlbpestimation.data.decorator.regressionundersampling import RegressionUndersampling
-from tests.fixtures.datasetloaderfixture import DatasetLoaderFixture
+from tests.unit.fixtures.datasetloaderfixture import DatasetLoaderFixture
 
 
 class TestRegressionUndersampling(TestCase):

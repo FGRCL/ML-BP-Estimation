@@ -55,7 +55,7 @@ class TrainIntegrationTest(TestCase):
         self._train(["hypothesis/dataset/source=mimic", "hypothesis/dataset/decorators=beatsequence", "hypothesis/model=transformerencoder"])
 
     def _train(self, test_overrides):
-        with initialize(version_base=None, config_path='../mlbpestimation/configuration'):
+        with initialize(version_base=None, config_path='../../mlbpestimation/configuration'):
             fast_overrides = ["hypothesis.optimization.batch_size=32", "hypothesis.optimization.epoch=1", "hypothesis.optimization.n_batches=10"]
             overrides = test_overrides + fast_overrides
             config = compose(config_name='train', overrides=overrides)

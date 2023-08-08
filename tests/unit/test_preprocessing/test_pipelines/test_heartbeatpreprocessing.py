@@ -3,7 +3,7 @@ from unittest import TestCase
 from tensorflow import TensorShape
 
 from mlbpestimation.preprocessing.pipelines.heartbeatpreprocessing import HeartbeatPreprocessing
-from tests.fixtures.signaldatasetloaderfixture import SignalDatasetLoaderFixture
+from tests.unit.fixtures.signaldatasetloaderfixture import SignalDatasetLoaderFixture
 
 
 class TestHeartbeatPreprocessing(TestCase):

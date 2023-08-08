@@ -5,7 +5,7 @@ from keras.saving.saving_api import load_model
 from numpy.testing import assert_allclose
 
 from mlbpestimation.models.rnn import Rnn
-from tests.fixtures.windowdatasetloaderfixture import WindowDatasetLoaderFixture
+from tests.unit.fixtures.windowdatasetloaderfixture import WindowDatasetLoaderFixture
 
 
 class TestRnn(TestCase):
