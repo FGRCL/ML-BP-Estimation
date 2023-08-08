@@ -1,7 +1,6 @@
 _target_: mlbpestimation.models.transformerencoder.TransformerEncoder
 n_encoder_modules: 3
 n_attention_heads: 4
-d_embedding: 1
 attention_dropout: 0.0
 ff_encoder_units: 64
 ff_encoder_dropout: 0.0

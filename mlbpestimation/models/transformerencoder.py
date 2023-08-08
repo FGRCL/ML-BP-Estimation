@@ -10,7 +10,6 @@ class TransformerEncoder(BloodPressureModel):
     def __init__(self,
                  n_encoder_modules: int,
                  n_attention_heads: int,
-                 d_embedding: int,
                  attention_dropout: float,
                  ff_encoder_units: int,
                  ff_encoder_dropout: float,
@@ -22,7 +21,6 @@ class TransformerEncoder(BloodPressureModel):
         super().__init__(*args, **kwargs)
         self.n_encoder_modules = n_encoder_modules
         self.n_attention_heads = n_attention_heads
-        self.d_embedding = d_embedding
         self.attention_dropout = attention_dropout
         self.ff_encoder_units = ff_encoder_units
         self.ff_encoder_dropout = ff_encoder_dropout
@@ -34,8 +32,6 @@ class TransformerEncoder(BloodPressureModel):
         self._input_layer = None
         self._flatten = Flatten()
         self._encoders = Sequential()
-        for _ in range(n_encoder_modules):
-            self._encoders.add(EncoderModule(n_attention_heads, d_embedding, attention_dropout, ff_encoder_units, ff_encoder_dropout))
         self._regressor = Regressor(n_regressor_layers, regressor_units, output_units, regressor_dropout)
 
     def call(self, inputs, training=None, mask=None):
@@ -46,12 +42,14 @@ class TransformerEncoder(BloodPressureModel):
 
     def set_input_shape(self, dataset_spec):
         self._input_layer = InputLayer(dataset_spec[0].shape[1:])
+        embedding_size = dataset_spec[0].shape[-1]
+        for _ in range(self.n_encoder_modules):
+            self._encoders.add(EncoderModule(self.n_attention_heads, embedding_size, self.attention_dropout, self.ff_encoder_units, self.ff_encoder_dropout))
 
     def get_config(self):
         return {
             'n_encoder_modules': self.n_encoder_modules,
             'n_attention_heads': self.n_attention_heads,
-            'd_embedding': self.d_embedding,
             'attention_dropout': self.attention_dropout,
             'ff_encoder_units': self.ff_encoder_units,
             'ff_encoder_dropout': self.ff_encoder_dropout,
