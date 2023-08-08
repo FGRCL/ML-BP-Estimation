@@ -52,7 +52,7 @@ class TrainIntegrationTest(TestCase):
         self._train(["hypothesis/dataset/source=mimic", "hypothesis/dataset/decorators=beatsequence", "hypothesis/model=rnnmlp"])
 
     def test_train_mimic_beatsequence_transofmerencoder(self):
-        self._train(["hypothesis/dataset/source=mimic", "hypothesis/dataset/decorators=beatsequence", "hypothesis/model=transformerencoder_seq"])
+        self._train(["hypothesis/dataset/source=mimic", "hypothesis/dataset/decorators=beatsequence", "hypothesis/model=transformerencoder"])
 
     def _train(self, test_overrides):
         with initialize(version_base=None, config_path='../mlbpestimation/configuration'):

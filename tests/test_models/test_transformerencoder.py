@@ -14,13 +14,13 @@ class TestTransformerEncoder(TestCase):
         rmtree('transformerencoder', ignore_errors=True)
 
     def test_build_model(self):
-        model = TransformerEncoder(5, 2, 100, 0.01, 500, 0.1, 2, 2000, 2, 0.1)
+        model = TransformerEncoder(5, 2, 0.01, 500, 0.1, 2, 2000, 2, 0.1)
 
         self.assertIsNotNone(model)
 
     def test_save_model(self):
         save_directory = 'transformerencoder'
-        model = TransformerEncoder(5, 2, 100, 0.01, 500, 0.1, 2, 2000, 2, 0.1)
+        model = TransformerEncoder(5, 2, 0.01, 500, 0.1, 2, 2000, 2, 0.1)
         train, _, _ = WindowDatasetLoaderFixture().load_datasets()
         sample = next(iter(train.batch(5).take(1)))
         inputs = sample[0]
