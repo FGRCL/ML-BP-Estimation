@@ -149,20 +149,19 @@ class ConvBlock(Layer):
 class SpectroTemporalBlock(Layer):
     def __init__(self):
         super().__init__()
-        self._spectrogram = Sequential([
-            STFT(
-                n_fft=128,
-                input_data_format="channels_last",
-                output_data_format="channels_last",
-            ),
-            Magnitude()
-        ])
-        self._temporal = Sequential([
-            GRU(64),
-            BatchNormalization(),
-        ])
+        self._spectrogram = STFT(
+            n_fft=128,
+            input_data_format="channels_last",
+            output_data_format="channels_last",
+        )
+        self._magnitude = Magnitude()
+        self._gru = GRU(64)
+        self._batch_norm = BatchNormalization()
 
     def call(self, inputs, training=None, mask=None):
-        x = self._spectrogram(inputs, training, mask)
+        x = self._spectrogram(inputs)
+        x = self._magnitude(x)
         x = Reshape((x.shape[1], -1))(x)
-        return self._temporal(x, training, mask)
+        x = self._gru(x)
+        x = self._batch_norm(x)
+        return x
