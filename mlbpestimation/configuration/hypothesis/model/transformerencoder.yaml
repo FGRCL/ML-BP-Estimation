@@ -1,11 +1,11 @@
 _target_: mlbpestimation.models.transformerencoder.TransformerEncoder
-n_encoder_modules: 2
-n_attention_heads: 7
+n_encoder_modules: 3
+n_attention_heads: 4
 d_embedding: 1
 attention_dropout: 0.0
-ff_encoder_units: 128
+ff_encoder_units: 64
 ff_encoder_dropout: 0.0
-n_regressor_layers: 3
-regressor_units: 4096
+n_regressor_layers: 2
+regressor_units: 128
 output_units: 2
 regressor_dropout: 0.0
