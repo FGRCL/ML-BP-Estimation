@@ -1,3 +1,4 @@
 _target_: mlbpestimation.data.vitaldb.vitaldatasetloader.VitalDatasetLoader
 random_seed: ${random_seed}
+use_ppg: false
 frequency: 500

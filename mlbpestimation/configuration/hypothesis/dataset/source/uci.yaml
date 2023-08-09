@@ -1,4 +1,5 @@
 _target_: mlbpestimation.data.uci.ucidatasetloader.UciDatasetLoader
 uci_files_directory: ${directories.data}/uci
 random_seed: ${random_seed}
+use_ppg: false
 frequency: 125
