@@ -16,12 +16,9 @@ from mlbpestimation.preprocessing.base import FlatMap, NumpyTransformOperation, 
 
 
 class RemoveNan(TransformOperation):
-    def transform(self, *args) -> Tuple[Tensor]:
-        return tuple([self._remove_nan_from_tensor(tensor) for tensor in args])
-
-    @staticmethod
-    def _remove_nan_from_tensor(tensor: Tensor) -> Tensor:
-        return boolean_mask(tensor, logical_not(is_nan(tensor)))
+    def transform(self, input_signal: Tensor, output_signal: Tensor) -> Tuple[Tensor]:
+        mask = logical_not(is_nan(input_signal)) & logical_not(is_nan(output_signal))
+        return boolean_mask(input_signal, mask), boolean_mask(output_signal, mask)
 
 
 class StandardScaling(TransformOperation):
