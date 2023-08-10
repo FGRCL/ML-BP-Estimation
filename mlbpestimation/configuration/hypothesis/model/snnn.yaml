@@ -1,0 +1,4 @@
+_target_: mlbpestimation.models.snnn.Snnn
+n_layers: 10
+n_units: 512
+output_units: 2
