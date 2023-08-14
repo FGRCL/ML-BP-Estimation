@@ -3,7 +3,7 @@ from pathlib import Path
 from mat73 import loadmat
 from numpy.random import seed, shuffle
 from tensorflow.python.data import Dataset
-from tensorflow.python.ops.ragged.ragged_factory_ops import constant
+from tensorflow.python.ops.ragged.ragged_concat_ops import stack
 
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.data.splitdataset import SplitDataset
@@ -25,7 +25,9 @@ class UciDatasetLoader(DatasetLoader):
 
         datasets = []
         for split in splits:
-            dataset = Dataset.from_tensor_slices((constant(split[:][0]), constant(split[:][1])))
+            input_signals = stack([s[0] for s in split])
+            output_signals = stack([s[1] for s in split])
+            dataset = Dataset.from_tensor_slices((input_signals, output_signals))
             datasets.append(dataset)
 
         return SplitDataset(*datasets)
