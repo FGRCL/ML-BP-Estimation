@@ -12,7 +12,7 @@ class StandardDeviationMetric(ABC, Metric):
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         measure = self.compute_metric(y_true, y_pred)
-        self.measures.assign(concat([self.measures.value(), measure[:, 0]], axis=0))
+        self.measures.assign(concat([self.measures.value(), measure], axis=0))
 
     def result(self):
         return reduce_std(self.measures)

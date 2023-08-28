@@ -1,11 +1,11 @@
-from typing import Tuple
-
 from keras import Sequential
 from keras.engine.input_layer import InputLayer
-from keras.layers import GRU, LSTM, SimpleRNN
+from keras.layers import BatchNormalization, Bidirectional, ConvLSTM1D, Dropout, GRU, LSTM, MaxPooling1D, ReLU, Reshape, SimpleRNN, TimeDistributed
 from tensorflow import TensorSpec
 
 from mlbpestimation.models.basemodel import BloodPressureModel
+from mlbpestimation.models.metricreducer.base import MetricReducer
+from mlbpestimation.models.metricreducer.mutlistep import MultiStep
 
 
 class Rnn(BloodPressureModel):
@@ -22,22 +22,47 @@ class Rnn(BloodPressureModel):
         self.rnn_implementation = rnn_implementation
         self.output_size = output_size
 
+        self.metric_reducer = MultiStep()
+
         self._input_layer = None
-        rnn = self._rnn_implementations[rnn_implementation.upper()]
-        self._rnn = Sequential()
-        for _ in range(n_layers):
-            self._rnn.add(rnn(n_units, return_sequences=True))
-        self._output = rnn(output_size, return_sequences=True)
+        self._hidden = Sequential()
+        for _ in range(4):
+            self._hidden.add(
+                Bidirectional(ConvLSTM1D(16, 5, return_sequences=True))
+            )
+            self._hidden.add(
+                TimeDistributed(BatchNormalization())
+            )
+            self._hidden.add(
+                TimeDistributed(ReLU())
+            )
+            self._hidden.add(
+                TimeDistributed(MaxPooling1D(2))
+            )
+            self._hidden.add(
+                TimeDistributed(Dropout(0.1))
+            )
+        self._reshape = None
+        self._out = None
+
+    def set_input(self, input_spec: TensorSpec):
+        shape = input_spec[0].shape
+        dtype = input_spec[0].dtype
+        self._input_layer = InputLayer(shape[1:], shape[0], dtype)
+        self._reshape = Reshape((shape[1], -1))
+
+    def set_output(self, output_spec: TensorSpec):
+        shape = output_spec.shape
+        self._out = GRU(shape[-1], return_sequences=True, activation=None)
 
     def call(self, inputs, training=None, mask=None):
-        x = self._input_layer(inputs, training, mask)
-        x = self._rnn(x, training=training, mask=mask)
-        return self._output(x, training=training, mask=mask)
+        x = self._input_layer(inputs)
+        x = self._hidden(x)
+        x = self._reshape(x)
+        return self._out(x)
 
-    def set_input_shape(self, dataset_spec: Tuple[TensorSpec]):
-        input_shape = dataset_spec[0].shape
-        input_type = dataset_spec[0].dtype
-        self._input_layer = InputLayer(input_shape[1:], input_shape[0], input_type)
+    def get_metric_reducer_strategy(self) -> MetricReducer:
+        return self.metric_reducer
 
     def get_config(self):
         return {

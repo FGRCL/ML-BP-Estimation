@@ -2,8 +2,11 @@ from keras import Sequential
 from keras.engine.base_layer import Layer
 from keras.engine.input_layer import InputLayer
 from keras.layers import Add, Dense, Dropout, Flatten, LayerNormalization, MultiHeadAttention, ReLU
+from tensorflow import TensorSpec
 
 from mlbpestimation.models.basemodel import BloodPressureModel
+from mlbpestimation.models.metricreducer.base import MetricReducer
+from mlbpestimation.models.metricreducer.singlestep import SingleStep
 
 
 class TransformerEncoder(BloodPressureModel):
@@ -29,10 +32,22 @@ class TransformerEncoder(BloodPressureModel):
         self.output_units = output_units
         self.regressor_dropout = regressor_dropout
 
+        self.metric_reducer = SingleStep()
+
         self._input_layer = None
         self._flatten = Flatten()
         self._encoders = Sequential()
-        self._regressor = Regressor(n_regressor_layers, regressor_units, output_units, regressor_dropout)
+        self._regressor = None
+
+    def set_input(self, input_spec: TensorSpec):
+        self._input_layer = InputLayer(input_spec[0].shape[1:])
+        embedding_size = input_spec[0].shape[-1]
+        for _ in range(self.n_encoder_modules):
+            self._encoders.add(EncoderModule(self.n_attention_heads, embedding_size, self.attention_dropout, self.ff_encoder_units, self.ff_encoder_dropout))
+
+    def set_output(self, output_spec: TensorSpec):
+        output_units = output_spec.shape[1]
+        self._regressor = Regressor(self.n_regressor_layers, self.regressor_units, output_units, self.regressor_dropout)
 
     def call(self, inputs, training=None, mask=None):
         x = self._input_layer(inputs, training, mask)
@@ -40,11 +55,8 @@ class TransformerEncoder(BloodPressureModel):
         x = self._flatten(x)
         return self._regressor(x, training=training, mask=mask)
 
-    def set_input_shape(self, dataset_spec):
-        self._input_layer = InputLayer(dataset_spec[0].shape[1:])
-        embedding_size = dataset_spec[0].shape[-1]
-        for _ in range(self.n_encoder_modules):
-            self._encoders.add(EncoderModule(self.n_attention_heads, embedding_size, self.attention_dropout, self.ff_encoder_units, self.ff_encoder_dropout))
+    def get_metric_reducer_strategy(self) -> MetricReducer:
+        return self.metric_reducer
 
     def get_config(self):
         return {
