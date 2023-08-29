@@ -1,14 +1,16 @@
+from typing import Any, Tuple, Union
+
 from neurokit2 import ppg_clean, ppg_findpeaks
-from numpy import argmin, empty, float32, ndarray, zeros
+from numpy import argmin, asarray, empty, float32, ndarray, zeros
+from scipy.signal import butter, sosfilt
 from tensorflow import DType, Tensor, reduce_all, reduce_max, reduce_min, stack
 from tensorflow.python.data import Dataset
 from tensorflow.python.ops.array_ops import shape
-from typing import Any, Tuple, Union
 
 from mlbpestimation.preprocessing.base import DatasetOperation, DatasetPreprocessingPipeline, FilterOperation, NumpyTransformOperation, TransformOperation
 from mlbpestimation.preprocessing.shared.filters import FilterSqi, HasData
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import EnsureShape, FlattenDataset, Reshape, SignalFilter, SlidingWindow, SplitHeartbeats, StandardScaling
+from mlbpestimation.preprocessing.shared.transforms import EnsureShape, FlattenDataset, Reshape, SlidingWindow, SplitHeartbeats, StandardScaling
 
 
 class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
@@ -25,7 +27,7 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
         scaling_axis = -1 if scale_per_signal else 2
         super(BeatSeriesPreprocessing, self).__init__([
             FilterHasSignal(),
-            SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
+            SignalFilter((float32, float32), frequency, lowpass_cutoff),
             SplitHeartbeats((float32, float32), frequency, beat_length),
             FilterBeats(sequence_steps),
             SlidingWindow(sequence_steps, sequence_stride),
@@ -35,7 +37,7 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
             EnsureShape([None, sequence_steps, beat_length], [None, sequence_steps, 2]),
             FilterPressureWithinBounds(min_pressure, max_pressure),
             StandardScaling(axis=scaling_axis),
-            Reshape([-1, sequence_steps, beat_length, 1], [-1, sequence_steps, 2]),
+            Reshape([-1, sequence_steps, beat_length], [-1, sequence_steps, 2]),
             FlattenDataset(),
             Shuffle(),
         ])
@@ -125,3 +127,16 @@ class Shuffle(DatasetOperation):
     def apply(self, dataset: Dataset) -> Dataset:
         count = int(dataset.reduce(0, lambda x, _: x + 1))
         return dataset.shuffle(count)
+
+
+class SignalFilter(NumpyTransformOperation):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], sample_rate, lowpass_cutoff):
+        super().__init__(out_type)
+        self.lowpass_cutoff = lowpass_cutoff
+        self.sample_rate = sample_rate
+
+    def transform(self, input_signal: Tensor, output_signal: Tensor) -> Any:
+        lowpass_filter = butter(2, self.lowpass_cutoff, 'lowpass', output='sos', fs=self.sample_rate)
+        signal_lowpass = asarray(sosfilt(lowpass_filter, output_signal), dtype=float32)
+
+        return signal_lowpass, signal_lowpass
