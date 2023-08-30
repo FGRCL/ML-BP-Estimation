@@ -24,7 +24,7 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
                  sequence_steps: int,
                  sequence_stride: int,
                  scale_per_signal: bool):
-        scaling_axis = -1 if scale_per_signal else 2
+        scaling_axis = None if scale_per_signal else (1, 2)
         super(BeatSeriesPreprocessing, self).__init__([
             FilterHasSignal(),
             SignalFilter((float32, float32), frequency, lowpass_cutoff),
