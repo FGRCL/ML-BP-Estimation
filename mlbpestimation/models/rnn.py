@@ -16,20 +16,27 @@ class Rnn(BloodPressureModel):
         'RNN': SimpleRNN,
     }
 
-    def __init__(self, n_units: int, n_layers: int, rnn_implementation: str, output_size: int):
+    def __init__(self, n_units: int, n_layers: int, dropout: float, recurrent_dropout: float, output_size: int):
         super().__init__()
         self.n_units = n_units
         self.n_layers = n_layers
-        self.rnn_implementation = rnn_implementation
+        self.dropout = dropout
+        self.recurrent_dropout = recurrent_dropout
         self.output_size = output_size
 
         self.metric_reducer = MultiStep()
 
         self._input_layer = None
         self._hidden = Sequential()
-        for _ in range(2):
+        for _ in range(n_layers):
             self._hidden.add(
-                Bidirectional(GRU(128, return_sequences=True, activation=relu))
+                Bidirectional(GRU(
+                    n_units,
+                    return_sequences=True,
+                    activation=relu,
+                    dropout=dropout,
+                    recurrent_dropout=recurrent_dropout
+                ))
             )
         self._out = None
 
