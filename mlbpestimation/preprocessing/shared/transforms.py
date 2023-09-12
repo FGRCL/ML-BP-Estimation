@@ -16,7 +16,7 @@ from mlbpestimation.preprocessing.base import FlatMap, NumpyTransformOperation, 
 
 
 class RemoveNan(TransformOperation):
-    def transform(self, input_signal: Tensor, output_signal: Tensor) -> Tuple[Tensor]:
+    def transform(self, input_signal: Tensor, output_signal: Tensor) -> Tuple[Tensor, Tensor]:
         mask = logical_not(is_nan(input_signal)) & logical_not(is_nan(output_signal))
         return boolean_mask(input_signal, mask), boolean_mask(output_signal, mask)
 
