@@ -43,7 +43,6 @@ class Hypothesis:
         log.info('Start evaluation')
 
         test = self.dataset.load_datasets().test \
-            .cache() \
             .batch(self.optimization.batch_size) \
             .prefetch(AUTOTUNE)
 
@@ -57,12 +56,10 @@ class Hypothesis:
         train, validation, _ = self.dataset.load_datasets()
 
         train = train \
-            .cache() \
             .batch(self.optimization.batch_size) \
             .prefetch(AUTOTUNE)
 
         validation = validation \
-            .cache() \
             .batch(self.optimization.batch_size) \
             .prefetch(AUTOTUNE)
 

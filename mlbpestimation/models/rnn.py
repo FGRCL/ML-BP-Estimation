@@ -61,6 +61,7 @@ class Rnn(BloodPressureModel):
         return {
             'units': self.n_units,
             'layers': self.n_layers,
-            'rnn_implementation': self.rnn_implementation,
+            'dropout': self.dropout,
+            'recurrent_dropout': self.recurrent_dropout,
             'output_size': self.output_size,
         }
