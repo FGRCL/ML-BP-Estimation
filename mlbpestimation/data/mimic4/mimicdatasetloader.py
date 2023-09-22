@@ -13,6 +13,9 @@ from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.data.splitdataset import SplitDataset
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, PythonFunctionTransformOperation, TransformOperation
 
+PPG_SIGNAL_CODE = 'Pleth'
+ABP_SIGNAL_CODE = 'ABP'
+
 
 class MimicDatasetLoader(DatasetLoader):
     def __init__(self, mimic_wave_files_directory: str, frequency: int, random_seed: int, use_ppg: bool, subsample: float = 1.0):
@@ -20,7 +23,7 @@ class MimicDatasetLoader(DatasetLoader):
         self.frequency = frequency
         self.random_seed = random_seed
         self.subsample = subsample
-        self.input_signal = 'Pleth' if use_ppg else 'ABP'
+        self.input_signal = PPG_SIGNAL_CODE if use_ppg else ABP_SIGNAL_CODE
 
     def load_datasets(self) -> SplitDataset:
         record_paths = self._get_paths()
@@ -29,10 +32,10 @@ class MimicDatasetLoader(DatasetLoader):
         record_paths_splits = self._make_splits(record_paths)
 
         datasets = []
-        reading_pipeline = MimicReaderPreprocessingPipeline(self.input_signal)
-        for path_split in record_paths_splits:
+        input_signals = [self.input_signal, PPG_SIGNAL_CODE, PPG_SIGNAL_CODE]
+        for input_signal, path_split in zip(input_signals, record_paths_splits):
             dataset = Dataset.from_tensor_slices(path_split)
-            dataset = reading_pipeline.apply(dataset)
+            dataset = MimicReaderPreprocessingPipeline(input_signal).apply(dataset)
             datasets.append(dataset)
 
         return SplitDataset(*datasets)
@@ -58,7 +61,7 @@ class MimicDatasetLoader(DatasetLoader):
 
 
 class MimicReaderPreprocessingPipeline(DatasetPreprocessingPipeline):
-    output_signal = 'ABP'
+    output_signal = ABP_SIGNAL_CODE
 
     def __init__(self, input_signal):
         super().__init__([

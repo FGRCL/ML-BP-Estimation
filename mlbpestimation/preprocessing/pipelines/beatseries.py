@@ -5,12 +5,12 @@ from numpy import argmin, asarray, empty, float32, ndarray, zeros
 from scipy.signal import butter, sosfilt
 from tensorflow import DType, Tensor, reduce_all, reduce_max, reduce_min, stack
 from tensorflow.python.data import Dataset
-from tensorflow.python.ops.array_ops import shape
 
-from mlbpestimation.preprocessing.base import DatasetOperation, DatasetPreprocessingPipeline, FilterOperation, NumpyTransformOperation, TransformOperation
+from mlbpestimation.preprocessing.base import DatasetOperation, DatasetPreprocessingPipeline, NumpyTransformOperation, TransformOperation
+from mlbpestimation.preprocessing.pipelines.beatsequencepreprocessing import FilterBeats
 from mlbpestimation.preprocessing.shared.filters import FilterSqi, HasData
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import EnsureShape, FlattenDataset, Reshape, SlidingWindow, SplitHeartbeats, StandardScaling
+from mlbpestimation.preprocessing.shared.transforms import EnsureShape, FlattenDataset, Reshape, SlidingWindow, StandardScaling
 
 
 class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
@@ -23,11 +23,12 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
                  beat_length: int,
                  sequence_steps: int,
                  sequence_stride: int,
-                 scale_per_signal: bool):
+                 scale_per_signal: bool,
+                 bandpass_output: bool):
         scaling_axis = None if scale_per_signal else (1, 2)
         super(BeatSeriesPreprocessing, self).__init__([
             FilterHasSignal(),
-            SignalFilter((float32, float32), frequency, lowpass_cutoff),
+            SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff, bandpass_output),
             SplitHeartbeats((float32, float32), frequency, beat_length),
             FilterBeats(sequence_steps),
             SlidingWindow(sequence_steps, sequence_stride),
@@ -52,14 +53,6 @@ class AddBeatSequenceBloodPressure(TransformOperation):
         return input_windows, pressures
 
 
-class FilterBeats(FilterOperation):
-    def __init__(self, min_beats: int):
-        self.min_beats = min_beats
-
-    def filter(self, input_windows: Tensor, output_windows: Tensor) -> bool:
-        return shape(input_windows)[0] > self.min_beats
-
-
 class FilterPressureWithinBounds(TransformOperation):
     def __init__(self, min: int, max: int):
         self.min = min
@@ -76,7 +69,7 @@ class FilterPressureWithinBounds(TransformOperation):
         return input_windows[valid_idx], pressures[valid_idx]
 
 
-class SplitHeartbeatsAlt(NumpyTransformOperation):
+class SplitHeartbeats(NumpyTransformOperation):
 
     def __init__(self, out_type: Union[DType, Tuple[DType, ...]], frequency, beat_length):
         super().__init__(out_type)
@@ -85,7 +78,7 @@ class SplitHeartbeatsAlt(NumpyTransformOperation):
 
     def transform(self, lowpass_signal: Tensor, bandpass_signal: Tensor = None) -> Any:
         try:
-            peak_indices = ppg_findpeaks(ppg_clean(bandpass_signal, self.frequency), self.frequency)['PPG_Peaks']
+            peak_indices = ppg_findpeaks(ppg_clean(lowpass_signal, self.frequency), self.frequency)['PPG_Peaks']
         except:
             return [zeros(0, float32), zeros(0, float32)]
 
@@ -130,13 +123,16 @@ class Shuffle(DatasetOperation):
 
 
 class SignalFilter(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], sample_rate, lowpass_cutoff):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], sample_rate, lowpass_cutoff, bandpass_cutoff, bandpass_output: bool):
         super().__init__(out_type)
-        self.lowpass_cutoff = lowpass_cutoff
-        self.sample_rate = sample_rate
+        lowpass_filter = butter(2, lowpass_cutoff, 'lowpass', output='sos', fs=sample_rate)
+        bandpass_filter = butter(2, bandpass_cutoff, 'bandpass', output='sos', fs=sample_rate)
+
+        self.input_filter = bandpass_filter if bandpass_output else lowpass_filter
+        self.output_filter = lowpass_filter
 
     def transform(self, input_signal: Tensor, output_signal: Tensor) -> Any:
-        lowpass_filter = butter(2, self.lowpass_cutoff, 'lowpass', output='sos', fs=self.sample_rate)
-        signal_lowpass = asarray(sosfilt(lowpass_filter, output_signal), dtype=float32)
+        input_filtered = asarray(sosfilt(self.input_filter, input_signal), dtype=float32)
+        output_filtered = asarray(sosfilt(self.output_filter, output_signal), dtype=float32)
 
-        return signal_lowpass, signal_lowpass
+        return input_filtered, output_filtered
