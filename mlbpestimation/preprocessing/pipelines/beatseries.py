@@ -2,7 +2,7 @@ from typing import Any, Tuple, Union
 
 from neurokit2 import ppg_clean, ppg_findpeaks
 from numpy import argmin, asarray, empty, float32, ndarray, zeros
-from scipy.signal import butter, sosfilt
+from scipy.signal import butter, resample, sosfilt
 from tensorflow import DType, Tensor, reduce_all, reduce_max, reduce_min, stack
 from tensorflow.python.data import Dataset
 
@@ -70,7 +70,6 @@ class FilterPressureWithinBounds(TransformOperation):
 
 
 class SplitHeartbeats(NumpyTransformOperation):
-
     def __init__(self, out_type: Union[DType, Tuple[DType, ...]], frequency, beat_length):
         super().__init__(out_type)
         self.beat_length = beat_length
@@ -105,13 +104,12 @@ class SplitHeartbeats(NumpyTransformOperation):
 
     def _get_beats(self, trough_indices, signal):
         beat_count = len(trough_indices) - 1
-        beats = zeros((beat_count, self.beat_length), dtype=float32)
+        beats = empty((beat_count, self.beat_length), dtype=float32)
 
         for i, (pulse_onset_index, diastolic_foot_index) in enumerate(zip(trough_indices[:-1], trough_indices[1:])):
             beat = signal[pulse_onset_index: diastolic_foot_index]
-            beat_truncated = beat[:self.beat_length]
-            length = beat_truncated.shape[0]
-            beats[i, 0:length] = beat_truncated
+            beat_resampled = resample(beat, self.beat_length)
+            beats[i] = beat_resampled
 
         return beats
 
