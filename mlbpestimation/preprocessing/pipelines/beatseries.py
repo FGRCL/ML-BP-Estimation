@@ -1,8 +1,8 @@
 from typing import Any, Tuple, Union
 
 from neurokit2 import ppg_clean, ppg_findpeaks
-from numpy import argmin, asarray, empty, float32, ndarray, zeros
-from scipy.signal import butter, resample, sosfilt
+from numpy import argmax, argmin, asarray, empty, float32, ndarray, zeros
+from scipy.signal import butter, correlate, correlation_lags, resample, sosfilt
 from tensorflow import DType, Tensor, reduce_all, reduce_max, reduce_min, stack
 from tensorflow.python.data import Dataset
 
@@ -24,17 +24,17 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
                  sequence_steps: int,
                  sequence_stride: int,
                  scale_per_signal: bool,
-                 bandpass_output: bool):
+                 bandpass_input: bool):
         scaling_axis = None if scale_per_signal else (1, 2)
         super(BeatSeriesPreprocessing, self).__init__([
             FilterHasSignal(),
-            SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff, bandpass_output),
+            SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff, bandpass_input),
             SplitHeartbeats((float32, float32), frequency, beat_length),
             FilterBeats(sequence_steps),
             SlidingWindow(sequence_steps, sequence_stride),
             FilterSqi((float32, float32), 0.5, 2),
             HasData(),
-            AddBeatSequenceBloodPressure(),
+            AddBloodPressureSequence(),
             EnsureShape([None, sequence_steps, beat_length], [None, sequence_steps, 2]),
             FilterPressureWithinBounds(min_pressure, max_pressure),
             StandardScaling(axis=scaling_axis),
@@ -44,7 +44,7 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
         ])
 
 
-class AddBeatSequenceBloodPressure(TransformOperation):
+class AddBloodPressureSequence(TransformOperation):
     def transform(self, input_windows: Tensor, output_windows: Tensor) -> Any:
         sbp = reduce_max(output_windows, axis=-1)
         dbp = reduce_min(output_windows, axis=-1)
@@ -121,12 +121,12 @@ class Shuffle(DatasetOperation):
 
 
 class SignalFilter(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], sample_rate, lowpass_cutoff, bandpass_cutoff, bandpass_output: bool):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], sample_rate, lowpass_cutoff, bandpass_cutoff, bandpass_input: bool):
         super().__init__(out_type)
         lowpass_filter = butter(2, lowpass_cutoff, 'lowpass', output='sos', fs=sample_rate)
         bandpass_filter = butter(2, bandpass_cutoff, 'bandpass', output='sos', fs=sample_rate)
 
-        self.input_filter = bandpass_filter if bandpass_output else lowpass_filter
+        self.input_filter = bandpass_filter if bandpass_input else lowpass_filter
         self.output_filter = lowpass_filter
 
     def transform(self, input_signal: Tensor, output_signal: Tensor) -> Any:
@@ -134,3 +134,16 @@ class SignalFilter(NumpyTransformOperation):
         output_filtered = asarray(sosfilt(self.output_filter, output_signal), dtype=float32)
 
         return input_filtered, output_filtered
+
+
+class AdjustPhaseLag(NumpyTransformOperation):
+    def transform(self, input_signal: ndarray, output_signal: ndarray) -> (ndarray, ndarray):
+        mode = 'full'
+        correlation = correlate(input_signal, output_signal, mode=mode)
+        lags = correlation_lags(input_signal.shape[0], output_signal.shape[0], mode=mode)
+        phase_lag = lags[argmax(correlation)]
+
+        if phase_lag > 0:
+            return input_signal[phase_lag:], output_signal[:-phase_lag]
+        else:
+            return input_signal[:-phase_lag], output_signal[phase_lag:]
