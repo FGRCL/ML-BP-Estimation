@@ -13,7 +13,7 @@ beatseries:
     sequence_steps: 10
     sequence_stride: 1
     scale_per_signal: true
-    bandpass_output: false
+    bandpass_output: true
   test_preprocessing:
     _target_: mlbpestimation.preprocessing.pipelines.beatseries.BeatSeriesPreprocessing
     frequency: ${hypothesis.dataset.source.frequency}
