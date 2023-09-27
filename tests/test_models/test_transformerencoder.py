@@ -22,9 +22,10 @@ class TestTransformerEncoder(TestCase):
         save_directory = 'transformerencoder'
         model = TransformerEncoder(5, 2, 0.01, 500, 0.1, 2, 2000, 2, 0.1)
         train, _, _ = WindowDatasetLoaderFixture().load_datasets()
-        sample = next(iter(train.batch(5).take(1)))
-        inputs = sample[0]
-        model.set_input_shape(sample)
+        train = train.batch(5)
+        inputs = next(iter(train))[0]
+        model.set_input(train.element_spec[:-1])
+        model.set_output(train.element_spec[-1])
         outputs = model(inputs)
 
         model.save(save_directory, overwrite=True)

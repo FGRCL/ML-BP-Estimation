@@ -22,9 +22,10 @@ class TestSlapnicar(TestCase):
         save_directory = 'slapnicar'
         model = Slapnicar(16, 32, 5, [8, 5, 5, 3], 2, 1, 65, 32, 2, .001, .25)
         train, _, _ = WindowDatasetLoaderFixture().load_datasets()
-        sample = next(iter(train.batch(5).take(1)))
-        inputs = sample[0]
-        model.set_input_shape(sample)
+        train = train.batch(5)
+        inputs = next(iter(train))[0]
+        model.set_input(train.element_spec[:-1])
+        model.set_output(train.element_spec[-1])
         outputs = model(inputs)
 
         model.save(save_directory, overwrite=True)

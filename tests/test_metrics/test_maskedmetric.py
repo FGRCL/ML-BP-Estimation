@@ -3,12 +3,12 @@ from unittest import TestCase
 from keras.metrics import MeanAbsoluteError
 from numpy import array, mean
 
-from mlbpestimation.metrics.maskedmetric import MaskedMetric
+from mlbpestimation.metrics.transformmetric import TransformMetric
 
 
-class TestMaskedMetric(TestCase):
+class TestTransformMetric(TestCase):
     def test_single_batch(self):
-        metric = MaskedMetric(MeanAbsoluteError(), [True, False])
+        metric = TransformMetric(MeanAbsoluteError(), lambda x, y: (x[:, 0], y[:, 0]))
         y_true = array([[1, 2, 3, 4], [4, 5, 6, 7]])
         y_pred = array([[14, 15, 16, 17], [18, 19, 20, 21]])
 
@@ -19,7 +19,7 @@ class TestMaskedMetric(TestCase):
         self.assertEqual(expected, result)
 
     def test_single_batch_second_axis(self):
-        metric = MaskedMetric(MeanAbsoluteError(), [False, True])
+        metric = TransformMetric(MeanAbsoluteError(), lambda x, y: (x[:, 1], y[:, 1]))
         y_true = array([[1, 2, 3, 4], [4, 5, 6, 7]])
         y_pred = array([[14, 15, 16, 17], [18, 19, 20, 21]])
 
@@ -30,7 +30,7 @@ class TestMaskedMetric(TestCase):
         self.assertEqual(expected, result)
 
     def test_multiple_batches(self):
-        metric = MaskedMetric(MeanAbsoluteError(), [True, False])
+        metric = TransformMetric(MeanAbsoluteError(), lambda x, y: (x[:, 0], y[:, 0]))
         y_true_batches = array([
             [[44, 23, 37, 39], [6, 23, 48, 18]],
             [[35, 1, 50, 21], [25, 18, 12, 3]],
