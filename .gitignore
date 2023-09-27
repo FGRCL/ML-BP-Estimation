@@ -84,3 +84,4 @@ slurm-*
 /outputs
 /multirun
 /sweeps
+/.dvc

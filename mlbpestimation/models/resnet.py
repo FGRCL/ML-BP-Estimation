@@ -3,8 +3,11 @@ from keras.engine.base_layer import Layer
 from keras.layers import Add, BatchNormalization, Conv1D, Conv2D, Dense, Dropout, Flatten, ReLU
 from keras.regularizers import L2
 from numpy import arange, concatenate, full, log2
+from tensorflow import TensorSpec
 
 from mlbpestimation.models.basemodel import BloodPressureModel
+from mlbpestimation.models.metricreducer.base import MetricReducer
+from mlbpestimation.models.metricreducer.singlestep import SingleStep
 
 
 class ResNet(BloodPressureModel):
@@ -37,6 +40,8 @@ class ResNet(BloodPressureModel):
         self.output_units = output_units
         self.use_2d = use_2d
 
+        self.metric_reducer = SingleStep()
+
         self._octaves = Sequential()
         filters = self._compute_filters(start_filters, max_filters)
         octave_modules = [first_octave_modules, second_octave_modules, third_octave_modules, fourth_octave_modules]
@@ -48,6 +53,13 @@ class ResNet(BloodPressureModel):
         for _ in range(regressor_layers):
             self._regressor.add(Dense(regressor_units, regressor_activation, kernel_regularizer=L2(l2_lambda)))
             self._regressor.add(Dropout(regressor_dropout))
+        self._output = None
+
+    def set_input(self, input_spec: TensorSpec):
+        pass
+
+    def set_output(self, output_spec: TensorSpec):
+        output_units = output_spec.shape[1]
         self._output = Dense(output_units)
 
     def call(self, inputs, training=None, mask=None):
@@ -56,8 +68,8 @@ class ResNet(BloodPressureModel):
         x = self._regressor(x)
         return self._output(x)
 
-    def set_input_shape(self, dataset_spec):
-        pass
+    def get_metric_reducer_strategy(self) -> MetricReducer:
+        return self.metric_reducer
 
     def get_config(self):
         return {

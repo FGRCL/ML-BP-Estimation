@@ -10,11 +10,11 @@ from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
 from mlbpestimation.callbacks.evaluatecallback import EvaluateCallback
 from mlbpestimation.data.datasetloader import DatasetLoader
-from mlbpestimation.metrics.maskedmetric import MaskedMetric
 from mlbpestimation.metrics.meanprediction import MeanPrediction
 from mlbpestimation.metrics.standardeviation import StandardDeviationAbsoluteError, StandardDeviationPrediction
 from mlbpestimation.metrics.thresholdmetric import ThresholdMetric
 from mlbpestimation.metrics.totalmeanabsoluteerror import TotalMeanAbsoluteErrorMetric
+from mlbpestimation.metrics.transformmetric import TransformMetric
 from mlbpestimation.models.basemodel import BloodPressureModel
 
 log = logging.getLogger(__name__)
@@ -30,35 +30,36 @@ class Hypothesis:
     def train(self):
         log.info('Start training')
         train, validation = self.setup_train_val()
-        pressure_output = train.element_spec[1].shape[1] == 2
-        self.model.set_input_shape(train.element_spec)
-        self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics(pressure_output))
-        self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_callbacks(), validation_data=validation)
+        log.info(train)
+        self.model.set_input(train.element_spec[:-1])
+        self.model.set_output(train.element_spec[-1])
+        self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
+        self.model.build([spec.shape for spec in train.element_spec[:-1]])  # TODO keep this?
+        self.model.summary()
+        self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_training_callbacks(), validation_data=validation)
         log.info('Finished training')
 
     def evaluate(self):
         log.info('Start evaluation')
 
         test = self.dataset.load_datasets().test \
-            .cache() \
             .batch(self.optimization.batch_size) \
             .prefetch(AUTOTUNE)
 
         if self.optimization.n_batches is not None:
             test = test.take(int(self.optimization.n_batches * 0.15))
 
-        self.model.evaluate(test, callbacks=self._get_eval_callbacks())
+        self.model.evaluate(test, callbacks=self._build_evaluation_callbacks())
         log.info('Finished evaluation')
 
     def setup_train_val(self):
-        datasets = self.dataset.load_datasets()
-        train = datasets.train \
-            .cache() \
+        train, validation, _ = self.dataset.load_datasets()
+
+        train = train \
             .batch(self.optimization.batch_size) \
             .prefetch(AUTOTUNE)
 
-        validation = datasets.validation \
-            .cache() \
+        validation = validation \
             .batch(self.optimization.batch_size) \
             .prefetch(AUTOTUNE)
 
@@ -67,13 +68,7 @@ class Hypothesis:
             validation = validation.take(int(self.optimization.n_batches * 0.15))
         return train, validation
 
-    def _build_callbacks(self):
-        return [
-            *self._get_wandb_callbacks(),
-            EarlyStopping(patience=5)
-        ]
-
-    def _get_wandb_callbacks(self):
+    def _build_training_callbacks(self):
         return [
             WandbMetricsLogger(
                 log_freq="batch"
@@ -81,34 +76,34 @@ class Hypothesis:
             WandbModelCheckpoint(
                 filepath=Path(self.output_directory) / wandb.run.name / '{epoch:02d}',
                 save_best_only=True
-            )
+            ),
+            EarlyStopping()
         ]
 
-    def _get_eval_callbacks(self):
+    @staticmethod
+    def _build_evaluation_callbacks():
         return [
             EvaluateCallback()
         ]
 
-    def _build_metrics(self, include_pressure_metrics: bool):
-        metric_masks = [
-            ([True, False], 'SBP'),
-            ([False, True], 'DBP')
-        ]
+    def _build_metrics(self):
+        reducer = self.model.get_metric_reducer_strategy()
         metrics = [
-            MeanAbsoluteError(name='Mean Absolute Error'),
-            TotalMeanAbsoluteErrorMetric(name='Total Mean Absolute Error')
+            TransformMetric(MeanAbsoluteError(), reducer.pressure_reduce, name='Mean Absolute Error'),
+            TransformMetric(TotalMeanAbsoluteErrorMetric(), reducer.pressure_reduce, name='Total Mean Absolute Error'),
         ]
-        if include_pressure_metrics:
-            for mask, name in metric_masks:
-                metrics += [
-                    MaskedMetric(MeanAbsoluteError(), mask, name=f'{name} Mean Absolute Error'),
-                    MaskedMetric(StandardDeviationAbsoluteError(), mask, name=f'{name} Absolute Error standard Deviation'),
-                    MaskedMetric(ThresholdMetric(MeanAbsoluteError(), upper=50), mask, name=f'{name} Mean Absolute Error under 50mmHg'),
-                    MaskedMetric(ThresholdMetric(MeanAbsoluteError(), lower=150), mask, name=f'{name} Mean Absolute Error above 150mmHg'),
-                    MaskedMetric(ThresholdMetric(MeanAbsoluteError(), lower=50, upper=150), mask,
-                                 name=f'{name} Mean Absolute Error between 50mmHg and 150mmHg'),
-                    MaskedMetric(MeanSquaredError(), mask, name=f'{name} Mean Squared Error'),
-                    MaskedMetric(MeanPrediction(), mask, name=f'{name} Prediction Mean'),
-                    MaskedMetric(StandardDeviationPrediction(), mask, name=f'{name} Prediction Standard Deviation'),
-                ]
+
+        for reduce, name in [(reducer.sbp_reduce, 'SBP'), (reducer.dbp_reduce, 'DBP')]:
+            metrics += [
+                TransformMetric(MeanAbsoluteError(), reduce, name=f'{name} Mean Absolute Error'),
+                TransformMetric(StandardDeviationAbsoluteError(), reduce, name=f'{name} Absolute Error standard Deviation'),
+                TransformMetric(ThresholdMetric(MeanAbsoluteError(), upper=50), reduce, name=f'{name} Mean Absolute Error under 50mmHg'),
+                TransformMetric(ThresholdMetric(MeanAbsoluteError(), lower=150), reduce, name=f'{name} Mean Absolute Error above 150mmHg'),
+                TransformMetric(ThresholdMetric(MeanAbsoluteError(), lower=50, upper=150), reduce,
+                                name=f'{name} Mean Absolute Error between 50mmHg and 150mmHg'),
+                TransformMetric(MeanSquaredError(), reduce, name=f'{name} Mean Squared Error'),
+                TransformMetric(MeanPrediction(), reduce, name=f'{name} Prediction Mean'),
+                TransformMetric(StandardDeviationPrediction(), reduce, name=f'{name} Prediction Standard Deviation'),
+
+            ]
         return metrics

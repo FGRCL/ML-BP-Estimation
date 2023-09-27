@@ -14,16 +14,17 @@ class TestRnn(TestCase):
         rmtree('rnn', ignore_errors=True)
 
     def test_create_model(self):
-        model = Rnn(1000, 3, 'rnn', 1)
+        model = Rnn(1000, 3, .0, .0, 1)
 
         self.assertIsNotNone(model)
 
     def test_save_model(self):
-        model = Rnn(1000, 3, 'rnn', 1)
+        model = Rnn(1000, 3, .0, .0, 1)
         train, _, _ = WindowDatasetLoaderFixture().load_datasets()
-        sample = next(iter(train.batch(5).take(1)))
-        inputs = sample[0]
-        model.set_input_shape(sample)
+        train = train.batch(5)
+        inputs = next(iter(train))[0]
+        model.set_input(train.element_spec[:-1])
+        model.set_output(train.element_spec[-1])
         outputs = model(inputs)
 
         model.save('rnn', overwrite=True)

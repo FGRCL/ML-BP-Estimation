@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from keras import Sequential
 from keras.engine.base_layer import Layer
 from keras.engine.input_layer import InputLayer
@@ -7,6 +5,8 @@ from keras.layers import Dense, GRU, LSTM, Reshape, SimpleRNN
 from tensorflow import TensorSpec, reduce_prod
 
 from mlbpestimation.models.basemodel import BloodPressureModel
+from mlbpestimation.models.metricreducer.base import MetricReducer
+from mlbpestimation.models.metricreducer.singlestep import SingleStep
 
 
 class RnnMlp(BloodPressureModel):
@@ -20,6 +20,8 @@ class RnnMlp(BloodPressureModel):
         self.activation = activation
         self.output_units = output_units
 
+        self.metric_reducer = SingleStep()
+
         self._input_layer = None
         self._reshape = None
         if rnn_first:
@@ -32,20 +34,29 @@ class RnnMlp(BloodPressureModel):
                 MlpModule(mlp_layers, mlp_units, activation),
                 RnnModule(rnn_layers, rnn_units, rnn_type),
             ])
-        self._layers.add(Dense(output_units))
+        self._output = None
+
+    def set_input(self, input_spec: TensorSpec):
+        shape = input_spec[0].shape
+        dtype = input_spec[0].dtype
+        self._input_layer = InputLayer(shape[1:], shape[0], dtype)
+
+        feature_size = reduce_prod(shape[2:]).numpy()  # TODO check if we still need this reshape
+        self._reshape = Reshape((shape[1], feature_size))
+
+    def set_output(self, output_spec: TensorSpec):
+        output_units = output_spec.shape[1]
+        self._output = Dense(output_units)
 
     def call(self, inputs, training=None, mask=None):
         x = self._input_layer(inputs, training, mask)
         x = self._reshape(x)
-        return self._layers(x, training, mask)
+        x = self._layers(x, training, mask)
+        x = self._output(x)
+        return x
 
-    def set_input_shape(self, dataset_spec: Tuple[TensorSpec]):
-        input_shape = dataset_spec[0].shape
-        input_type = dataset_spec[0].dtype
-        self._input_layer = InputLayer(input_shape[1:], input_shape[0], input_type)
-
-        feature_size = reduce_prod(input_shape[2:]).numpy()
-        self._reshape = Reshape((input_shape[1], feature_size))
+    def get_metric_reducer_strategy(self) -> MetricReducer:
+        return self.metric_reducer
 
     def get_config(self):
         return {

@@ -32,9 +32,10 @@ class TestRnnMlp(TestCase):
         save_directory = 'rnnmlp'
         model = RnnMlp(True, 5, 100, 'gru', 5, 200, 'relu', 2)
         train, _, _ = WindowDatasetLoaderFixture().load_datasets()
-        sample = next(iter(train.batch(5).take(1)))
-        inputs = sample[0]
-        model.set_input_shape(sample)
+        train = train.batch(5)
+        inputs = next(iter(train))[0]
+        model.set_input(train.element_spec[:-1])
+        model.set_output(train.element_spec[-1])
         outputs = model(inputs)
 
         model.save(save_directory, overwrite=True)

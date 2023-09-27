@@ -16,7 +16,10 @@ class TestResNet(TestCase):
     def test_save_model(self):
         model = ResNet(64, 256, 1, 1, 1, 1, 1, 100, 0, 'relu', 0.01, 2, False)
         train, _, _ = WindowDatasetLoaderFixture().load_datasets()
-        inputs = next(iter(train.batch(5).take(1)))[0]
+        train = train.batch(5)
+        inputs = next(iter(train))[0]
+        model.set_input(train.element_spec[:-1])
+        model.set_output(train.element_spec[-1])
         outputs = model(inputs)
 
         model.save('resnet', overwrite=True)

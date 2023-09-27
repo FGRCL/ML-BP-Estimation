@@ -39,11 +39,9 @@ class NumpyTransformOperation(DatasetOperation):
     def apply(self, dataset: Dataset) -> Dataset:
         return dataset.map(self.adapted_function, num_parallel_calls=AUTOTUNE, deterministic=False, name=self.__class__.__name__)
 
-    def adapted_function(self, x: Tensor, y: Tensor = None):
-        if y is None:
-            return numpy_function(self.transform, [x], self.out_type, self.stateful, name=self.__class__.__name__)
-        else:
-            return numpy_function(self.transform, [x, y], self.out_type, self.stateful, name=self.__class__.__name__)
+    def adapted_function(self, *args):
+        ls_args = list(args)
+        return numpy_function(self.transform, ls_args, self.out_type, self.stateful, name=self.__class__.__name__)
 
     @abstractmethod
     def transform(self, *args) -> Any:

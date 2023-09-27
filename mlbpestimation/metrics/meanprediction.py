@@ -8,7 +8,7 @@ class MeanPrediction(Metric):
         self.predictions = Variable([], shape=(None,), validate_shape=False)
 
     def update_state(self, y_true, y_pred, sample_weight=None):
-        self.predictions.assign(concat([self.predictions, y_pred[:, 0]], axis=0))
+        self.predictions.assign(concat([self.predictions, y_pred], axis=0))
 
     def result(self):
         return reduce_mean(self.predictions)

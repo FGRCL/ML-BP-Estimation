@@ -1,5 +1,5 @@
 _target_: mlbpestimation.data.mimic4.mimicdatasetloader.MimicDatasetLoader
-mimic_wave_files_directory: ${directories.data}/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves
+mimic_wave_files_directory: ${directories.data}/raw/mimic-IV/physionet.org/files/mimic4wdb/0.1.0/waves
 random_seed: ${random_seed}
-use_ppg: false
+use_ppg: true
 frequency: 125

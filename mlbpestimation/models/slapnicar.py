@@ -8,8 +8,11 @@ from keras.layers import Add, AveragePooling1D, BatchNormalization, Concatenate,
 from keras.regularizers import l2
 from numpy import arange, concatenate, full, log2
 from omegaconf import ListConfig
+from tensorflow import TensorSpec
 
 from mlbpestimation.models.basemodel import BloodPressureModel
+from mlbpestimation.models.metricreducer.base import MetricReducer
+from mlbpestimation.models.metricreducer.singlestep import SingleStep
 
 
 class Slapnicar(BloodPressureModel):
@@ -38,6 +41,8 @@ class Slapnicar(BloodPressureModel):
         self.l2_lambda = l2_lambda
         self.dropout_rate = dropout_rate
 
+        self.metric_reducer = SingleStep()
+
         resnet_filters = self._compute_resnet_filters(start_filters, max_filters, resnet_blocks)
         self._input_layer = None
         self._resnet_blocks = Sequential()
@@ -52,7 +57,14 @@ class Slapnicar(BloodPressureModel):
             BatchNormalization(),
         ])
         self._concatenate = Concatenate()
-        self._regressor = Regressor(dense_units, output_units, l2_lambda, dropout_rate)
+        self._regressor = None
+
+    def set_input(self, input_spec: TensorSpec):
+        self._input_layer = InputLayer(input_spec[0].shape[1:])
+
+    def set_output(self, output_spec: TensorSpec):
+        output_units = output_spec.shape[1]
+        self._regressor = Regressor(self.dense_units, output_units, self.l2_lambda, self.dropout_rate)
 
     def call(self, inputs, training=None, mask=None):
         x = self._input_layer(inputs, training, mask)
@@ -61,6 +73,9 @@ class Slapnicar(BloodPressureModel):
         spectrotemporal_output = self._spectro_temporal_block(x, training, mask)
         x = self._concatenate([gru_output, spectrotemporal_output])
         return self._regressor(x, training, mask)
+
+    def get_metric_reducer_strategy(self) -> MetricReducer:
+        return self.metric_reducer
 
     def get_config(self):
         return {
@@ -76,9 +91,6 @@ class Slapnicar(BloodPressureModel):
             'l2_lambda': self.l2_lambda,
             'dropout_rate': self.dropout_rate,
         }
-
-    def set_input_shape(self, dataset_spec):
-        self._input_layer = InputLayer(dataset_spec[0].shape[1:])
 
     @staticmethod
     def _compute_resnet_filters(start_filters, max_filters, resnet_blocks):
