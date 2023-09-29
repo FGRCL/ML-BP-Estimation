@@ -2,8 +2,9 @@ from typing import Any, Tuple, Union
 
 from neurokit2 import ppg_clean, ppg_findpeaks
 from numpy import argmax, argmin, asarray, empty, float32, ndarray, zeros
+from numpy.random import default_rng
 from scipy.signal import butter, correlate, correlation_lags, resample, sosfilt
-from tensorflow import DType, Tensor, reduce_all, reduce_max, reduce_min, stack
+from tensorflow import DType, Tensor, concat, reduce_all, reduce_max, reduce_min, stack
 from tensorflow.python.data import Dataset
 
 from mlbpestimation.preprocessing.base import DatasetOperation, DatasetPreprocessingPipeline, NumpyTransformOperation, TransformOperation
@@ -24,7 +25,9 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
                  sequence_steps: int,
                  sequence_stride: int,
                  scale_per_signal: bool,
-                 bandpass_input: bool):
+                 bandpass_input: bool,
+                 random_seed: int,
+                 subsample: float):
         scaling_axis = None if scale_per_signal else (1, 2)
         super(BeatSeriesPreprocessing, self).__init__([
             FilterHasSignal(),
@@ -32,6 +35,8 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
             SplitHeartbeats((float32, float32), frequency, beat_length),
             FilterBeats(sequence_steps),
             SlidingWindow(sequence_steps, sequence_stride),
+            Subsample((float32, float32), random_seed, subsample),
+            HasData(),
             FilterSqi((float32, float32), 0.5, 2),
             HasData(),
             AddBloodPressureSequence(),
@@ -40,6 +45,7 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
             StandardScaling(axis=scaling_axis),
             Reshape([-1, sequence_steps, beat_length], [-1, sequence_steps, 2]),
             FlattenDataset(),
+            AddShiftedInput(),
             Shuffle(),
         ])
 
@@ -147,3 +153,26 @@ class AdjustPhaseLag(NumpyTransformOperation):
             return input_signal[phase_lag:], output_signal[:-phase_lag]
         else:
             return input_signal[:-phase_lag], output_signal[phase_lag:]
+
+
+class AddShiftedInput(TransformOperation):
+    def transform(self, input_windows: Tensor, output_pressures: Tensor) -> Any:
+        first = zeros((1, output_pressures.shape[1]))
+        shifted_output = concat([first, output_pressures[1:]], axis=0)
+        return (input_windows, shifted_output), output_pressures
+
+
+class Subsample(NumpyTransformOperation):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], seed: int, sample_rate: float):
+        super().__init__(out_type)
+        self.random_generator = default_rng(seed)
+        self.sample_rate = sample_rate
+
+    def transform(self, inputs_windows: ndarray, output_windows: ndarray) -> Any:
+        n_elements = inputs_windows.shape[0]
+        sample_size = int(n_elements * self.sample_rate)
+        sample_idx = self.random_generator.choice(range(n_elements), sample_size, False)
+
+        print(inputs_windows.shape, output_windows.shape, inputs_windows[sample_idx].shape, output_windows[sample_idx].shape)
+
+        return inputs_windows[sample_idx], output_windows[sample_idx]

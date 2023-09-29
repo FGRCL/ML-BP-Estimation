@@ -34,7 +34,7 @@ class Hypothesis:
         self.model.set_input(train.element_spec[:-1])
         self.model.set_output(train.element_spec[-1])
         self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
-        self.model.build([spec.shape for spec in train.element_spec[:-1]])  # TODO keep this?
+        self.model.build([spec.shape for spec in train.element_spec[0]])  # TODO keep this?
         self.model.summary()
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_training_callbacks(), validation_data=validation)
         log.info('Finished training')
