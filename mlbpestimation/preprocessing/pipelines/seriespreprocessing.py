@@ -18,12 +18,13 @@ class SeriesPreprocessing(DatasetPreprocessingPipeline):
                  window_size: float,
                  lowpass_cutoff: int,
                  bandpass_cutoff,
-                 scale_per_signal: bool):
+                 scale_per_signal: bool,
+                 bandpass_input: bool):
         window_samples = int(window_size * resample_frequency * SECONDS_IN_MINUTES)
         scaling_axis = -1 if scale_per_signal else 1
         super().__init__([
             FilterHasSignal(),
-            SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
+            SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff, bandpass_input),
             ResampleSignals((float32, float32), frequency, resample_frequency),
             SlidingWindow(window_samples, window_samples),
             StandardScaling(axis=scaling_axis),

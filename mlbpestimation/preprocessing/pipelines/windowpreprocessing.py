@@ -33,14 +33,15 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
                  max_pressure: int,
                  lowpass_cutoff: int,
                  bandpass_cutoff: Tuple[float, float],
-                 scale_per_signal: bool):
+                 scale_per_signal: bool,
+                 bandpass_input: bool):
         window_size_frequency = window_size * frequency
         window_step_frequency = window_step * frequency
         scaling_axis = -1 if scale_per_signal else 1
         super().__init__([
             FilterHasSignal(),
             FilterSize(window_size_frequency),
-            SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
+            SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff, bandpass_input),
             SlidingWindow(window_size_frequency, window_step_frequency),
             FilterSqi((float32, float32), 0.35, 0.8),
             AddBloodPressureOutput(),
