@@ -13,27 +13,68 @@ from mlbpestimation.models.metricreducer.mutlistep import MultiStep
 
 class Transformer(BloodPressureModel):
 
-    def __init__(self, sequence_length: int, embedding_size: int, n_layers: int, n_attention_heads: int, ff_units: int, coder_dropout: float,
-                 ff_dropout: float, attention_dropout: float, output_size: int):
+    def __init__(self,
+                 n_layers: int,
+                 n_attention_heads: int,
+                 ff_units: int,
+                 coder_dropout: float,
+                 ff_dropout: float,
+                 attention_dropout: float):
         super().__init__()
-        self.encoder = Encoder(sequence_length, embedding_size, n_layers, ff_units, n_attention_heads, coder_dropout, ff_dropout, attention_dropout)
-        self.decoder = Decoder(sequence_length, output_size, n_layers, ff_units, n_attention_heads, coder_dropout, ff_dropout, attention_dropout)
-        self.regressor = Dense(output_size)
+        self.n_layers = n_layers
+        self.ff_units = ff_units
+        self.n_attention_heads = n_attention_heads
+        self.coder_dropout = coder_dropout
+        self.ff_dropout = ff_dropout
+        self.attention_dropout = attention_dropout
+
+        self.encoder = None
+        self.decoder = None
+        self.regressor = None
 
         self.metric_reducer = MultiStep()
 
     def set_input(self, input_spec: TensorSpec):
-        pass  # TODO implement setting the input and output
+        sequence_length = input_spec[0][0].shape[1]
+        embedding_size = input_spec[0][0].shape[2]
+        output_size = input_spec[0][1].shape[2]
+
+        self.encoder = Encoder(
+            sequence_length,
+            embedding_size,
+            self.n_layers,
+            self.ff_units,
+            self.n_attention_heads,
+            self.coder_dropout,
+            self.ff_dropout,
+            self.attention_dropout)
+        self.decoder = Decoder(
+            sequence_length,
+            output_size,
+            self.n_layers,
+            self.ff_units,
+            self.n_attention_heads,
+            self.coder_dropout,
+            self.ff_dropout,
+            self.attention_dropout)
 
     def set_output(self, output_spec: TensorSpec):
-        pass
+        output_size = output_spec.shape[2]
+
+        self.regressor = Dense(output_size)
 
     def get_metric_reducer_strategy(self) -> MetricReducer:
         return self.metric_reducer
 
     def get_config(self):
         return {
-            # TODO implement config
+            "n_layers": self.n_layers,
+            "ff_units": self.ff_units,
+            "n_attention_heads": self.n_attention_heads,
+            "coder_dropout": self.coder_dropout,
+            "ff_dropout": self.ff_dropout,
+            "attention_dropout": self.attention_dropout
+
         }
 
     def call(self, inputs):
