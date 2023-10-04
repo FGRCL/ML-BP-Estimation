@@ -3,7 +3,7 @@ from typing import Any, Tuple
 from numpy import float32, zeros
 from tensorflow import Tensor, concat
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, Prefetch, PrintShape, Shuffle, TransformOperation
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, Prefetch, Shuffle, TransformOperation
 from mlbpestimation.preprocessing.pipelines.beatsequencepreprocessing import FilterBeats
 from mlbpestimation.preprocessing.shared.filters import FilterSqi, HasData
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
@@ -40,7 +40,6 @@ class BeatSeriesPreprocessingTeacherForcing(DatasetPreprocessingPipeline):
             FilterPressureSeriesWithinBounds(min_pressure, max_pressure),
             StandardScaling(axis=scaling_axis),
             Reshape([-1, sequence_steps, beat_length], [-1, sequence_steps, 2]),
-            PrintShape("Data"),
             FlattenDataset(),
             AddShiftedInput(),
             Shuffle(),
