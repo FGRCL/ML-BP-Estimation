@@ -30,11 +30,12 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
                  min_pressure: int,
                  max_pressure: int,
                  beat_length: int,
-                 scale_per_signal: bool):
+                 scale_per_signal: bool,
+                 bandpass_input: bool):
         scaling_axis = -1 if scale_per_signal else 1
         dataset_operations = [
             FilterHasSignal(),
-            SignalFilter((tfloat32, tfloat32), frequency, lowpass_cutoff, bandpass_cutoff),
+            SignalFilter((tfloat32, tfloat32), frequency, lowpass_cutoff, bandpass_cutoff, bandpass_input),
             SplitHeartbeats((tfloat32, tfloat32), frequency, beat_length),
             HasData(),
             FilterSqi((tfloat32, tfloat32), 0.5, 2),

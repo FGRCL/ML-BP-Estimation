@@ -4,7 +4,7 @@ from numpy import argmax
 from scipy.signal import correlate, correlation_lags
 from tensorflow import float32
 
-from mlbpestimation.preprocessing.pipelines.beatseries import AdjustPhaseLag
+from mlbpestimation.preprocessing.shared.transforms import AdjustPhaseLag
 from tests.fixtures.signaldatasetloaderfixture import SignalDatasetLoaderFixture
 
 

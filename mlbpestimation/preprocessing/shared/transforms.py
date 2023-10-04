@@ -2,8 +2,9 @@ from typing import Any, List, Optional, Tuple, Union
 
 import tensorflow
 from neurokit2 import ppg_clean, ppg_findpeaks
-from numpy import argmin, asarray, empty, float32, ndarray, zeros
-from scipy.signal import butter, resample, sosfilt
+from numpy import argmax, argmin, asarray, empty, float32, ndarray, zeros
+from numpy.random import default_rng
+from scipy.signal import butter, correlate, correlation_lags, resample, sosfilt
 from scipy.stats import skew
 from tensorflow import DType, Tensor, cast, ensure_shape, reduce_max, reduce_mean, reduce_min, reshape
 from tensorflow.python.data import Dataset
@@ -11,6 +12,7 @@ from tensorflow.python.ops.array_ops import boolean_mask, gather, shape, stack
 from tensorflow.python.ops.gen_math_ops import is_nan
 from tensorflow.python.ops.math_ops import reduce_std
 from tensorflow.python.ops.numpy_ops import logical_not
+from tensorflow.python.ops.ragged.ragged_math_ops import reduce_all
 
 from mlbpestimation.preprocessing.base import FlatMap, NumpyTransformOperation, TransformOperation
 
@@ -33,19 +35,19 @@ class StandardScaling(TransformOperation):
 
 
 class SignalFilter(NumpyTransformOperation):
-    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], sample_rate, lowpass_cutoff, bandpass_cutoff):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], sample_rate, lowpass_cutoff, bandpass_cutoff, bandpass_input: bool):
         super().__init__(out_type)
-        self.bandpass_cutoff = bandpass_cutoff
-        self.lowpass_cutoff = lowpass_cutoff
-        self.sample_rate = sample_rate
+        lowpass_filter = butter(2, lowpass_cutoff, 'lowpass', output='sos', fs=sample_rate)
+        bandpass_filter = butter(2, bandpass_cutoff, 'bandpass', output='sos', fs=sample_rate)
+
+        self.input_filter = bandpass_filter if bandpass_input else lowpass_filter
+        self.output_filter = lowpass_filter
 
     def transform(self, input_signal: Tensor, output_signal: Tensor) -> Any:
-        lowpass_filter = butter(2, self.lowpass_cutoff, 'lowpass', output='sos', fs=self.sample_rate)
-        bandpass_filter = butter(2, self.bandpass_cutoff, 'bandpass', output='sos', fs=self.sample_rate)
-        signal_bandpass = asarray(sosfilt(bandpass_filter, input_signal), dtype=float32)
-        signal_lowpass = asarray(sosfilt(lowpass_filter, output_signal), dtype=float32)
+        input_filtered = asarray(sosfilt(self.input_filter, input_signal), dtype=float32)
+        output_filtered = asarray(sosfilt(self.output_filter, output_signal), dtype=float32)
 
-        return signal_bandpass, signal_lowpass
+        return input_filtered, output_filtered
 
 
 class AddBloodPressureOutput(TransformOperation):
@@ -140,7 +142,7 @@ class SplitHeartbeats(NumpyTransformOperation):
 
     def transform(self, lowpass_signal: Tensor, bandpass_signal: Tensor = None) -> Any:
         try:
-            peak_indices = ppg_findpeaks(ppg_clean(bandpass_signal, self.frequency), self.frequency)['PPG_Peaks']
+            peak_indices = ppg_findpeaks(ppg_clean(lowpass_signal, self.frequency), self.frequency)['PPG_Peaks']
         except:
             return [zeros(0, float32), zeros(0, float32)]
 
@@ -175,3 +177,55 @@ class SplitHeartbeats(NumpyTransformOperation):
             beats[i] = beat_resampled
 
         return beats
+
+
+class AddBloodPressureSeries(TransformOperation):
+    def transform(self, input_windows: Tensor, output_windows: Tensor) -> Any:
+        sbp = reduce_max(output_windows, axis=-1)
+        dbp = reduce_min(output_windows, axis=-1)
+        pressures = stack((sbp, dbp), -1)
+
+        return input_windows, pressures
+
+
+class FilterPressureSeriesWithinBounds(TransformOperation):
+    def __init__(self, min: int, max: int):
+        self.min = min
+        self.max = max
+
+    def transform(self, input_windows: Tensor, pressures: Tensor) -> Tuple[ndarray, ndarray]:
+        sbp = pressures[:, :, 0]
+        dbp = pressures[:, :, 1]
+        sbp_min = reduce_all(self.min < sbp, axis=-1)
+        sbp_max = reduce_all(sbp < self.max, axis=-1)
+        dbp_min = reduce_all(self.min < dbp, axis=-1)
+        dbp_max = reduce_all(dbp < self.max, axis=-1)
+        valid_idx = sbp_min & sbp_max & dbp_min & dbp_max
+        return input_windows[valid_idx], pressures[valid_idx]
+
+
+class AdjustPhaseLag(NumpyTransformOperation):
+    def transform(self, input_signal: ndarray, output_signal: ndarray) -> (ndarray, ndarray):
+        mode = 'full'
+        correlation = correlate(input_signal, output_signal, mode=mode)
+        lags = correlation_lags(input_signal.shape[0], output_signal.shape[0], mode=mode)
+        phase_lag = lags[argmax(correlation)]
+
+        if phase_lag > 0:
+            return input_signal[phase_lag:], output_signal[:-phase_lag]
+        else:
+            return input_signal[:-phase_lag], output_signal[phase_lag:]
+
+
+class Subsample(NumpyTransformOperation):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], seed: int, sample_rate: float):
+        super().__init__(out_type)
+        self.random_generator = default_rng(seed)
+        self.sample_rate = sample_rate
+
+    def transform(self, inputs_windows: ndarray, output_windows: ndarray) -> Any:
+        n_elements = inputs_windows.shape[0]
+        sample_size = int(n_elements * self.sample_rate)
+        sample_idx = self.random_generator.choice(range(n_elements), sample_size, False)
+
+        return inputs_windows[sample_idx], output_windows[sample_idx]

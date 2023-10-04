@@ -99,6 +99,17 @@ class FlatMap(DatasetOperation):
         ...
 
 
+class Shuffle(DatasetOperation):
+    def apply(self, dataset: Dataset) -> Dataset:
+        count = int(dataset.reduce(0, lambda x, _: x + 1))
+        return dataset.shuffle(count)
+
+
+class Prefetch(DatasetOperation):
+    def apply(self, dataset: Dataset) -> Dataset:
+        return dataset.prefetch(AUTOTUNE)
+
+
 class WithOptions(DatasetOperation):
     def __init__(self, options: Options):
         self.options = options

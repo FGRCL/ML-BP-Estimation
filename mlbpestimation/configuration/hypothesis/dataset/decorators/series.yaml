@@ -1,6 +1,6 @@
 heartbeat:
   _target_: mlbpestimation.data.decorator.preprocessedloader.PreprocessedLoader
-  preprocessing:
+  training_preprocessing:
     _target_: mlbpestimation.preprocessing.pipelines.seriespreprocessing.SeriesPreprocessing
     frequency: ${hypothesis.dataset.source.frequency}
     resample_frequency: 125
@@ -10,3 +10,15 @@ heartbeat:
       - 0.1
       - 8
     scale_per_signal: false
+    bandpass_input: true
+  test_preprocessing:
+    _target_: mlbpestimation.preprocessing.pipelines.seriespreprocessing.SeriesPreprocessing
+    frequency: ${hypothesis.dataset.source.frequency}
+    resample_frequency: 125
+    window_size: 10
+    lowpass_cutoff: 5
+    bandpass_cutoff:
+      - 0.1
+      - 8
+    scale_per_signal: false
+    bandpass_input: true

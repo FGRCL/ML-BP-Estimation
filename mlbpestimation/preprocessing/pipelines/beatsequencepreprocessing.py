@@ -19,11 +19,12 @@ class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
                  beat_length: int,
                  sequence_steps: int,
                  sequence_stride: int,
-                 scale_per_signal: bool):
+                 scale_per_signal: bool,
+                 bandpass_input: bool):
         scaling_axis = -1 if scale_per_signal else 2
         super(BeatSequencePreprocessing, self).__init__([
             FilterHasSignal(),
-            SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff),
+            SignalFilter((float32, float32), frequency, lowpass_cutoff, bandpass_cutoff, bandpass_input),
             SplitHeartbeats((float32, float32), frequency, beat_length),
             FilterBeats(sequence_steps),
             SlidingWindow(sequence_steps, sequence_stride),
