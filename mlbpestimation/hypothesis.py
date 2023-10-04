@@ -5,7 +5,7 @@ import wandb
 from keras.callbacks import EarlyStopping
 from keras.metrics import MeanAbsoluteError, MeanSquaredError
 from omegaconf import DictConfig
-from tensorflow.python.data import AUTOTUNE
+from tensorflow.python.data import AUTOTUNE, Dataset
 from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
 
 from mlbpestimation.callbacks.evaluatecallback import EvaluateCallback
@@ -34,7 +34,7 @@ class Hypothesis:
         self.model.set_input(train.element_spec[:-1])
         self.model.set_output(train.element_spec[-1])
         self.model.compile(self.optimization.optimizer, loss=self.optimization.loss, metrics=self._build_metrics())
-        self.model.build([spec.shape for spec in train.element_spec[0]])  # TODO keep this?
+        self.model.build(self._get_input_shapes(train))
         self.model.summary()
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_training_callbacks(), validation_data=validation)
         log.info('Finished training')
@@ -107,3 +107,11 @@ class Hypothesis:
 
             ]
         return metrics
+
+    def _get_input_shapes(self, dataset: Dataset):
+        input_element_specs = dataset.element_spec[0]
+
+        if type(input_element_specs) is tuple:
+            return [spec.shape for spec in input_element_specs]
+        else:
+            return input_element_specs.shape
