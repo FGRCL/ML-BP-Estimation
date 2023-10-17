@@ -8,3 +8,4 @@ optimizer:
 batch_size: 64
 epoch: 1
 n_batches: 10
+early_stopping: false

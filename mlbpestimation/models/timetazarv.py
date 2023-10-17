@@ -1,0 +1,79 @@
+import tensorflow
+from keras.activations import relu
+from keras.engine.base_layer import Layer
+from keras.engine.input_layer import InputLayer
+from keras.layers import BatchNormalization, Bidirectional, Conv1D, Dense, Flatten, GRU, LSTM, ReLU, SimpleRNN, TimeDistributed
+from tensorflow import TensorSpec
+
+from mlbpestimation.models.basemodel import BloodPressureModel
+from mlbpestimation.models.metricreducer.base import MetricReducer
+from mlbpestimation.models.metricreducer.mutlistep import MultiStep
+
+
+class TimeTazarv(BloodPressureModel):
+    _rnn_implementations = {
+        'GRU': GRU,
+        'LSTM': LSTM,
+        'RNN': SimpleRNN,
+    }
+
+    def __init__(self, n_units: int, n_layers: int, dropout: float, recurrent_dropout: float, output_size: int):
+        super().__init__()
+        self.n_units = n_units
+        self.n_layers = n_layers
+        self.dropout = dropout
+        self.recurrent_dropout = recurrent_dropout
+        self.output_size = output_size
+
+        self.metric_reducer = MultiStep()
+
+        self._input_layer = None
+
+        self._layers = [
+            TimeDistributed(Conv1D(32, 5)),
+            TimeDistributed(ReLU()),
+            TimeDistributed(BatchNormalization()),
+            # TimeDistributed(MaxPooling1D(4)),
+            # TimeDistributed(Dropout(0.01)),
+            TimeDistributed(Flatten()),
+            TimeDistributed(Dense(256, activation=relu)),
+            TimeDistributed(Dense(32, activation=None)),
+            Bidirectional(SimpleRNN(256, return_sequences=True, activation=relu, unroll=True)),
+            SimpleRNN(2, return_sequences=True, activation=None, unroll=True)
+        ]
+
+    def set_input(self, input_spec: TensorSpec):
+        shape = input_spec[0].shape
+        dtype = input_spec[0].dtype
+        self._input_layer = InputLayer(shape[1:], shape[0], dtype)
+
+    def set_output(self, output_spec: TensorSpec):
+        pass
+
+    def call(self, inputs, training=None, mask=None):
+        x = inputs
+        x = x[:, :, :, tensorflow.newaxis]
+        for layer in self._layers:
+            x = layer(x)
+
+        return x
+
+    def get_metric_reducer_strategy(self) -> MetricReducer:
+        return self.metric_reducer
+
+    def get_config(self):
+        return {
+            'units': self.n_units,
+            'layers': self.n_layers,
+            'dropout': self.dropout,
+            'recurrent_dropout': self.recurrent_dropout,
+            'output_size': self.output_size,
+        }
+
+
+class ResidualRecurrentModule(Layer):
+    def __init__(self):
+        pass
+
+    def __call__(self, inputs):
+        pass
