@@ -1,17 +1,18 @@
 from itertools import compress
-from typing import Tuple, Union
+from typing import Any, Tuple, Union
 
 import numpy
 from neurokit2 import ppg_clean, ppg_findpeaks
-from numpy import arange, argmin, concatenate, empty, float32, newaxis, percentile, reshape, where, zeros
+from numpy import arange, argmin, concatenate, empty, float32, ndarray, newaxis, percentile, reshape, where, zeros
+from numpy.random import default_rng
 from scipy.ndimage import gaussian_filter1d
-from scipy.signal import correlate, resample
+from scipy.signal import correlate
 from tensorflow import DType, Tensor
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation, Prefetch, Print, PrintShape
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation, Prefetch, Print, PrintShape, Shuffle
 from mlbpestimation.preprocessing.shared.filters import FilterSqi, HasData
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureSeries, AdjustPhaseLag, EnsureShape, FilterPressureSeriesWithinBounds, FlattenDataset, Reshape, SignalFilter, StandardScaling, Subsample
+from mlbpestimation.preprocessing.shared.transforms import AdjustPhaseLag, EnsureShape, FilterPressureSeriesWithinBounds, FlattenDataset, Reshape, SignalFilter, StandardScaling
 
 
 class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
@@ -37,18 +38,17 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
             HasData(),
             FilterSqi((float32, float32), 0.5, 2),
             HasData(),
-            AddBloodPressureSeries(),
             EnsureShape([None, sequence_steps, beat_length], [None, sequence_steps, 2]),
             FilterPressureSeriesWithinBounds(min_pressure, max_pressure),
             HasData(),
             StandardScaling(axis=scaling_axis),
             Reshape([-1, sequence_steps, beat_length], [-1, sequence_steps, 2]),
             PrintShape(),
-            Subsample((float32, float32), random_seed, subsample),
+            RandomChoice((float32, float32), random_seed, 5),
             PrintShape(),
             FlattenDataset(),
             Print("Done preprocessing"),
-            # Shuffle(),
+            Shuffle(),
             Prefetch(),
         ])
 
@@ -62,9 +62,9 @@ class SequenceIntoHeartbeats(NumpyTransformOperation):
         self.width = width
         self.shift = shift
 
-    def transform(self, lowpass_signal: Tensor, bandpass_signal: Tensor = None):
+    def transform(self, input_signal: Tensor, output_signal: Tensor = None):
         try:
-            peak_indices = ppg_findpeaks(ppg_clean(lowpass_signal, self.frequency), self.frequency)['PPG_Peaks']
+            peak_indices = ppg_findpeaks(ppg_clean(input_signal, self.frequency), self.frequency)['PPG_Peaks']
         except:
             return [zeros(0, float32), zeros(0, float32)]
 
@@ -73,33 +73,33 @@ class SequenceIntoHeartbeats(NumpyTransformOperation):
 
         segments_indices = self._get_segments_indices(peak_indices)
 
-        lowpass_series = []
-        bandpass_series = []
+        sequences_input = []
+        sequences_output = []
         for segment_indices in segments_indices:
-            trough_indices = self._get_troughs(segment_indices, bandpass_signal)
+            trough_indices = self._get_troughs(segment_indices, input_signal)
 
-            lowpass_heartbeats = self._get_beats(trough_indices, lowpass_signal)
-            bandpass_heartbeats = self._get_beats(trough_indices, bandpass_signal)
+            heartbeat_input = self._get_beats(trough_indices, input_signal)
+            pressure_output = self._get_pressures(trough_indices, output_signal)
 
-            lowpass_serie = self._sliding_window(lowpass_heartbeats)
-            bandpass_serie = self._sliding_window(bandpass_heartbeats)
+            segment_sequences_input = self._sliding_window(heartbeat_input)
+            segment_sequences_output = self._sliding_window(pressure_output)
 
-            if lowpass_serie.shape[0] > 1:
-                filtered_lowpass, filtered_bandpass = self._autocorrelation_filter(
-                    lowpass_heartbeats,
-                    lowpass_serie,
-                    bandpass_serie
+            if segment_sequences_input.shape[0] > 1:
+                filtered_input, filtered_output = self._autocorrelation_filter(
+                    heartbeat_input,
+                    segment_sequences_input,
+                    segment_sequences_output
                 )
 
-                lowpass_series.append(filtered_lowpass)
-                bandpass_series.append(filtered_bandpass)
+                sequences_input.append(filtered_input)
+                sequences_output.append(filtered_output)
 
-        if len(lowpass_series) == 0:
+        if len(sequences_input) == 0:
             return [zeros(0, float32), zeros(0, float32)]
 
-        lowpass_series = concatenate(lowpass_series)
-        bandpass_series = concatenate(bandpass_series)
-        return lowpass_series, bandpass_series
+        sequences_input = concatenate(sequences_input)
+        sequences_output = concatenate(sequences_output)
+        return sequences_input, sequences_output
 
     def _get_segments_indices(self, peak_indices):
         intervals = peak_indices[1:] - peak_indices[:-1]
@@ -129,12 +129,12 @@ class SequenceIntoHeartbeats(NumpyTransformOperation):
 
     def _get_beats(self, trough_indices, signal):
         beat_count = len(trough_indices) - 1
-        beats = empty((beat_count, self.beat_length), dtype=float32)
+        beats = zeros((beat_count, self.beat_length), dtype=float32)
 
         for i, (pulse_onset_index, diastolic_foot_index) in enumerate(zip(trough_indices[:-1], trough_indices[1:])):
-            beat = signal[pulse_onset_index: diastolic_foot_index]
-            beat_resampled = resample(beat, self.beat_length)
-            beats[i] = beat_resampled
+            beat = signal[pulse_onset_index + 1: diastolic_foot_index + 1]
+            truncated_beat = beat[:self.beat_length]
+            beats[i, :truncated_beat.shape[0]] = truncated_beat
 
         return beats
 
@@ -153,3 +153,28 @@ class SequenceIntoHeartbeats(NumpyTransformOperation):
         filtered_bandpass = bandpass_series[valid_idx]
 
         return filtered_lowpass, filtered_bandpass
+
+    def _get_pressures(self, trough_indices, output_signal):
+        beat_count = len(trough_indices) - 1
+        beats = zeros((beat_count, 2), dtype=float32)
+
+        for i, (pulse_onset_index, diastolic_foot_index) in enumerate(zip(trough_indices[:-1], trough_indices[1:])):
+            beat = output_signal[pulse_onset_index + 1: diastolic_foot_index + 1]
+            beats[i, 0] = max(beat)
+            beats[i, 1] = beat[-1]
+
+        return beats
+
+
+class RandomChoice(NumpyTransformOperation):
+    def __init__(self, out_type: Union[DType, Tuple[DType, ...]], seed: int, n: int):
+        super().__init__(out_type)
+        self.random_generator = default_rng(seed)
+        self.n = n
+
+    def transform(self, inputs_windows: ndarray, output_windows: ndarray) -> Any:
+        n_elements = inputs_windows.shape[0]
+        sample_size = min(n_elements, self.n)
+        sample_idx = self.random_generator.choice(range(n_elements), sample_size, False)
+
+        return inputs_windows[sample_idx], output_windows[sample_idx]
