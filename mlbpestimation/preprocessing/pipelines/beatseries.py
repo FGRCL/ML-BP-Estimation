@@ -9,7 +9,7 @@ from scipy.ndimage import gaussian_filter1d
 from scipy.signal import correlate
 from tensorflow import DType, Tensor
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation, Prefetch, Print, PrintShape, Shuffle
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation, Prefetch, Shuffle
 from mlbpestimation.preprocessing.shared.filters import FilterSqi, HasData
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
 from mlbpestimation.preprocessing.shared.transforms import AdjustPhaseLag, EnsureShape, FilterPressureSeriesWithinBounds, FlattenDataset, Reshape, SignalFilter, StandardScaling
@@ -42,12 +42,9 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
             FilterPressureSeriesWithinBounds(min_pressure, max_pressure),
             HasData(),
             StandardScaling(axis=scaling_axis),
+            RandomChoice((float32, float32), random_seed, 1000),
             Reshape([-1, sequence_steps, beat_length], [-1, sequence_steps, 2]),
-            PrintShape(),
-            RandomChoice((float32, float32), random_seed, 5),
-            PrintShape(),
             FlattenDataset(),
-            Print("Done preprocessing"),
             Shuffle(),
             Prefetch(),
         ])
