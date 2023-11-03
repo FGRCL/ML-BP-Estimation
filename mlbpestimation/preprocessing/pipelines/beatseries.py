@@ -3,7 +3,7 @@ from typing import Any, Tuple, Union
 
 import numpy
 from neurokit2 import ppg_clean, ppg_findpeaks
-from numpy import arange, argmin, concatenate, empty, float32, ndarray, newaxis, percentile, reshape, where, zeros
+from numpy import arange, argmin, concatenate, empty, float32, mean, ndarray, newaxis, percentile, reshape, std, where, zeros
 from numpy.random import default_rng
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import correlate
@@ -12,7 +12,7 @@ from tensorflow import DType, Tensor
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, NumpyTransformOperation, Prefetch, Shuffle
 from mlbpestimation.preprocessing.shared.filters import FilterSqi, HasData
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
-from mlbpestimation.preprocessing.shared.transforms import AdjustPhaseLag, EnsureShape, FilterPressureSeriesWithinBounds, FlattenDataset, Reshape, SignalFilter, StandardScaling
+from mlbpestimation.preprocessing.shared.transforms import AdjustPhaseLag, EnsureShape, FilterPressureSeriesWithinBounds, FlattenDataset, Reshape, SignalFilter
 
 
 class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
@@ -41,7 +41,6 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
             EnsureShape([None, sequence_steps, beat_length], [None, sequence_steps, 2]),
             FilterPressureSeriesWithinBounds(min_pressure, max_pressure),
             HasData(),
-            StandardScaling(axis=scaling_axis),
             RandomChoice((float32, float32), random_seed, 1000),
             Reshape([-1, sequence_steps, beat_length], [-1, sequence_steps, 2]),
             FlattenDataset(),
@@ -69,13 +68,14 @@ class SequenceIntoHeartbeats(NumpyTransformOperation):
             return [zeros(0, float32), zeros(0, float32)]
 
         segments_indices = self._get_segments_indices(peak_indices)
+        scaled_input = self._scale_signal(input_signal)
 
         sequences_input = []
         sequences_output = []
         for segment_indices in segments_indices:
-            trough_indices = self._get_troughs(segment_indices, input_signal)
+            trough_indices = self._get_troughs(segment_indices, scaled_input)
 
-            heartbeat_input = self._get_beats(trough_indices, input_signal)
+            heartbeat_input = self._get_beats(trough_indices, scaled_input)
             pressure_output = self._get_pressures(trough_indices, output_signal)
 
             segment_sequences_input = self._sliding_window(heartbeat_input)
@@ -161,6 +161,11 @@ class SequenceIntoHeartbeats(NumpyTransformOperation):
             beats[i, 1] = beat[-1]
 
         return beats
+
+    def _scale_signal(self, signal):
+        mu = mean(signal)
+        sigma = std(signal)
+        return (signal - mu) / sigma
 
 
 class RandomChoice(NumpyTransformOperation):
