@@ -41,7 +41,6 @@ class BeatSeriesPreprocessing(DatasetPreprocessingPipeline):
             EnsureShape([None, sequence_steps, beat_length], [None, sequence_steps, 2]),
             FilterPressureSeriesWithinBounds(min_pressure, max_pressure),
             HasData(),
-            RandomChoice((float32, float32), random_seed, 1000),
             Reshape([-1, sequence_steps, beat_length], [-1, sequence_steps, 2]),
             FlattenDataset(),
             Shuffle(),
