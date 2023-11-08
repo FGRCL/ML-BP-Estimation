@@ -3,9 +3,7 @@ defaults:
   - loss: meanabsoluteerror
   - _self_
 
-optimizer:
-  learning_rate: 1e-3
-batch_size: 64
-epoch: 1
-n_batches: 10
+batch_size: 128
+epoch: 20
+n_batches: 20
 early_stopping: false

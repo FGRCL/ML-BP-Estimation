@@ -1,2 +1,6 @@
 shuffle:
   _target_: mlbpestimation.data.decorator.shufflesplitdatasetloader.ShuffleSplitDatasetLoader
+  random_seed: ${random_seed}
+  train_size: .7
+  validation_size: .15
+  test_size: .15
