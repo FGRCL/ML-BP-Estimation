@@ -211,10 +211,14 @@ class AdjustPhaseLag(NumpyTransformOperation):
         lags = correlation_lags(input_signal.shape[0], output_signal.shape[0], mode=mode)
         phase_lag = lags[argmax(correlation)]
 
-        if phase_lag > 0:
-            return input_signal[phase_lag:], output_signal[:-phase_lag]
+        if phase_lag == 0:
+            shifted_input_signal, shifted_output_signal = input_signal, output_signal
+        elif phase_lag > 0:
+            shifted_input_signal, shifted_output_signal = input_signal[phase_lag:], output_signal[:-phase_lag]
         else:
-            return input_signal[:-phase_lag], output_signal[phase_lag:]
+            shifted_input_signal, shifted_output_signal = input_signal[:-phase_lag], output_signal[phase_lag:]
+
+        return shifted_input_signal, shifted_output_signal
 
 
 class Subsample(NumpyTransformOperation):

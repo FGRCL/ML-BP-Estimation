@@ -15,7 +15,7 @@ beatseries:
     scale_per_signal: true
     bandpass_input: true
     random_seed: ${random_seed}
-    subsample: 1
+    subsample: 0.1
   test_preprocessing:
     _target_: mlbpestimation.preprocessing.pipelines.beatseries.BeatSeriesPreprocessing
     frequency: ${hypothesis.dataset.source.frequency}
@@ -31,4 +31,4 @@ beatseries:
     scale_per_signal: true
     bandpass_input: true
     random_seed: ${random_seed}
-    subsample: 1
+    subsample: 0.1

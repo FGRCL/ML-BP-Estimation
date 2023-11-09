@@ -69,7 +69,7 @@ class Hypothesis:
         return train, validation
 
     def _build_training_callbacks(self):
-        return [
+        callbacks = [
             WandbMetricsLogger(
                 log_freq="batch"
             ),
@@ -77,8 +77,11 @@ class Hypothesis:
                 filepath=Path(self.output_directory) / wandb.run.name / '{epoch:02d}',
                 save_best_only=True
             ),
-            EarlyStopping()
         ]
+        if self.optimization.early_stopping:
+            callbacks.append(EarlyStopping(patience=5, min_delta=0.01, restore_best_weights=True, mode='min'))
+
+        return callbacks
 
     @staticmethod
     def _build_evaluation_callbacks():

@@ -4,5 +4,6 @@ defaults:
   - _self_
 
 batch_size: 128
-epoch: 50
+epoch: 300
 n_batches: null
+early_stopping: false
