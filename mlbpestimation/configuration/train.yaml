@@ -5,7 +5,7 @@ defaults:
   - wandb: disabled
   - _self_
 
-random_seed: 257
+random_seed: 106
 job_id: ${oc.env:SLURM_JOB_ID,0}
 array_job_id: ${oc.env:SLURM_ARRAY_JOB_ID,0}
 array_task_id: ${oc.env:SLURM_ARRAY_TASK_ID,0}

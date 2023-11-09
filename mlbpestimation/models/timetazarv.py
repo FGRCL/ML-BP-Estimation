@@ -1,8 +1,7 @@
 import tensorflow
 from keras.activations import relu
-from keras.engine.base_layer import Layer
 from keras.engine.input_layer import InputLayer
-from keras.layers import BatchNormalization, Bidirectional, Conv1D, Dense, Flatten, GRU, LSTM, ReLU, SimpleRNN, TimeDistributed
+from keras.layers import BatchNormalization, Bidirectional, Conv1D, Dense, Dropout, Flatten, GRU, LSTM, MaxPooling1D, ReLU, SimpleRNN, TimeDistributed
 from tensorflow import TensorSpec
 
 from mlbpestimation.models.basemodel import BloodPressureModel
@@ -33,8 +32,8 @@ class TimeTazarv(BloodPressureModel):
             TimeDistributed(Conv1D(32, 5)),
             TimeDistributed(ReLU()),
             TimeDistributed(BatchNormalization()),
-            # TimeDistributed(MaxPooling1D(4)),
-            # TimeDistributed(Dropout(0.01)),
+            TimeDistributed(MaxPooling1D(4)),
+            TimeDistributed(Dropout(0.01)),
             TimeDistributed(Flatten()),
             TimeDistributed(Dense(256, activation=relu)),
             TimeDistributed(Dense(32, activation=None)),
@@ -69,11 +68,3 @@ class TimeTazarv(BloodPressureModel):
             'recurrent_dropout': self.recurrent_dropout,
             'output_size': self.output_size,
         }
-
-
-class ResidualRecurrentModule(Layer):
-    def __init__(self):
-        pass
-
-    def __call__(self, inputs):
-        pass
