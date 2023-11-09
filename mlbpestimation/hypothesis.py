@@ -1,14 +1,15 @@
 import logging
-from pathlib import Path
+from os.path import join
 
 import wandb
 from keras.callbacks import EarlyStopping
 from keras.metrics import MeanAbsoluteError, MeanSquaredError
 from omegaconf import DictConfig
 from tensorflow.python.data import AUTOTUNE, Dataset
-from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
+from wandb.integration.keras import WandbMetricsLogger
 
 from mlbpestimation.callbacks.evaluatecallback import EvaluateCallback
+from mlbpestimation.callbacks.weightrestorer import Mode, RestoreBestWeights
 from mlbpestimation.data.datasetloader import DatasetLoader
 from mlbpestimation.metrics.meanprediction import MeanPrediction
 from mlbpestimation.metrics.standardeviation import StandardDeviationAbsoluteError, StandardDeviationPrediction
@@ -38,6 +39,9 @@ class Hypothesis:
         self.model.summary()
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_training_callbacks(), validation_data=validation)
         log.info('Finished training')
+
+        log.info('Saving model')
+        self.model.save_weights(join(wandb.run.dir, "model.keras"))
 
     def evaluate(self):
         log.info('Start evaluation')
@@ -73,10 +77,10 @@ class Hypothesis:
             WandbMetricsLogger(
                 log_freq="batch"
             ),
-            WandbModelCheckpoint(
-                filepath=Path(self.output_directory) / wandb.run.name / '{epoch:02d}',
-                save_best_only=True
-            ),
+            RestoreBestWeights(
+                "val_Mean Absolute Error",
+                Mode.MINIMIZE
+            )
         ]
         if self.optimization.early_stopping:
             callbacks.append(EarlyStopping(patience=5, min_delta=0.01, restore_best_weights=True, mode='min'))
