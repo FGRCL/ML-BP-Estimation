@@ -5,7 +5,7 @@ from tensorflow.python.data import Options
 from tensorflow.python.data.ops.options import AutotuneAlgorithm, AutotuneOptions, ThreadingOptions
 from tensorflow.python.ops.array_ops import size
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, WithOptions
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, Prefetch, Shuffle, WithOptions
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, FilterSqi
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
 from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, EnsureShape, FlattenDataset, Reshape, SignalFilter, SlidingWindow, StandardScaling
@@ -50,6 +50,8 @@ class WindowPreprocessing(DatasetPreprocessingPipeline):
             StandardScaling(axis=scaling_axis),
             Reshape([-1, window_size_frequency, 1], [-1, 2]),
             FlattenDataset(),
+            Shuffle(),
+            Prefetch(),
             WithOptions(self.options)
         ])
 

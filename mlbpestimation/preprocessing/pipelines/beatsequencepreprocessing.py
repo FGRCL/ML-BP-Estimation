@@ -1,15 +1,29 @@
 from typing import Any, Tuple
 
 from tensorflow import Tensor, float32, reduce_max, reduce_min, stack
+from tensorflow.python.data.ops.options import AutotuneAlgorithm, AutotuneOptions, Options, ThreadingOptions
 from tensorflow.python.ops.array_ops import shape
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, TransformOperation
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, FilterOperation, Prefetch, Shuffle, TransformOperation, WithOptions
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, FilterSqi, HasData
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
 from mlbpestimation.preprocessing.shared.transforms import EnsureShape, FlattenDataset, Reshape, SignalFilter, SlidingWindow, SplitHeartbeats, StandardScaling
 
 
 class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
+    autotune_options = AutotuneOptions()
+    autotune_options.autotune_algorithm = AutotuneAlgorithm.MAX_PARALLELISM
+    autotune_options.enabled = True
+    autotune_options.ram_budget = int(3.2e10)
+
+    threading_options = ThreadingOptions()
+    threading_options.private_threadpool_size = 0
+
+    options = Options()
+    options.autotune = autotune_options
+    options.deterministic = False
+    options.threading = threading_options
+
     def __init__(self,
                  frequency: int,
                  lowpass_cutoff: int,
@@ -35,7 +49,10 @@ class BeatSequencePreprocessing(DatasetPreprocessingPipeline):
             FilterPressureWithinBounds(min_pressure, max_pressure),
             StandardScaling(axis=scaling_axis),
             Reshape([-1, sequence_steps, beat_length], [-1, 2]),
-            FlattenDataset()
+            FlattenDataset(),
+            Shuffle(),
+            Prefetch(),
+            WithOptions(self.options)
         ])
 
 

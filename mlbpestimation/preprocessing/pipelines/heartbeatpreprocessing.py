@@ -3,7 +3,7 @@ from typing import Tuple
 from tensorflow import float32 as tfloat32
 from tensorflow.python.data.ops.options import AutotuneAlgorithm, AutotuneOptions, Options, ThreadingOptions
 
-from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, WithOptions
+from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, Prefetch, Shuffle, WithOptions
 from mlbpestimation.preprocessing.shared.filters import FilterPressureWithinBounds, FilterSqi, HasData
 from mlbpestimation.preprocessing.shared.pipelines import FilterHasSignal
 from mlbpestimation.preprocessing.shared.transforms import AddBloodPressureOutput, EnsureShape, FlattenDataset, Reshape, SignalFilter, SplitHeartbeats, StandardScaling
@@ -45,6 +45,8 @@ class HeartbeatPreprocessing(DatasetPreprocessingPipeline):
             StandardScaling(axis=scaling_axis),
             Reshape([-1, beat_length, 1], [-1, 2]),
             FlattenDataset(),
+            Shuffle(),
+            Prefetch(),
             WithOptions(self.options)
         ]
         super().__init__(dataset_operations)
