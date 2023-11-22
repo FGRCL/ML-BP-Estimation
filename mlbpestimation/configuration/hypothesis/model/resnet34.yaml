@@ -1,0 +1,13 @@
+_target_: mlbpestimation.models.resnet34.ResNet34
+start_filters: 64
+max_filters: 512
+first_octave_modules: 3
+second_octave_modules: 4
+third_octave_modules: 6
+fourth_octave_modules: 3
+regressor_layers: 0
+regressor_units: 0
+regressor_dropout: 0.01
+regressor_activation: relu
+l2_lambda: .001
+output_units: 2
