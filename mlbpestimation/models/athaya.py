@@ -1,5 +1,5 @@
 from keras.engine.base_layer import Layer
-from keras.layers import Concatenate, Conv1D, Dense, Dropout, LeakyReLU, MaxPooling1D, UpSampling1D
+from keras.layers import Concatenate, Conv1D, Dense, Dropout, Flatten, LeakyReLU, MaxPooling1D, UpSampling1D, ZeroPadding1D
 from tensorflow import TensorSpec
 
 from mlbpestimation.models.basemodel import BloodPressureModel
@@ -31,6 +31,7 @@ class Athaya(BloodPressureModel):
                 Expansion(current_filters)
             )
 
+        self.flatten = Flatten()
         self.regressor = Dense(2)
 
     def call(self, inputs, training=None, mask=None):
@@ -43,6 +44,7 @@ class Athaya(BloodPressureModel):
         for expansion, contraction_output in zip(self.expansion_blocks[::-1], contraction_outputs[-2::-1]):
             x = expansion(x, contraction_output)
 
+        x = self.flatten(x)
         x = self.regressor(x)
         return x
 
@@ -73,13 +75,19 @@ class Expansion(Layer):
     def __init__(self, filters, **kwargs):
         super().__init__(**kwargs)
         self._upsample = UpSampling1D(2)
-        self._reduce_conv = Conv1D(filters, 2)
+        self._padding = ZeroPadding1D(padding=1)
+        self._reduce_conv_valid = Conv1D(filters, 2, padding="valid")
+        self._reduce_conv_same = Conv1D(filters, 2, padding="same")
         self._concatenate = Concatenate()
         self._conv_layers = ConvBlock(filters, False)
 
     def call(self, inputs, contraction_features):
         x = self._upsample(inputs)
-        x = self._reduce_conv(x)
+        if x.shape[1] != contraction_features.shape[1]:
+            x = self._padding(x)
+            x = self._reduce_conv_valid(x)
+        else:
+            x = self._reduce_conv_same(x)
         x = self._concatenate([x, contraction_features])
         x = self._conv_layers(x)
         return x
