@@ -5,5 +5,5 @@ defaults:
 
 batch_size: 128
 epoch: 20
-n_batches: 20
+n_batches: 100
 early_stopping: false
