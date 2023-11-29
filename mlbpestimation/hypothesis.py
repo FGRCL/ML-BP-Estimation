@@ -8,6 +8,7 @@ from omegaconf import DictConfig
 from tensorflow.python.data import AUTOTUNE, Dataset
 from wandb.integration.keras import WandbMetricsLogger
 
+from mlbpestimation.callbacks.epochtime import EpochTime
 from mlbpestimation.callbacks.evaluatecallback import EvaluateCallback
 from mlbpestimation.callbacks.weightrestorer import Mode, RestoreBestWeights
 from mlbpestimation.data.datasetloader import DatasetLoader
@@ -74,13 +75,14 @@ class Hypothesis:
 
     def _build_training_callbacks(self):
         callbacks = [
+            EpochTime(),
             WandbMetricsLogger(
                 log_freq="batch"
             ),
             RestoreBestWeights(
                 "val_Mean Absolute Error",
                 Mode.MINIMIZE
-            )
+            ),
         ]
         if self.optimization.early_stopping:
             callbacks.append(EarlyStopping(patience=5, min_delta=0.01, restore_best_weights=True, mode='min'))
