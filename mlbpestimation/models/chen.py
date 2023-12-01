@@ -3,11 +3,9 @@ from keras.activations import sigmoid
 from keras.engine.base_layer import Layer
 from keras.initializers.initializers import Zeros
 from keras.layers import Add, BatchNormalization, Concatenate, Conv1D, Dense, GlobalAveragePooling1D, Lambda, MaxPooling1D, Multiply, ReLU
-from keras_core.src.ops import absolute
+from keras_core.src.ops import absolute, add, greater, less, multiply
 from keras_nlp.src.backend import ops
-from tensorflow import TensorSpec, cast, float32, int64, scatter_nd
-from tensorflow.python.keras.backend import shape
-from tensorflow.python.ops.array_ops import gather_nd, where
+from tensorflow import TensorSpec, float32
 
 from mlbpestimation.models.basemodel import BloodPressureModel
 from mlbpestimation.models.metricreducer.base import MetricReducer
@@ -206,20 +204,21 @@ class SoftAttention(Layer):
             initializer=Zeros(),
             trainable=True
         )
+        self.kernel = None
 
     def call(self, feature_map, attention_map):
-        above_idx = where(attention_map > self.tau)
-        above_updates = gather_nd(feature_map, above_idx) - self.tau
-        above_values = scatter_nd(above_idx, above_updates, cast(shape(feature_map), int64))
+        above_mask = greater(attention_map, self.tau)
+        above_updates = add(feature_map, -self.tau)
+        above_values = multiply(above_updates, above_mask)
 
-        under_idx = where(attention_map < -self.tau)
-        under_updates = gather_nd(feature_map, under_idx) + self.tau
-        under_values = scatter_nd(under_idx, under_updates, cast(shape(feature_map), int64))
+        under_mask = less(attention_map, -self.tau)
+        under_updates = add(feature_map, self.tau)
+        under_values = multiply(under_updates, under_mask)
 
         # Removed the "between" inputs because the function isn't well defined
         # between_idx = logical_and(-self.tau <= feature_map, feature_map <= self.tau)
         # feature_map[between_idx] = 0
 
-        result = above_values + under_values
+        result = add(above_values, under_values)
 
         return result
