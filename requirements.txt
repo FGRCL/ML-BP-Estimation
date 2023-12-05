@@ -72,7 +72,7 @@ google-auth-oauthlib==1.0.0
 google-pasta==0.2.0
 googleapis-common-protos==1.59.0
 greenlet==2.0.2
-grpcio==1.53.0
+grpcio==1.51.3
 grpcio-tools==1.48.2
 gviz-api==1.10.0
 h5py==3.9.0
