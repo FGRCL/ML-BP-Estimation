@@ -6,12 +6,11 @@ from numpy import argmax, argmin, asarray, empty, float32, ndarray, zeros
 from numpy.random import default_rng
 from scipy.signal import butter, correlate, correlation_lags, resample, sosfilt
 from scipy.stats import skew
-from tensorflow import DType, Tensor, cast, ensure_shape, reduce_max, reduce_mean, reduce_min, reshape
+from tensorflow import DType, Tensor, cast, ensure_shape, reduce_max, reduce_mean, reduce_min, reshape, stack
 from tensorflow.python.data import Dataset
-from tensorflow.python.ops.array_ops import boolean_mask, gather, shape, stack
-from tensorflow.python.ops.gen_math_ops import is_nan
+from tensorflow.python.ops.array_ops import boolean_mask, gather, shape
+from tensorflow.python.ops.gen_math_ops import is_nan, logical_not
 from tensorflow.python.ops.math_ops import reduce_std
-from tensorflow.python.ops.numpy_ops import logical_not
 from tensorflow.python.ops.ragged.ragged_math_ops import reduce_all
 
 from mlbpestimation.preprocessing.base import FlatMap, NumpyTransformOperation, TransformOperation

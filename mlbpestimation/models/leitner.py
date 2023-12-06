@@ -1,6 +1,5 @@
 from keras import Sequential
-from keras.engine.base_layer import Layer
-from keras.layers import BatchNormalization, Concatenate, Conv1D, Dense, Flatten, GRU, ReLU
+from keras.layers import BatchNormalization, Concatenate, Conv1D, Dense, Flatten, GRU, Layer, ReLU
 from tensorflow import TensorSpec
 
 from mlbpestimation.models.basemodel import BloodPressureModel

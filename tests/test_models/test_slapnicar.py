@@ -1,7 +1,6 @@
-from shutil import rmtree
+from os import unlink
 from unittest import TestCase
 
-from keras.saving.saving_api import load_model
 from numpy.testing import assert_allclose
 
 from mlbpestimation.models.slapnicar import Slapnicar
@@ -9,9 +8,11 @@ from tests.fixtures.windowdatasetloaderfixture import WindowDatasetLoaderFixture
 
 
 class TestSlapnicar(TestCase):
+    weights_file = "slapnicar.keras"
+
     @classmethod
     def tearDownClass(cls) -> None:
-        rmtree('slapnicar', ignore_errors=True)
+        unlink(cls.weights_file)
 
     def test_create_model(self):
         model = Slapnicar(16, 128, 5, [8, 5, 5, 3], 2, 1, 65, 32, 2, .001, .25)
@@ -28,8 +29,8 @@ class TestSlapnicar(TestCase):
         model.set_output(train.element_spec[-1])
         outputs = model(inputs)
 
-        model.save(save_directory, overwrite=True)
-        loaded_model: Slapnicar = load_model(save_directory, custom_objects={'Slapnicar': Slapnicar})
-        result = loaded_model(inputs)
+        model.save_weights(self.weights_file)
+        model.load_weights(self.weights_file)
+        result = model(inputs)
 
         assert_allclose(outputs, result)

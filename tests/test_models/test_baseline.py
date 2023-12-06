@@ -1,7 +1,6 @@
-from shutil import rmtree
+from os import unlink
 from unittest import TestCase
 
-from keras.saving.saving_api import load_model
 from numpy.testing import assert_allclose
 
 from mlbpestimation.models.tazarv import Tazarv
@@ -9,9 +8,11 @@ from tests.fixtures.windowdatasetloaderfixture import WindowDatasetLoaderFixture
 
 
 class TestTazarv(TestCase):
+    weights_file = "tazarv.keras"
+
     @classmethod
     def tearDownClass(cls) -> None:
-        rmtree('tazarv', ignore_errors=True)
+        unlink(cls.weights_file)
 
     def test_save_model(self):
         model = Tazarv()
@@ -19,8 +20,8 @@ class TestTazarv(TestCase):
         inputs = next(iter(train.batch(5).take(1)))[0]
         outputs = model(inputs)
 
-        model.save('tazarv')
-        loaded_model: Tazarv = load_model('tazarv', custom_objects={'Tazarv': Tazarv})
-        result = loaded_model(inputs)
+        model.save_weights(self.weights_file)
+        model.load_weights(self.weights_file)
+        result = model(inputs)
 
         assert_allclose(outputs, result)

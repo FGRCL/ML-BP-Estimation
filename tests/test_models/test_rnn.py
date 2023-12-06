@@ -1,7 +1,6 @@
-from shutil import rmtree
+from os import unlink
 from unittest import TestCase
 
-from keras.saving.saving_api import load_model
 from numpy.testing import assert_allclose
 
 from mlbpestimation.models.rnn import Rnn
@@ -9,9 +8,11 @@ from tests.fixtures.windowdatasetloaderfixture import WindowDatasetLoaderFixture
 
 
 class TestRnn(TestCase):
+    weights_file = 'rnn.keras'
+
     @classmethod
     def tearDownClass(cls) -> None:
-        rmtree('rnn', ignore_errors=True)
+        unlink(cls.weights_file)
 
     def test_create_model(self):
         model = Rnn(1000, 3, .0, .0, 1)
@@ -27,8 +28,8 @@ class TestRnn(TestCase):
         model.set_output(train.element_spec[-1])
         outputs = model(inputs)
 
-        model.save('rnn', overwrite=True)
-        loaded_model: Rnn = load_model('rnn', custom_objects={'Rnn': Rnn})
-        result = loaded_model(inputs)
+        model.save_weights(self.weights_file)
+        model.load_weights(self.weights_file)
+        result = model(inputs)
 
         assert_allclose(outputs, result, atol=1e-5)

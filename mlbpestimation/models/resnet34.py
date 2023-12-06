@@ -1,9 +1,8 @@
 import tensorflow
 from keras import Sequential
-from keras.engine.base_layer import Layer
-from keras.engine.input_layer import InputLayer
-from keras.layers import Add, AveragePooling1D, AveragePooling2D, BatchNormalization, Conv1D, Conv2D, Dense, Dropout, Flatten, MaxPooling1D, MaxPooling2D, ReLU
+from keras.layers import Add, AveragePooling1D, AveragePooling2D, BatchNormalization, Conv1D, Conv2D, Dense, Dropout, Flatten, Layer, MaxPooling1D, MaxPooling2D, ReLU
 from keras.regularizers import L2
+from keras_core.src.layers import InputLayer
 from numpy import arange, concatenate, full, log2
 from tensorflow import TensorSpec
 

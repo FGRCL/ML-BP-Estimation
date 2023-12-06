@@ -1,7 +1,6 @@
 from keras import Sequential
 from keras.activations import gelu
-from keras.engine.base_layer import Layer
-from keras.layers import Add, Attention, BatchNormalization, Concatenate, Conv1D, Dense, Flatten, LayerNormalization, MultiHeadAttention, ReLU, UpSampling1D
+from keras.layers import Add, Attention, BatchNormalization, Concatenate, Conv1D, Dense, Flatten, Layer, LayerNormalization, MultiHeadAttention, ReLU, UpSampling1D
 from keras_nlp.src.layers import SinePositionEncoding
 from tensorflow import TensorSpec
 

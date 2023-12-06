@@ -1,6 +1,5 @@
 from keras import Sequential
 from keras.activations import relu
-from keras.engine.input_layer import InputLayer
 from keras.layers import Bidirectional, GRU, LSTM, SimpleRNN
 from tensorflow import TensorSpec
 
@@ -26,7 +25,6 @@ class Rnn(BloodPressureModel):
 
         self.metric_reducer = MultiStep()
 
-        self._input_layer = None
         self._hidden = Sequential()
         for _ in range(n_layers):
             self._hidden.add(
@@ -41,17 +39,14 @@ class Rnn(BloodPressureModel):
         self._out = None
 
     def set_input(self, input_spec: TensorSpec):
-        shape = input_spec[0].shape
-        dtype = input_spec[0].dtype
-        self._input_layer = InputLayer(shape[1:], shape[0], dtype)
+        pass
 
     def set_output(self, output_spec: TensorSpec):
         shape = output_spec.shape
         self._out = GRU(shape[-1], return_sequences=True, activation=None)
 
     def call(self, inputs, training=None, mask=None):
-        x = self._input_layer(inputs)
-        x = self._hidden(x)
+        x = self._hidden(inputs)
         return self._out(x)
 
     def get_metric_reducer_strategy(self) -> MetricReducer:

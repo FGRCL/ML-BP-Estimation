@@ -1,5 +1,4 @@
 from keras import Sequential
-from keras.engine.input_layer import InputLayer
 from keras.layers import Dense, Flatten
 from tensorflow import TensorSpec
 
@@ -18,7 +17,6 @@ class MLP(BloodPressureModel):
 
         self.metric_reducer = SingleStep()
 
-        self.input_layer = None
         self.flatten = Flatten()
         self.dense_layers = Sequential()
         for neuron_count in range(n_layers):
@@ -26,15 +24,14 @@ class MLP(BloodPressureModel):
         self.output_layer = None
 
     def set_input(self, input_spec: TensorSpec):
-        self.input_layer = InputLayer(input_spec[0].shape[1:])
+        pass
 
     def set_output(self, output_spec: TensorSpec):
         output_units = output_spec.shape[1]
         self.output_layer = Dense(output_units)
 
     def call(self, inputs, training=None, mask=None):
-        x = self.input_layer(inputs)
-        x = self.flatten(x)
+        x = self.flatten(inputs)
         x = self.dense_layers(x, training, mask)
         return self.output_layer(x)
 

@@ -9,11 +9,11 @@ sbatch <<EOT
 #SBATCH --array=1-$2
 #SBATCH --output=/home/fgrcl/scratch/job-logs/slurm-%A_%a.out
 
-module load python/3.8 cuda cudnn
+module load python/3.10 cuda cudnn
 
 source venv/bin/activate
 pip install --no-index --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements.txt --use-deprecated=legacy-resolver
 
 export $(cat .env | xargs)
 wandb agent --count 1 $1
