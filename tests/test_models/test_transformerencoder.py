@@ -1,7 +1,6 @@
-from shutil import rmtree
+from os import unlink
 from unittest import TestCase
 
-from keras.saving.saving_api import load_model
 from numpy.testing import assert_allclose
 
 from mlbpestimation.models.transformerencoder import TransformerEncoder
@@ -9,9 +8,11 @@ from tests.fixtures.windowdatasetloaderfixture import WindowDatasetLoaderFixture
 
 
 class TestTransformerEncoder(TestCase):
+    weights_file = "transformerencoder.keras"
+
     @classmethod
     def tearDownClass(cls) -> None:
-        rmtree('transformerencoder', ignore_errors=True)
+        unlink(cls.weights_file)
 
     def test_build_model(self):
         model = TransformerEncoder(5, 2, 0.01, 500, 0.1, 2, 2000, 2, 0.1)
@@ -28,8 +29,8 @@ class TestTransformerEncoder(TestCase):
         model.set_output(train.element_spec[-1])
         outputs = model(inputs)
 
-        model.save(save_directory, overwrite=True)
-        loaded_model: TransformerEncoder = load_model(save_directory, custom_objects={'TransformerEncoder': TransformerEncoder})
-        result = loaded_model(inputs)
+        model.save_weights(self.weights_file)
+        model.load_weights(self.weights_file)
+        result = model(inputs)
 
         assert_allclose(outputs, result)

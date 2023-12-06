@@ -8,7 +8,7 @@ sbatch <<EOT
 #SBATCH --time=1-00:00     # DD-HH:MM:SS
 #SBATCH --output=/home/fgrcl/scratch/job-logs/slurm-%A_%a.out
 
-module load python/3.8 cuda cudnn
+module load python/3.10 cuda cudnn
 
 source venv/bin/activate
 pip install --no-index --upgrade pip

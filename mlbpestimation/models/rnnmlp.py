@@ -1,7 +1,5 @@
 from keras import Sequential
-from keras.engine.base_layer import Layer
-from keras.engine.input_layer import InputLayer
-from keras.layers import Dense, GRU, LSTM, Reshape, SimpleRNN
+from keras.layers import Dense, GRU, LSTM, Layer, Reshape, SimpleRNN
 from tensorflow import TensorSpec, reduce_prod
 
 from mlbpestimation.models.basemodel import BloodPressureModel
@@ -22,7 +20,6 @@ class RnnMlp(BloodPressureModel):
 
         self.metric_reducer = SingleStep()
 
-        self._input_layer = None
         self._reshape = None
         if rnn_first:
             self._layers = Sequential([
@@ -39,7 +36,6 @@ class RnnMlp(BloodPressureModel):
     def set_input(self, input_spec: TensorSpec):
         shape = input_spec[0].shape
         dtype = input_spec[0].dtype
-        self._input_layer = InputLayer(shape[1:], shape[0], dtype)
 
         feature_size = reduce_prod(shape[2:]).numpy()  # TODO check if we still need this reshape
         self._reshape = Reshape((shape[1], feature_size))
@@ -49,8 +45,7 @@ class RnnMlp(BloodPressureModel):
         self._output = Dense(output_units)
 
     def call(self, inputs, training=None, mask=None):
-        x = self._input_layer(inputs, training, mask)
-        x = self._reshape(x)
+        x = self._reshape(inputs)
         x = self._layers(x, training, mask)
         x = self._output(x)
         return x

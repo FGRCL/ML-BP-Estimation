@@ -1,8 +1,7 @@
 from keras import Sequential
 from keras.activations import sigmoid
-from keras.engine.base_layer import Layer
-from keras.initializers.initializers import Zeros
-from keras.layers import Add, BatchNormalization, Concatenate, Conv1D, Dense, GlobalAveragePooling1D, Lambda, MaxPooling1D, Multiply, ReLU
+from keras.layers import Add, BatchNormalization, Concatenate, Conv1D, Dense, GlobalAveragePooling1D, Lambda, Layer, MaxPooling1D, Multiply, ReLU
+from keras_core.src.initializers import Zeros
 from keras_core.src.ops import absolute, add, greater, less, multiply
 from keras_nlp.src.backend import ops
 from tensorflow import TensorSpec, float32

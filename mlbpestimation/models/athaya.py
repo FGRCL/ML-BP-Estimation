@@ -1,5 +1,4 @@
-from keras.engine.base_layer import Layer
-from keras.layers import Concatenate, Conv1D, Dense, Dropout, Flatten, LeakyReLU, MaxPooling1D, UpSampling1D, ZeroPadding1D
+from keras.layers import Concatenate, Conv1D, Dense, Dropout, Flatten, Layer, LeakyReLU, MaxPooling1D, UpSampling1D, ZeroPadding1D
 from tensorflow import TensorSpec
 
 from mlbpestimation.models.basemodel import BloodPressureModel

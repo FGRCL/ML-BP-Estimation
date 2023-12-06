@@ -1,9 +1,8 @@
 from unittest import TestCase
 
-from tensorflow import TensorShape
-
 from mlbpestimation.preprocessing.pipelines.beatsequencepreprocessing import BeatSequencePreprocessing
 from tests.fixtures.signaldatasetloaderfixture import SignalDatasetLoaderFixture
+from tests.utils import get_dataset_output_shapes
 
 
 class TestBeatSequencePreprocessing(TestCase):
@@ -28,6 +27,6 @@ class TestBeatSequencePreprocessing(TestCase):
 
         self.assertIsNotNone(dataset)
         self.assertIsNotNone(element)
-        self.assertEqual((TensorShape([16, 400]), TensorShape([2])), dataset.output_shapes)
+        self.assertEqual([[16, 400], [2]], get_dataset_output_shapes(dataset))
         self.assertEqual(element[0].shape, [16, 400])
         self.assertEqual(element[1].shape, [2])

@@ -1,8 +1,7 @@
 import numpy
 import tensorflow
 from keras import Sequential
-from keras.engine.base_layer import Layer
-from keras.layers import Add, Dense, Dropout, LayerNormalization, MultiHeadAttention
+from keras.layers import Add, Dense, Dropout, Layer, LayerNormalization, MultiHeadAttention
 from numpy import arange, concatenate
 from tensorflow import TensorSpec, cast, float32
 

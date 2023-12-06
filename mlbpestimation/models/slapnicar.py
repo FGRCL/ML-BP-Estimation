@@ -2,9 +2,7 @@ from typing import List
 
 from kapre import Magnitude, STFT
 from keras import Sequential
-from keras.engine.base_layer import Layer
-from keras.engine.input_layer import InputLayer
-from keras.layers import Add, AveragePooling1D, BatchNormalization, Concatenate, Conv1D, Dense, Dropout, GRU, ReLU, Reshape
+from keras.layers import Add, AveragePooling1D, BatchNormalization, Concatenate, Conv1D, Dense, Dropout, GRU, Layer, ReLU, Reshape
 from keras.regularizers import l2
 from numpy import arange, concatenate, full, log2
 from omegaconf import ListConfig
@@ -44,7 +42,6 @@ class Slapnicar(BloodPressureModel):
         self.metric_reducer = SingleStep()
 
         resnet_filters = self._compute_resnet_filters(start_filters, max_filters, resnet_blocks)
-        self._input_layer = None
         self._resnet_blocks = Sequential()
         for resnet_filter in resnet_filters:
             self._resnet_blocks.add(
@@ -60,14 +57,14 @@ class Slapnicar(BloodPressureModel):
         self._regressor = None
 
     def set_input(self, input_spec: TensorSpec):
-        self._input_layer = InputLayer(input_spec[0].shape[1:])
+        pass
 
     def set_output(self, output_spec: TensorSpec):
         output_units = output_spec.shape[1]
         self._regressor = Regressor(self.dense_units, output_units, self.l2_lambda, self.dropout_rate)
 
     def call(self, inputs, training=None, mask=None):
-        x = self._input_layer(inputs, training, mask)
+        x = inputs
         resnet_output = self._resnet_blocks(x, training, mask)
         gru_output = self._gru_block(resnet_output)
         spectrotemporal_output = self._spectro_temporal_block(x, training, mask)

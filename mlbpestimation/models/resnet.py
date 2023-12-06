@@ -1,6 +1,5 @@
 from keras import Sequential
-from keras.engine.base_layer import Layer
-from keras.layers import Add, BatchNormalization, Conv1D, Conv2D, Dense, Dropout, Flatten, ReLU
+from keras.layers import Add, BatchNormalization, Conv1D, Conv2D, Dense, Dropout, Flatten, Layer, ReLU
 from keras.regularizers import L2
 from numpy import arange, concatenate, full, log2
 from tensorflow import TensorSpec

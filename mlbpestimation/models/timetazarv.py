@@ -1,7 +1,7 @@
 import tensorflow
 from keras.activations import relu
-from keras.engine.input_layer import InputLayer
 from keras.layers import BatchNormalization, Bidirectional, Conv1D, Dense, Dropout, Flatten, GRU, LSTM, MaxPooling1D, ReLU, SimpleRNN, TimeDistributed
+from keras_core.src.layers import InputLayer
 from tensorflow import TensorSpec
 
 from mlbpestimation.models.basemodel import BloodPressureModel
