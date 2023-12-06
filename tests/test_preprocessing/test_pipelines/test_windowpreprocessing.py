@@ -1,9 +1,8 @@
 from unittest import TestCase
 
-from tensorflow import TensorShape
-
 from mlbpestimation.preprocessing.pipelines.windowpreprocessing import WindowPreprocessing
 from tests.fixtures.signaldatasetloaderfixture import SignalDatasetLoaderFixture
+from tests.utils import get_dataset_output_shapes
 
 
 class TestWindowPreprocessing(TestCase):
@@ -26,6 +25,6 @@ class TestWindowPreprocessing(TestCase):
 
         self.assertIsNotNone(dataset)
         self.assertIsNotNone(element)
-        self.assertEqual((TensorShape([1000, 1]), TensorShape([2])), dataset.output_shapes)
+        self.assertEqual([[1000, 1], [2]], get_dataset_output_shapes(dataset))
         self.assertEqual((1000, 1), element[0].shape)
         self.assertEqual((2,), element[1].shape)
