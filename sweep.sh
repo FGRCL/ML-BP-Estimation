@@ -11,7 +11,7 @@ sbatch <<EOT
 source venv/bin/activate
 module load python/3.10 cuda cudnn
 pip install --no-index --upgrade pip
-pip install -r requirements.txt --use-deprecated=legacy-resolver
+pip install -r requirements.txt
 
 export $(cat .env | xargs)
 wandb agent --count 1 $1
