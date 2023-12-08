@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from hydra import main
 from hydra.utils import instantiate
 from omegaconf import OmegaConf
-from wandb import Settings, init
+from wandb import init
 
 from mlbpestimation.configuration.train import Train
 from mlbpestimation.data.datasetloader import DatasetLoader
@@ -44,8 +44,8 @@ def main(configuration: Train):
         init(project=configuration.wandb.project_name,
              entity=configuration.wandb.entity,
              mode=configuration.wandb.mode,
-             config=OmegaConf.to_container(configuration, resolve=True),
-             settings=Settings(start_method='fork'))  # TODO: check that this is still needed
+             config=OmegaConf.to_container(configuration, resolve=True)
+             )
         hypothesis.train()
         if configuration.evaluate:
             hypothesis.evaluate()
