@@ -45,7 +45,10 @@ def main(configuration: Train):
              entity=configuration.wandb.entity,
              mode=configuration.wandb.mode,
              config=OmegaConf.to_container(configuration, resolve=True),
-             settings=Settings(start_method="thread"),
+             settings=Settings(
+                 init_timeout=600,
+                 _service_wait=600
+             )
              )
         hypothesis.train()
         if configuration.evaluate:
