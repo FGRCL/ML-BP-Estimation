@@ -8,8 +8,8 @@ sbatch <<EOT
 #SBATCH --array=1-$2
 #SBATCH --output=/home/fgrcl/scratch/job-logs/slurm-%A_%a.out
 
-source venv/bin/activate
 module load python/3.10 cuda cudnn
+source venv/bin/activate
 pip install --no-index --upgrade pip
 pip install -r requirements.txt
 
