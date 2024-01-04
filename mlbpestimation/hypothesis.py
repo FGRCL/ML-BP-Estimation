@@ -41,8 +41,9 @@ class Hypothesis:
         self.model.fit(train, epochs=self.optimization.epoch, callbacks=self._build_training_callbacks(), validation_data=validation)
         log.info('Finished training')
 
-        log.info('Saving model')
-        self.model.save_weights(join(wandb.run.dir, "model.keras"))
+        save_path = join(wandb.run.dir, "model.tf")
+        log.info(f'Saving model to {save_path}')
+        self.model.save_weights(save_path, overwrite=True)
 
     def evaluate(self):
         log.info('Start evaluation')
