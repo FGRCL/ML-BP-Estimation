@@ -1,4 +1,3 @@
-import tensorflow
 from keras import Sequential
 from keras.activations import sigmoid
 from keras.layers import Add, BatchNormalization, Concatenate, Conv1D, Dense, GlobalAveragePooling1D, Lambda, Layer, MaxPooling1D, Multiply, ReLU
@@ -208,6 +207,4 @@ class SoftAttention(Layer):
         under_values = multiply(under_updates, under_mask)
 
         result = (feature_map - feature_map) + above_values + under_values
-
-        tensorflow.print("new", above_mask, under_mask)
         return result
