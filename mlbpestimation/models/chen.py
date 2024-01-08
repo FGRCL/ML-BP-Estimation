@@ -1,10 +1,9 @@
 from keras import Sequential
 from keras.activations import sigmoid
 from keras.layers import Add, BatchNormalization, Concatenate, Conv1D, Dense, GlobalAveragePooling1D, Lambda, Layer, MaxPooling1D, Multiply, ReLU
-from keras_core.src.initializers import Zeros
 from keras_core.src.ops import absolute, add, greater, less, multiply
 from keras_nlp.src.backend import ops
-from tensorflow import TensorSpec, float32
+from tensorflow import TensorSpec
 
 from mlbpestimation.models.basemodel import BloodPressureModel
 from mlbpestimation.models.metricreducer.base import MetricReducer
@@ -197,27 +196,15 @@ class GlobalSpatialMaxPooling1D(Layer):
 class SoftAttention(Layer):
     def __init__(self):
         super().__init__()
-        self.tau = self.add_weight(
-            name="threshold",
-            dtype=float32,
-            initializer=Zeros(),
-            trainable=True
-        )
-        self.kernel = None
 
     def call(self, feature_map, attention_map):
-        above_mask = greater(attention_map, self.tau)
-        above_updates = add(feature_map, -self.tau)
+        above_mask = greater(feature_map, attention_map)
+        above_updates = add(feature_map, -attention_map)
         above_values = multiply(above_updates, above_mask)
 
-        under_mask = less(attention_map, -self.tau)
-        under_updates = add(feature_map, self.tau)
+        under_mask = less(feature_map, -attention_map)
+        under_updates = add(feature_map, attention_map)
         under_values = multiply(under_updates, under_mask)
 
-        # Removed the "between" inputs because the function isn't well defined
-        # between_idx = logical_and(-self.tau <= feature_map, feature_map <= self.tau)
-        # feature_map[between_idx] = 0
-
-        result = add(above_values, under_values)
-
+        result = (feature_map - feature_map) + above_values + under_values
         return result
