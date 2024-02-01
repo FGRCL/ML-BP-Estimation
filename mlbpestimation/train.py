@@ -48,7 +48,8 @@ def main(configuration: Train):
              settings=Settings(
                  init_timeout=600,
                  _service_wait=600
-             )
+             ),
+             group=configuration.wandb.group
              )
         hypothesis.train()
         if configuration.evaluate:
