@@ -240,5 +240,5 @@ class Sample(DatasetOperation):
 
     def apply(self, dataset: Dataset) -> Dataset:
         count = int(dataset.reduce(0, lambda x, _: x + 1))
-        size = round(count * self.sample_rate)
-        return dataset.take(size)
+        sample_size = round(count * self.sample_rate)
+        return dataset.take(sample_size)

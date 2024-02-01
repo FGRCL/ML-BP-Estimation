@@ -1,5 +1,5 @@
 from mlbpestimation.preprocessing.base import DatasetPreprocessingPipeline, Shuffle
-from mlbpestimation.preprocessing.shared.transforms import Sample
+from mlbpestimation.preprocessing.shared.transforms import FlattenDataset, Sample
 
 
 class ShuffleSample(DatasetPreprocessingPipeline):
@@ -7,4 +7,6 @@ class ShuffleSample(DatasetPreprocessingPipeline):
         super().__init__([
             Shuffle(),
             Sample(sample_rate),
+            FlattenDataset(),
+            Shuffle(),
         ])
