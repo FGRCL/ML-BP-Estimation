@@ -7,3 +7,4 @@ class WandbConfiguration:
     project_name: str
     entity: str
     mode: str
+    group: str
