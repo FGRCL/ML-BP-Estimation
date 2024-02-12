@@ -13,7 +13,7 @@ from tensorflow.python.ops.gen_math_ops import is_nan, logical_not
 from tensorflow.python.ops.math_ops import reduce_std
 from tensorflow.python.ops.ragged.ragged_math_ops import reduce_all
 
-from mlbpestimation.preprocessing.base import FlatMap, NumpyTransformOperation, TransformOperation
+from mlbpestimation.preprocessing.base import DatasetOperation, FlatMap, NumpyTransformOperation, TransformOperation
 
 
 class RemoveNan(TransformOperation):
@@ -232,3 +232,13 @@ class Subsample(NumpyTransformOperation):
         sample_idx = self.random_generator.choice(range(n_elements), sample_size, False)
 
         return inputs_windows[sample_idx], output_windows[sample_idx]
+
+
+class Sample(DatasetOperation):
+    def __init__(self, sample_rate: float):
+        self.sample_rate = sample_rate
+
+    def apply(self, dataset: Dataset) -> Dataset:
+        count = int(dataset.reduce(0, lambda x, _: x + 1))
+        sample_size = round(count * self.sample_rate)
+        return dataset.take(sample_size)
